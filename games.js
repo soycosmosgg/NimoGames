@@ -1,5 +1,5 @@
 const juegos = [
-  { name: "Level Devil", url: "./games/Level-Devil/index.html", img: "assets/game-images/level-devil.webp", tags: ["arcade", "skill", "2players"] },
+  { name: "Level Devil", url: "https://raw.githack.com/soycosmosgg/ng-source/main/Level-Devil/index.html", img: "assets/game-images/level-devil.webp", tags: ["arcade", "skill", "2players"] },
   { name: "Stick fighter", url: "https://labgstore21.github.io/g2/class-629/", img: "assets/game-images/stick-fighter.webp", tags: ["action", "skill", "2player"] },
   { name: "Suika Game", url: "https://suikagame.io/game/suika-game/", img: "assets/game-images/suika-game.webp", tags: ["puzzle", "skill", "merge"] },
   { name: "Merge Rot", url: "./games/Merge-Rot/index.html", img: "assets/game-images/merge-rot.webp", tags: ["merge", "puzzle"] },
