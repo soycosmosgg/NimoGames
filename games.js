@@ -182,5 +182,5 @@ const juegos = [
   { name: "Wordle", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game12/index.html", img: "assets/game-images/wordle.webp", tags: ["puzzle"] },
   {name: "Trivia crack", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game6/index.html", img: "assets/game-images/trivia-crack.webp", tags: ["puzzle"] },
   {name: "Master chess", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game3/index.html", img: "assets/game-images/master-chess.webp", tags: ["puzzle", "skill"] },
-  {name: "Golf Party", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game15/index.html", img: "assets/game-images/golf-party.webp", tags: ["racing", "skill"] },
+  {name: "Golf Party", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game15/index.html?", img: "assets/game-images/golf-party.webp", tags: ["racing", "skill"] },
 ];
