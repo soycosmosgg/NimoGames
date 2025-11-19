@@ -112,7 +112,7 @@ const juegos = [
   { name: "Uno Online", url: "https://rawcdn.githack.com/soycosmosgg/ng-source/main/game10/index.html", img: "assets/game-images/uno-online.webp", tags: ["skill"] },
   { name: "Stickman prison escape", url: "https://abinbins.github.io/a7/escaping-the-prison/", img: "assets/game-images/stickman-prison-escape.webp", tags: ["action", "skill"] },
   { name: "Murder", url: "https://h5.ant.games/game-assets/17477130192978/index.html", img: "assets/game-images/murder.webp", tags: ["action", "skill"] },
-  { name: "Granny", url: "./games/game39", img: "assets/game-images/granny.webp", tags: ["horror"] },
+  { name: "Granny", url: "./games/game39.html", img: "assets/game-images/granny.webp", tags: ["horror"] },
   { name: "Plonky", url: "https://raw.githack.com/soycosmosgg/ng-source/main/game14/index.html", img: "assets/game-images/plonky.webp", tags: ["arcade", "skill"] },
   { name: "Drift.io", url: "https://drift.io/", img: "assets/game-images/drift.io.webp", tags: ["racing", "io"] },
   { name: "Traffic Escape", url: "https://fly.silvergames.com/m/traffic-escape/", img: "assets/game-images/traffic-escape.webp", tags: ["racing", "skill"] },
