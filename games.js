@@ -79,7 +79,7 @@ const juegos = [
   { name: "That's not my neighbor", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game18/index.html", img: "assets/game-images/thats-not-my-neighbor.webp", tags: ["puzzle"] },
   { name: "Raft", url: "./games/game15.html", img: "assets/game-images/raft.webp", tags: ["simulation"] },
   { name: "Hollow Knight", url: "https://2games.io/embed/hollow-knight", img: "assets/game-images/hollow-knight.webp", tags: ["platform"] },
-  { name: "Buckshot Roulette", url: "./games/game25.html", img: "assets/game-images/buckshot-roulette.webp", tags: ["platform"] },
+  { name: "Buckshot Roulette", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game19/index.html", img: "assets/game-images/buckshot-roulette.webp", tags: ["platform"] },
   { name: "Cuphead", url: "https://raw.githack.com/web-ports/cuphead/main/index.html", img: "assets/game-images/cuphead.webp", tags: ["platform", "skill", "action"] },
   { name: "R.E.P.O", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game17/index.html", img: "assets/game-images/repo.webp", tags: ["horror", "action"] },
   { name: "Slime Rancher", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game16/index.html", img: "assets/game-images/slime-rancher.webp", tags: ["action"] },
