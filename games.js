@@ -83,7 +83,7 @@ const juegos = [
   { name: "Cuphead", url: "./games/game40.html", img: "assets/game-images/cuphead.webp", tags: ["platform", "skill", "action"] },
   { name: "R.E.P.O", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game17/index.html", img: "assets/game-images/repo.webp", tags: ["horror", "action"] },
   { name: "Slime Rancher", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game16/index.html", img: "assets/game-images/slime-rancher.webp", tags: ["action"] },
-  { name: "Amanda the adventurer", url: "./games/game0.html", img: "assets/game-images/amanda-the-adventurer.webp", tags: ["horror"] },
+  { name: "Amanda the adventurer", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game21/index.html", img: "assets/game-images/amanda-the-adventurer.webp", tags: ["horror"] },
   { name: "Omori", url: "./games/game38.html", img: "assets/game-images/omori.webp", tags: ["horror"] },
   { name: "Bendi and the ink machine", url: "./games/game24.html", img: "assets/game-images/bendy-and-the-ink-machine.webp", tags: ["horror"] },
   { name: "Bad Parenting 1", url: "./games/game1.html", img: "assets/game-images/bad-parenting.webp", tags: ["horror"] },
