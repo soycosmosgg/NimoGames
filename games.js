@@ -87,7 +87,7 @@ const juegos = [
   { name: "Omori", url: "./games/game38.html", img: "assets/game-images/omori.webp", tags: ["horror"] },
   { name: "Bendi and the ink machine", url: "./games/game24.html", img: "assets/game-images/bendy-and-the-ink-machine.webp", tags: ["horror"] },
   { name: "Bad Parenting 1", url: "./games/game1.html", img: "assets/game-images/bad-parenting.webp", tags: ["horror"] },
-  { name: "Fears to fathom home alone", url: "https://gnhustgames.github.io/class-69/fearstofathom-homealone/", img: "assets/game-images/ftp-home-alone.webp", tags: ["horror"] },
+  { name: "Fears to fathom home alone", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game22/index.html", img: "assets/game-images/ftp-home-alone.webp", tags: ["horror"] },
   { name: "Gta Chinatown", url: "https://retrogamesonline.io/grand-theft-auto-chinatown-wars-usa-enfrdeesit.embed", img: "assets/game-images/gta-chinatown.webp", tags: ["action", "skill"] },
   { name: "Rocket soccer derby", url: "https://rocket-soccer-derby.github.io/file/", img: "assets/game-images/rocket-soccer-derby.webp", tags: ["racing"] },
   { name: "Getting over it", url: "./games/game2", img: "assets/game-images/getting-over-it.webp", tags: ["skill"] },
