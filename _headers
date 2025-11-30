@@ -1,9 +1,14 @@
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
 /*
   X-Frame-Options: ALLOWALL
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: *
   Access-Control-Allow-Headers: *
   Referrer-Policy: strict-origin-when-cross-origin
+
+/*.html
   Cache-Control: max-age=0, no-cache, no-store, must-revalidate
 
 /privacy.html
