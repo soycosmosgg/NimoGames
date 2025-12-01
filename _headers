@@ -4,7 +4,6 @@
   Access-Control-Allow-Methods: *
   Access-Control-Allow-Headers: *
   Referrer-Policy: strict-origin-when-cross-origin
-  Cache-Control: max-age=0, no-cache, no-store, must-revalidate
 
 /privacy.html
   Content-Type: text/html; charset=utf-8
