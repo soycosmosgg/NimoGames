@@ -100,7 +100,8 @@ const juegos = [
   { name: "Cookie Clicker", url: "https://webglmath.github.io/cookie-clicker/", img: "assets/game-images/cookie-clicker.webp", tags: ["clicker"] },
   { name: "Sprunki Clicker", url: "https://game.azgame.io/sprunki-clicker/", img: "assets/game-images/sprunki-clicker.webp", tags: ["clicker"] },
   { name: "Bottle Jump", url: "https://1games.io/game/bottle-jump/", img: "assets/game-images/bottle-jump.webp", tags: ["skill", "arcade"] },
-  { name: "Brain Test", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game11/index.html", img: "assets/game-images/brain-test.webp", tags: ["puzzle"] },
+  { name: "Brain Test 2 Tricky Stories", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game11/index.html", img: "assets/game-images/brain-test-2-tricky-stories.webp", tags: ["puzzle"] },
+  { name: "Brain Test 4 Tricky Friends", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game34/index.html", img: "assets/game-images/brain-test-4-tricky-friends.webp", tags: ["puzzle"] },
   { name: "Cut the Rope", url: "https://games-site.github.io/projects/ctr-time-travel/index.html", img: "assets/game-images/cut-the-rope.webp", tags: ["puzzle"] },
   { name: "Papery Planes", url: "./games/game13.html", img: "assets/game-images/papery-planes.webp", tags: ["skill", "arcade"] },
   { name: "Sprunki", url: "https://azgames.io/game/sprunki/", img: "assets/game-images/sprunki.webp", tags: ["arcade"] },
@@ -189,4 +190,5 @@ const juegos = [
   {name: "Golf Party", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game15/index.html", img: "assets/game-images/golf-party.webp", tags: ["racing", "skill"] },
   {name: "Sudoku", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game32/index.html", img: "assets/game-images/sudoku.webp", tags: ["puzzle", "skill"] },
   {name: "Sushi Party", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game33/index.html", img: "assets/game-images/sushi-party.webp", tags: ["racing", "2player"] },
+  {name: "Soundboard", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/soundboard/index.html", img: "assets/game-images/soundboard.webp", tags: ["racing", "2player"] },
 ];
