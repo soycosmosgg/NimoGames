@@ -2,7 +2,7 @@ const juegos = [
   { name: "Level Devil", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game1/index.html", img: "assets/game-images/level-devil.webp", tags: ["arcade", "skill", "2players"] },
   { name: "Stick fighter", url: "https://labgstore21.github.io/g2/class-629/", img: "assets/game-images/stick-fighter.webp", tags: ["action", "skill", "2player"] },
   { name: "Suika Game", url: "https://suikagame.io/game/suika-game/", img: "assets/game-images/suika-game.webp", tags: ["puzzle", "skill", "merge"] },
-  { name: "Merge Rot", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game4/index.html", img: "assets/game-images/merge-rot.webp", tags: ["merge", "puzzle"] },
+  { name: "Merge Rot", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game37/index.html", img: "assets/game-images/merge-rot.webp", tags: ["merge", "puzzle"] },
   { name: "Stickman Hook", url: "https://ug17.github.io/play/Stickman-HookUB/", img: "assets/game-images/stickman-hook.webp", tags: ["skill", "arcade"] },
   { name: "Monkey Mart", url: "./games/game12.html", img: "assets/game-images/monkey-mart.webp", tags: ["tycoon", "simulation"] },
   { name: "Apple Worm", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game0/index.html", img: "assets/game-images/apple-worm.webp", tags: ["puzzle"] },
