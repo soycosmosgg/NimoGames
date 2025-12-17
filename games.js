@@ -93,7 +93,7 @@ const juegos = [
   { name: "Fears to fathom home alone", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game22/index.html", img: "assets/game-images/ftp-home-alone.webp", tags: ["horror"] },
   { name: "Gta Chinatown", url: "https://retrogamesonline.io/grand-theft-auto-chinatown-wars-usa-enfrdeesit.embed", img: "assets/game-images/gta-chinatown.webp", tags: ["action", "skill"] },
   { name: "Rocket soccer derby", url: "https://rocket-soccer-derby.github.io/file/", img: "assets/game-images/rocket-soccer-derby.webp", tags: ["racing"] },
-  { name: "Getting over it", url: "./games/game2", img: "assets/game-images/getting-over-it.webp", tags: ["skill"] },
+  { name: "Getting over it", url: "./games/game2.html", img: "assets/game-images/getting-over-it.webp", tags: ["skill"] },
   { name: "Head Soccer 2024", url: "https://1games.io/game/head-soccer-2024/", img: "assets/game-images/head-soccer-2024.webp", tags: ["2player", "skill"] },
   { name: "Rubik", url: "https://rubikscu.be/", img: "assets/game-images/rubik.webp", tags: ["puzzle"] },
   { name: "Chill guy clicker", url: "https://game.azgame.io/chill-guy-clicker/", img: "assets/game-images/chill-guy-clicker.webp", tags: ["clicker"] },
