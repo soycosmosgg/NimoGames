@@ -193,4 +193,5 @@ const juegos = [
   {name: "Sudoku", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game32/index.html", img: "assets/game-images/sudoku.webp", tags: ["puzzle", "skill"] },
   {name: "Sushi Party", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game33/index.html", img: "assets/game-images/sushi-party.webp", tags: ["racing", "2player"] },
   {name: "Soundboard", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/soundboard/index.html", img: "assets/game-images/soundboard.webp", tags: ["racing", "2player"] },
+  {name: "Cube Escape Collections", url: "https://raw.githack.com/nimogamesdev/ng-source-more/main/game38/index.html", img: "assets/game-images/cube-escape.webp", tags: ["puzzle", "skill"] },
 ];
