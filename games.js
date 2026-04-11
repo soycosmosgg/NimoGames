@@ -76,7 +76,7 @@ const juegos = [
   { name: "Boxing Stars", url: "https://www.friv.com/z/games/boxingstars/game.html", img: "assets/game-images/boxing-stars.webp", tags: ["action", "skill"] },
   { name: "Steal a Brainrot", url: "./games/game20.html", img: "assets/game-images/steal-a-brainrot.webp", tags: ["puzzle", "tycoon"] },
   { name: "Plants vs Brainrots", url: "https://st.8games.net/7/8g/igra-brejnroty-protiv-rastenij/", img: "assets/game-images/plants-vs-brainrots.webp", tags: ["puzzle", "tycoon"] },
-  { name: "Geometry Dash", url: "https://1games.io/game/geometry-lite/", img: "assets/game-images/geometry-dash.webp", tags: ["skill", "arcade"] },
+  { name: "Geometry Dash", url: "https://geometry-dash-lite.1games.io/", img: "assets/game-images/geometry-dash.webp", tags: ["skill", "arcade"] },
   { name: "Geometry Vibes", url: "https://files.twoplayergames.org/files/games/g1/geometry-vibes-v11/index.html", img: "assets/game-images/geometry-vibes.webp", tags: ["skill", "arcade", "2player"] },
   { name: "Harvest Simulator", url: "https://g.igroutka.ru/games/1213/jtFMmdAVoke2w6qL/d8d9f2cc-186e-4695-adce-1ef984e47d59/index.html", img: "assets/game-images/harvest-simulator.webp", tags: ["simulation", "tycoon"] },
   { name: "That's not my neighbor", url: "https://raw.githack.com/nimogamesdev/ng-source/main/game18/index.html", img: "assets/game-images/thats-not-my-neighbor.webp", tags: ["puzzle"] },
