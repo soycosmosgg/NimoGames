@@ -116,6 +116,13 @@ const G_DATA = [
     ported: true,
     tags: ["Fishing", "Casual", "Cute"],
     desc: "BrotatoBrotato is a roguelite shooter where you control a potato that wields up to 6 weapons at once.",
+  },
+  { 
+    id: '3722330', 
+    n: "Shift At Midnight", 
+    dev: "slqntdevss", 
+    ported: true,
+    tags: ["Horror", "Retro", "3D"],
+    desc: "Shift At Midnight is a cooperative horror and investigation video game for up to three players, in which you take on the role of an employee at a convenience store during the night shift.",
   }
 ];
-
