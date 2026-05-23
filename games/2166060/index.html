@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>2166060</title>
+    <base href="https://cdn-slyte.pages.dev/2166060/">
+    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+
+<body>
+
+    <div id="status">
+        <img id="status-splash" src="assets/images/logo.webp" alt="Game Logo">
+        <div id="status-progress">
+            <div id="progress-bar-empty">
+                <div id="progress-bar-full"></div>
+            </div>
+        </div>
+        <div id="loading-text"></div>
+    </div>
+
+    <div id="unity-container" class="unity-desktop hidden">
+        <canvas id="unity-canvas" width=960 height=600></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+        <div id="unity-warning"> </div>
+    </div>
+
+    <script>
+        var container = document.querySelector("#unity-container");
+        var canvas = document.querySelector("#unity-canvas");
+        var statusElement = document.querySelector("#status");
+        var progressBarFull = document.querySelector("#progress-bar-full");
+        var loadingText = document.querySelector("#loading-text");
+        var warningBanner = document.querySelector("#unity-warning");
+
+        const DB_NAME = "AmandaGameDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "saveData";
+
+        function openGameDatabase() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: "key" });
+                    }
+                };
+
+                request.onsuccess = (event) => resolve(event.target.result);
+                request.onerror = (event) => reject(event.target.error || event.target);
+            });
+        }
+
+        function saveGameData(key, value) {
+            return openGameDatabase().then((db) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(STORE_NAME, "readwrite");
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.put({ key: key, value: value, updatedAt: Date.now() });
+
+                    request.onsuccess = () => resolve(true);
+                    request.onerror = () => reject(request.error);
+                });
+            });
+        }
+
+        function loadGameData(key) {
+            return openGameDatabase().then((db) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(STORE_NAME, "readonly");
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.get(key);
+
+                    request.onsuccess = () => resolve(request.result ? request.result.value : null);
+                    request.onerror = () => reject(request.error);
+                });
+            });
+        }
+
+        function deleteGameData(key) {
+            return openGameDatabase().then((db) => {
+                return new Promise((resolve, reject) => {
+                    const transaction = db.transaction(STORE_NAME, "readwrite");
+                    const store = transaction.objectStore(STORE_NAME);
+                    const request = store.delete(key);
+
+                    request.onsuccess = () => resolve(true);
+                    request.onerror = () => reject(request.error);
+                });
+            });
+        }
+
+        function restoreGameProgress(key = "gameProgress") {
+            return loadGameData(key)
+                .then((data) => {
+                    if (data) {
+                        console.log("Loaded saved game progress from IndexedDB:", data);
+                        if (window.unityInstance && typeof window.unityInstance.SendMessage === "function") {
+                            window.unityInstance.SendMessage("GameManager", "LoadProgress", JSON.stringify(data));
+                        }
+                    }
+                    return data;
+                })
+                .catch((error) => {
+                    console.error("IndexedDB load error:", error);
+                    return null;
+                });
+        }
+
+        function saveProgressToIndexedDB(data, key = "gameProgress") {
+            return saveGameData(key, data)
+                .then(() => console.log("Saved progress to IndexedDB:", data))
+                .catch((error) => console.error("IndexedDB save error:", error));
+        }
+
+        window.saveGameProgress = saveProgressToIndexedDB;
+        window.loadGameProgress = loadGameData;
+        window.deleteGameProgress = deleteGameData;
+        window.restoreGameProgress = restoreGameProgress;
+
+        function unityShowBanner(msg, type) {}
+
+        function mergeFiles(fileParts, fileType) {
+            let partsLoaded = 0;
+            const totalParts = fileParts.length;
+            
+            return Promise.all(fileParts.map(part => 
+                fetch(part)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`Failed to load ${part}: ${res.status}`);
+                        }
+                        return res.arrayBuffer();
+                    })
+                    .then(buf => {
+                        partsLoaded++;
+                        doneparts++;
+                        const totalProgress = (doneparts / maxparts) * 100;
+                        progressBarFull.style.width = `${totalProgress}%`;
+                        console.log(`Loaded ${partsLoaded}/${totalParts} parts for ${fileType}`);
+                        return buf;
+                    })
+            )).then(buffers => {
+                const mergedBlob = new Blob(buffers);
+                return URL.createObjectURL(mergedBlob);
+            });
+        }
+        
+        let doneparts = 0;
+        let maxparts = 0;
+
+        function getParts(file, start, end) {
+            let parts = [];
+            for (let i = start; i <= end; i++) {
+                parts.push(file + ".part" + i);
+            }
+            maxparts += parts.length;
+            console.log(`Added ${parts.length} parts for ${file}, total parts: ${maxparts}`);
+            return parts;
+        }
+
+        const originalFetch = window.fetch;
+        window.fetch = async function (...args) {
+            const url = args[0];
+            if (typeof url === "string") {
+                if (url.includes("gn-math.github.io/Clip_Secret Tape 2.webm") && f2Url) {
+                    return new Response(f2Url, { status: 200 });
+                } else if (url.includes("gn-math.github.io/Clip_Secret Tape 3.webm") && f3Url) {
+                    return new Response(f3Url, { status: 200 });
+                } else if (url.includes("gn-math.github.io/Clip_Secret Tape 5.webm") && f5Url) {
+                    return new Response(f5Url, { status: 200 });
+                } else if (url.includes("gn-math.github.io/Clip_Secret Tape 6.webm") && f6Url) {
+                    return new Response(f6Url, { status: 200 });
+                }
+            }
+            return originalFetch.apply(this, args);
+        };
+        
+        let f2Url = null;
+        let f6Url = null;
+        let f3Url = null;
+        let f5Url = null;
+        
+        console.log("Starting to load game files...");
+
+        Promise.all([
+            mergeFiles(getParts("Build/Build.wasm", 1, 4), "WASM"),
+            mergeFiles(getParts("Build/Build.data", 1, 63), "Data"),
+            mergeFiles(getParts("gn-math.github.io/Clip_Secret Tape 2.webm", 1, 2), "Video2"),
+            mergeFiles(getParts("gn-math.github.io/Clip_Secret Tape 6.webm", 1, 2), "Video6"),
+            mergeFiles(getParts("gn-math.github.io/Clip_Secret Tape 3.webm", 1, 2), "Video3"),
+            mergeFiles(getParts("gn-math.github.io/Clip_Secret Tape 5.webm", 1, 3), "Video5")
+        ]).then(([wasmUrl, dataUrl, f2, f6, f3, f5]) => {
+            console.log("All files loaded successfully!");
+            
+            f2Url = f2;
+            f6Url = f6;
+            f3Url = f3;
+            f5Url = f5;
+            container.classList.remove("hidden");
+            
+            var buildUrl = "Build";
+            var loaderUrl = buildUrl + "/Build.loader.js";
+            var config = {
+                dataUrl: dataUrl,
+                frameworkUrl: buildUrl + "/Build.framework.js",
+                codeUrl: wasmUrl,
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "MangledMaw",
+                productName: "Amanda The Adventurer",
+                productVersion: "1.6.17b",
+                showBanner: unityShowBanner,
+            };
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                var meta = document.createElement('meta');
+                meta.name = 'viewport';
+                meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+                document.getElementsByTagName('head')[0].appendChild(meta);
+                container.className = "unity-mobile";
+                canvas.className = "unity-mobile";
+            } else {
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    canvas.style.width = window.innerWidth + "px";
+                    canvas.style.height = window.innerHeight + "px";
+                }
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+            }
+            
+            var script = document.createElement("script");
+            script.src = loaderUrl;
+            script.onload = () => {
+                console.log("Unity loader loaded, creating instance...");
+                
+                createUnityInstance(canvas, config, (progress) => {
+                    const unityProgress = progress * 0.5;
+                    const totalProgress = 50 + unityProgress;
+                    progressBarFull.style.width = `${totalProgress}%`;
+
+                    console.log(`Unity progress: ${Math.round(progress * 100)}%`);
+                    
+                }).then((unityInstance) => {
+                    console.log("Unity loaded successfully!");
+                    window.unityInstance = unityInstance;
+                    statusElement.classList.add("hidden");
+                    restoreGameProgress();
+                    
+                }).catch((error) => {
+                    console.error("Failed to load Unity:", error);
+                    loadingText.textContent = "ERROR LOADING GAME";
+                    loadingText.style.color = "red";
+                });
+            };
+            
+            script.onerror = (error) => {
+                console.error("Failed to load Unity loader:", error);
+                loadingText.textContent = "ERROR LOADING GAME FILES";
+                loadingText.style.color = "red";
+            };
+            
+            document.body.appendChild(script);
+            
+        }).catch((error) => {
+            console.error("Error loading game files:", error);
+            loadingText.textContent = "ERROR LOADING GAME FILES";
+            loadingText.style.color = "red";
+        });
+
+    </script>
+</body>
+</html>

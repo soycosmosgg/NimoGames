@@ -1,0 +1,21 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<title>367520</title>
+<base href="https://cdn-slyte.pages.dev/367520/">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:#000;overflow:hidden}#loading-text{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font:24px Arial}#unity-canvas{width:100vw;height:100vh;display:block}#unity-mobile-warning{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;background:rgba(0,0,0,.9);padding:20px;border-radius:8px;font:14px Arial}
+</style>
+</head>
+<body>
+<div id="loading-text">truffed.lol</div>
+<div id="unity-mobile-warning">WebGL not supported on mobile</div>
+<canvas id="unity-canvas"></canvas>
+  
+<script>
+const lt=document.getElementById("loading-text"),cv=document.getElementById("unity-canvas"),mw=document.getElementById("unity-mobile-warning");let lb=0;const tm='912.81';if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){const m=document.createElement('meta');m.name='viewport';m.content='width=device-width,height=device-height,initial-scale=1,user-scalable=no,shrink-to-fit=yes';document.head.appendChild(m);mw.style.display="block";setTimeout(()=>mw.style.display="none",5000);}async function fwp(u){const r=await fetch(u),rd=r.body.getReader(),ch=[];while(true){const{done,value}=await rd.read();if(done)break;lb+=value.length;ch.push(value);lt.textContent=`${(lb/1048576).toFixed(2)} MB / ${tm} MB`;}return URL.createObjectURL(new Blob(ch));}async function mf(p){const b=await Promise.all(p.map(fwp)),bl=await Promise.all(b.map(u=>fetch(u).then(r=>r.blob())));return URL.createObjectURL(new Blob(bl));}function gp(f,s,e){return Array.from({length:e-s+1},(_,i)=>`${f}.part${s+i}`);}(async()=>{const[du,wu]=await Promise.all([mf(gp("Build/hktruffled.data",1,45)),mf(gp("Build/hktruffled.wasm",1,2))]),sc=document.createElement("script");sc.src="Build/hktruffled.loader.js";sc.onload=()=>{createUnityInstance(cv,{dataUrl:du,frameworkUrl:"Build/hktruffled.framework.js",codeUrl:wu,streamingAssetsUrl:"StreamingAssets",companyName:"Team Cherry",productName:"Hollow Knight",productVersion:"1.0"}).then(()=>{lt.remove();}).catch(alert);};document.body.appendChild(sc);})();
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nimo Games</title>
+  <script>
+    window.NIMO_CONFIG = window.NIMO_CONFIG || {};
+    // Set this to your Cloudflare Pages CDN origin when you want the launcher
+    // to load game pages from a private CDN repo, for example:
+    // window.NIMO_CONFIG.gameBaseUrl = 'https://<your-project>.pages.dev';
+  </script>
+  <link id="page-favicon" rel="icon" href="./images/favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; gap: 10px;">
+    <div class="top-notch" id="n-game" onclick="tglV('g')" style="position: relative; left: auto; top: auto; transform: none; cursor: pointer; display: none; background: rgba(255,255,255,0.15);">
+      <span id="n-game-title" style="color: #fff;">Game</span>
+      <span onclick="clsGm(event)" style="margin-left: 8px; color: #ff4d4d; font-weight: bold; font-size: 16px;">×</span>
+    </div>
+  </div>
+
+  <img src="" id="bg-amb" alt="Background">
+
+  <div id="app-wrap">
+    <div id="v-Nimo" class="tab-view active">
+      <div id="error-fallback" style="display:none;"></div>
+      <div id="Nimo-content">
+        <div class="sec-head" id="hc-head" style="margin-top:0;">Continue Playing</div>
+        <div class="hero-cont" id="hc-box">
+          <img src="" id="hc-img" class="h-img" alt="Hero">
+          <div class="h-over">
+            <div class="h-tag" id="hc-tag">RESUME</div>
+            <h1 class="h-title" id="hc-title">...</h1>
+            <div class="h-stat">
+              <span id="hc-time"></span>
+              <span id="hc-dev"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec-head">Games We Recommend</div>
+        <div class="marquee-wrap">
+          <div class="marquee-track" id="g-recom-track"></div>
+        </div>
+
+        <div class="sec-head">Daily Picks</div>
+        <div class="grid-h" id="g-day"></div>
+
+        <div class="sec-head">Trending Now</div>
+        <div class="grid-h" id="g-trnd"></div>
+      </div>
+    </div>
+
+    <div id="v-lib" class="tab-view">
+      <div class="sec-head" style="margin-top:0;">Complete Library</div>
+      <div class="lib-search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="lib-search" placeholder="Search games by name, tag, or genre..." onkeyup="filterLib()">
+      </div>
+      <div class="grid-v" id="g-lib"></div>
+      <div class="credits">
+        <p>Main UI made by <strong>Fig</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dock-wrap">
+    <div class="main-dock">
+      <div class="d-btn active" id="b-Nimo" onclick="chgTab('Nimo')">Nimo</div>
+      <div class="d-btn" id="b-lib" onclick="chgTab('lib')">Library</div>
+    </div>
+
+    <div class="trk-widg" id="tk">
+      <img src="" class="tw-img" id="tk-img" alt="Track">
+      <div class="tw-txt">
+        <small id="tk-lbl">Last Played</small>
+        <strong id="tk-nm">...</strong>
+      </div>
+      <button class="tw-btn" id="tk-btn" onclick="tkAction()"></button>
+    </div>
+  </div>
+
+  <div id="modal-ui">
+    <img src="" class="m-bg" id="mdl-bg" alt="Modal background">
+    <div class="m-close" onclick="clsMdl()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </div>
+    <div id="modal-load-status" class="modal-load-status" aria-live="polite" style="display:none;">
+      <span class="modal-load-icon">
+        <svg class="modal-load-spinner" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.2"></circle>
+          <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"></path>
+        </svg>
+      </span>
+      <span class="modal-load-copy">
+        <strong>Loading game data</strong>
+        <small>Fetching description, achievements, and requirements...</small>
+      </span>
+    </div>
+    <div class="m-grid">
+      <div class="m-l">
+        <img src="" id="mdl-post" alt="Modal poster">
+        <div class="m-actions">
+          <button class="m-play" onclick="try2launch()">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"></path></svg>
+            Play
+          </button>
+          <button class="m-buy" id="mdl-buy" onclick="goToStore()" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;">
+              <circle cx="9" cy="20.5" r="1"></circle>
+              <circle cx="19" cy="20.5" r="1"></circle>
+              <path d="M1 1h4l2.68 12.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            Buy
+          </button>
+        </div>
+        <div class="m-stats m-stats-bottom">
+          <div class="m-stats-item">
+            <div class="m-stats-label">Play Time</div>
+            <div class="m-stats-value" id="mdl-tm"></div>
+          </div>
+          <div class="m-stats-item">
+            <div class="m-stats-label">Last Played</div>
+            <div class="m-stats-value" id="mdl-lp"></div>
+          </div>
+          <div class="m-stats-item">
+            <div class="m-stats-label">Achievements</div>
+            <div class="m-stats-value" id="mdl-ac"></div>
+          </div>
+        </div>
+      </div>
+      <div class="m-r">
+        <h1 class="m-t" id="mdl-t"></h1>
+        <div class="m-d" id="mdl-d"></div>
+        <div class="m-tgs" id="mdl-tg"></div>
+        <div class="m-desc" id="mdl-dc"></div>
+        <div class="m-req">
+          <div class="m-rc">
+            <h4>Minimum</h4>
+            <div class="m-ri"><small>OS</small><span id="qm-os"></span></div>
+            <div class="m-ri"><small>Processor</small><span id="qm-cpu"></span></div>
+            <div class="m-ri"><small>Memory</small><span id="qm-ram"></span></div>
+            <div class="m-ri"><small>Graphics</small><span id="qm-gpu"></span></div>
+          </div>
+          <div class="m-rc">
+            <h4>Recommended</h4>
+            <div class="m-ri"><small>OS</small><span id="qr-os"></span></div>
+            <div class="m-ri"><small>Processor</small><span id="qr-cpu"></span></div>
+            <div class="m-ri"><small>Memory</small><span id="qr-ram"></span></div>
+            <div class="m-ri"><small>Graphics</small><span id="qr-gpu"></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-wrap" id="p-legal-block">
+    <div class="popup-box" style="max-width: 500px;">
+      <div class="popup-icon-container" style="background:rgba(255,200,0,0.1); border:1px solid rgba(255,200,0,0.2);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ffc800" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h2>Legal Notice & Disclaimer</h2>
+      <div id="legal-scroll" style="max-height:160px; overflow-y:auto; font-size:13px; line-height: 1.6; color:#aaa; text-align:left; padding:15px; background:rgba(0,0,0,0.3); border-radius:12px; margin-bottom:20px; border: 1px solid var(--border);" onscroll="checkLegalScroll(this)">
+        <p><strong>Please read carefully before proceeding.</strong></p>
+        <p>Nimo Games are not hosting, storing, or distributing any of the games presented on this application. All games are merely embedded via standard iFrames pointing directly to their original providers.</p>
+        <p>We do not claim ownership of any trademarks, copyrighted materials, or intellectual property displayed within the application. If there are any legal disputes or DMCA claims regarding the hosting and playing of these games, they should be directed towards the source host.</p>
+        <p>By clicking "I Agree", you acknowledge that Nimo games acts solely as a UI aggregator and is free from any liability regarding third-party content.</p>
+        <p><em>Scroll to the bottom to accept. NOTE THIS PLEASE, YOU MUST ALLOW POP UPS!</em></p>
+        <br><br><br><br>
+        <p>End of notice.</p>
+      </div>
+      <div class="popup-btn-row">
+        <button class="popup-btn primary" id="btn-legal-accept" disabled onclick="acceptLegal()" style="width:100%;">I Agree</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-wrap" id="p-launch-choice" onclick="closePopupClick(event)">
+    <div class="popup-box">
+      <div class="popup-icon-container" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </div>
+      <h2>Launch Options</h2>
+      <p>If you are accessing the site directly through no proxy please use the open in tab option or if using proxy use internal.</p>
+      <div class="popup-btn-row">
+        <button class="popup-btn secondary" onclick="rnLdExt()">Open in Tab</button>
+        <button class="popup-btn primary" onclick="rnLdInt()">Open Internally</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="popup-wrap" id="p-sess-block" onclick="closePopupClick(event)">
+    <div class="popup-box">
+      <div class="popup-icon-container" style="background:rgba(255,77,77,0.1);border:1px solid rgba(255,77,77,0.2);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h2>Session Active</h2>
+      <p>You're already playing a game! Make sure to exit your current session before starting a new one.</p>
+      <div class="popup-btn-row">
+        <button class="popup-btn primary" style="width: 100%;" onclick="hidePopup('p-sess-block')">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-layer">
+    <div id="bS">
+      <h2 id="bS-t" style="margin:0 0 20px 0;">Loading...</h2>
+      <span style="font-size:14px; color:#aaa; text-align:center; max-width:450px; line-height:1.6;">Notice: If you exit fullscreen, the mouse lock may break.<br>Use <b>ALT + Z</b> (hold 3s) to lock mouse and fullscreen.<br>Use <b>ALT + C</b> (hold 3s) to safely exit.</span>
+    </div>
+    <div id="lO">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" style="margin-bottom:20px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <h1 style="margin:0 0 10px 0; font-size:32px; font-weight:700; letter-spacing:-1px;">Session Expired</h1>
+      <p style="color:#aaa; font-size:16px; max-width:450px; line-height:1.6; margin-bottom: 30px;">Logged out. Go to a proper game session to log in.</p>
+      <button onclick="clsGm()" style="padding:14px 36px; background:#fff; color:#000; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer;">Close</button>
+    </div>
+    <button id="fB" onclick="mnLk()" title="Hold ALT + Z for 3 secs to lock mouse" aria-label="Toggle fullscreen">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+        <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+        <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+        <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+      </svg>
+    </button>
+    <div id="tD">3</div>
+    <div id="eD">3</div>
+    <iframe id="gF" allow="autoplay;fullscreen;pointer-lock;keyboard-map;clipboard-read;clipboard-write;gamepad"></iframe>
+  </div>
+
+  <script src="js/gamelayout.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
