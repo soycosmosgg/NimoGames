@@ -16,6 +16,20 @@
             overflow: hidden;
             height: 100%;
             width: 100%;
+            background: #000;
+        }
+
+        #loading-text {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-family: cursive;
+            font-size: 48px;
+            text-align: center;
+            z-index: 1;
         }
 
         #unity-container {
@@ -29,7 +43,7 @@
 </head>
 
 <body>
-    <div id="loading-text" style="color: black; font-family: cursive; font-size: 48px; text-align: center; margin-top: 20px;">LOADING...</div>
+    <div id="loading-text">LOADING...</div>
     <div id="unity-container" class="unity-desktop" hidden>
         <canvas id="unity-canvas" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
