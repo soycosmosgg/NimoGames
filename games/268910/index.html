@@ -4,277 +4,185 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>268910</title>
-    <base href="https://cdn-slyte.pages.dev/268910/">
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <script src="TemplateData/UnityProgress.js"></script>
     <script src="Build/UnityLoader.js"></script>
   </head>
   <body>
-    <div id="loading-video-background"></div>
     <div id="loading-overlay">
       <div id="loading-text">LOADING</div>
       <div id="loading-progress">0 MB / 2127.34 MB</div>
     </div>
     <div id="unityContainer"></div>
     <script>
-      // Create video element lazily to not block initial load
-      let loadingVideo = null;
       const loadingText = document.querySelector("#loading-text");
       const loadingProgress = document.querySelector("#loading-progress");
       const loadingOverlay = document.querySelector("#loading-overlay");
-      
-      function initializeVideo() {
-          const bg = document.querySelector("#loading-video-background");
-          if (!bg || bg.querySelector('video')) return;
-          
-          const video = document.createElement('video');
-          video.id = 'loading-video';
-          video.muted = true;
-          video.loop = true;
-          video.playsInline = true;
-          video.style.display = 'block';
-          video.style.opacity = '0.9';
-          video.preload = 'none';
-          
-          const source = document.createElement('source');
-          source.src = 'TemplateData/loading.mp4';
-          source.type = 'video/mp4';
-          video.appendChild(source);
-          bg.appendChild(video);
-          
-          loadingVideo = video;
-          
-          // Try to play after creation
-          setTimeout(() => {
-              video.play().catch(() => console.log('Video autoplay not available'));
-          }, 100);
-      }
-      
-      // Initialize video after a short delay to not block page load
-      setTimeout(initializeVideo, 50);
-      
-      // Initialize tracking variables
-      window.filesFromCache = 0;
-      
-      // Monitor for Unity canvas rendering
-      const checkInterval = setInterval(function() {
-          const canvas = document.querySelector("canvas");
-          const allFromCache = window.filesFromCache === 3;
-          
-          // Check if canvas exists and has rendered content, or all files are from cache
-          if ((canvas && canvas.offsetHeight > 0 && canvas.offsetWidth > 0) || allFromCache) {
-              if (loadingOverlay && loadingOverlay.style.display !== 'none') {
-                  loadingOverlay.style.display = 'none';
-                  clearInterval(checkInterval);
-              }
-          }
-      }, 100);
-      
-      // Set a timeout to ensure cleanup
-      setTimeout(function() {
-          clearInterval(checkInterval);
-      }, 30000);
-      
-      if (loadingVideo) {
-          // Setup video element
-          loadingVideo.muted = true;
-          loadingVideo.loop = true;
-          loadingVideo.playsInline = true;
-          loadingVideo.style.display = 'block';
-          loadingVideo.style.opacity = '0.9';
-          
-          // Try to play video after a short delay to allow buffering
-          setTimeout(function() {
-              var playPromise = loadingVideo.play();
-              if (playPromise !== undefined) {
-                  playPromise.catch(function(e) {
-                      // Silently fail if browser won't autoplay
-                      console.log('Video autoplay not available');
-                  });
-              }
-          }, 500);
-          
-          // Log video loading issues
-          loadingVideo.addEventListener('error', function() {
-              console.warn('Video error:', loadingVideo.error);
-          });
-      }
-  
       let loadedBytes = 0;
-      
-      // IndexedDB for caching processed files
-      const DB_NAME = 'GameBuildCache';
+      window.filesFromCache = 0;
+
+      function hideLoadingOverlay() {
+        if (loadingOverlay) {
+          loadingOverlay.style.display = 'none';
+        }
+      }
+
+      const DB_NAME = 'CupheadBuildCache';
       const DB_VERSION = 1;
-      
+
       function initIndexedDB() {
-          return new Promise((resolve, reject) => {
-              const request = indexedDB.open(DB_NAME, DB_VERSION);
-              request.onerror = () => reject(request.error);
-              request.onsuccess = () => resolve(request.result);
-              request.onupgradeneeded = (e) => {
-                  const db = e.target.result;
-                  if (!db.objectStoreNames.contains('files')) {
-                      db.createObjectStore('files');
-                  }
-              };
-          });
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+          request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve(request.result);
+          request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('files')) {
+              db.createObjectStore('files');
+            }
+          };
+        });
       }
-      
+
       function getFromCache(key) {
+        return initIndexedDB().then((db) => {
           return new Promise((resolve) => {
-              initIndexedDB().then(db => {
-                  const tx = db.transaction('files', 'readonly');
-                  const store = tx.objectStore('files');
-                  const request = store.get(key);
-                  request.onsuccess = () => resolve(request.result);
-                  request.onerror = () => resolve(null);
-              }).catch(() => resolve(null));
+            const tx = db.transaction('files', 'readonly');
+            const store = tx.objectStore('files');
+            const request = store.get(key);
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => resolve(null);
           });
+        }).catch(() => null);
       }
-      
+
       function saveToCache(key, blob) {
+        return initIndexedDB().then((db) => {
           return new Promise((resolve) => {
-              initIndexedDB().then(db => {
-                  const tx = db.transaction('files', 'readwrite');
-                  const store = tx.objectStore('files');
-                  const request = store.put(blob, key);
-                  request.onsuccess = () => resolve(true);
-                  request.onerror = () => resolve(false);
-              }).catch(() => resolve(false));
+            const tx = db.transaction('files', 'readwrite');
+            const store = tx.objectStore('files');
+            const request = store.put(blob, key);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
           });
+        }).catch(() => false);
       }
-  
+
       async function fetchWithProgress(url) {
-          const response = await fetch(url);
-          const reader = response.body.getReader();
-          let chunks = [];
-          let received = 0;
-  
-          while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              received += value.length;
-              loadedBytes += value.length;
-              chunks.push(value);
-  
-              let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
-              let mbTotal = '2127.34';
-              loadingText.textContent = 'LOADING';
-              loadingProgress.textContent = `${mbDone} MB / ${mbTotal} MB`;
-          }
-  
-          let fullBuffer = new Uint8Array(received);
-          let offset = 0;
-          for (let chunk of chunks) {
-              fullBuffer.set(chunk, offset);
-              offset += chunk.length;
-          }
-          return fullBuffer.buffer;
+        const response = await fetch(url);
+        const reader = response.body.getReader();
+        let chunks = [];
+        let received = 0;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.length;
+          loadedBytes += value.length;
+          chunks.push(value);
+
+          const mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+          const mbTotal = '2127.34';
+          loadingText.textContent = 'LOADING';
+          loadingProgress.textContent = `${mbDone} MB / ${mbTotal} MB`;
+        }
+
+        const fullBuffer = new Uint8Array(received);
+        let offset = 0;
+        for (let chunk of chunks) {
+          fullBuffer.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        return fullBuffer.buffer;
       }
-  
+
       async function mergeFiles(fileParts, cacheKey) {
-          // Try to get from cache first
-          const cached = await getFromCache(cacheKey);
-          if (cached) {
-              console.log('Loaded from cache:', cacheKey);
-              window.filesFromCache = (window.filesFromCache || 0) + 1;
-              return URL.createObjectURL(cached);
+        const cached = await getFromCache(cacheKey);
+        if (cached) {
+          window.filesFromCache += 1;
+          return URL.createObjectURL(cached);
+        }
+
+        const blobParts = [];
+        for (const part of fileParts) {
+          try {
+            const buffer = await fetchWithProgress(part);
+            blobParts.push(new Blob([buffer]));
+            await new Promise(resolve => setTimeout(resolve, 10));
+          } catch (e) {
+            console.warn('Failed to fetch part:', part, e);
           }
-          
-          // If not cached, download and merge
-          const blobParts = [];
-          for (const part of fileParts) {
-              try {
-                  const buffer = await fetchWithProgress(part);
-                  blobParts.push(new Blob([buffer]));
-                  await new Promise(resolve => setTimeout(resolve, 10));
-              } catch (e) {
-                  console.warn('Failed to fetch part:', part, e);
-              }
-          }
-          const mergedBlob = new Blob(blobParts);
-          
-          // Save to cache for next time
-          saveToCache(cacheKey, mergedBlob);
-          
-          return URL.createObjectURL(mergedBlob);
+        }
+
+        const mergedBlob = new Blob(blobParts);
+        await saveToCache(cacheKey, mergedBlob);
+        return URL.createObjectURL(mergedBlob);
       }
-  
+
       function getParts(file, start, end) {
-          let parts = [];
-          for (let i = start; i <= end; i++) {
-              parts.push(file + ".part" + i);
-          }
-          return parts;
+        let parts = [];
+        for (let i = start; i <= end; i++) {
+          parts.push(file + ".part" + i);
+        }
+        return parts;
       }
-  
+
       function resizeUnityContainer() {
-    var container = document.getElementById("unityContainer");
-    var canvas = container.querySelector("canvas");
+        var container = document.getElementById("unityContainer");
+        var canvas = container.querySelector("canvas");
 
-    container.style.width = window.innerWidth + "px";
-    container.style.height = window.innerHeight + "px";
+        container.style.width = window.innerWidth + "px";
+        container.style.height = window.innerHeight + "px";
 
-    if (canvas) {
-        canvas.style.width = window.innerWidth + "px";
-        canvas.style.height = window.innerHeight + "px";
-    }
-}
+        if (canvas) {
+          canvas.style.width = window.innerWidth + "px";
+          canvas.style.height = window.innerHeight + "px";
+        }
+      }
 
-  
       (async () => {
-          const allParts = [
-              ...getParts("Build/Build.asm.code.unityweb", 1, 3),
-              ...getParts("Build/Build.data.unityweb", 1, 103),
-              ...getParts("Build/Build.wasm.code.unityweb", 1, 2),
-          ];
- 
-  
-          const [asmurl, dataUrl, wasmurl] = await Promise.all([
-              mergeFiles(getParts("Build/Build.asm.code.unityweb", 1, 3), "Build.asm.code.unityweb"),
-              mergeFiles(getParts("Build/Build.data.unityweb", 1, 103), "Build.data.unityweb"),
-              mergeFiles(getParts("Build/Build.wasm.code.unityweb", 1, 2), "Build.wasm.code.unityweb"),
-          ]);
-          
-          // If all files loaded from cache, hide loading overlay immediately
-          if (window.filesFromCache === 3) {
-              if (loadingOverlay) loadingOverlay.style.display = 'none';
-          }
-  
-          const json ={
-"companyName": "SpanishFreddy",
-"productName": "Cuphead",
-"dataUrl": dataUrl,
-"wasmCodeUrl": wasmurl,
-"wasmFrameworkUrl": "Build.wasm.framework.unityweb",
-"asmCodeUrl": asmurl,
-"asmMemoryUrl": "Build.asm.memory.unityweb",
-"asmFrameworkUrl": "Build.asm.framework.unityweb",
-"TOTAL_MEMORY": 2130706432,
-"graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
-"webglContextAttributes": {"preserveDrawingBuffer": false},
-"splashScreenStyle": "Dark",
-"backgroundColor": "#231F20"
-};
-  
-          let blob = new Blob([JSON.stringify(json)], { type: "application/json" });
-          let blobUrl = URL.createObjectURL(blob);
-          window.addEventListener("resize", resizeUnityContainer);
-  
-          UnityLoader.instantiate("unityContainer", json, {
-              url: blobUrl,
-              Module: {
-                  onRuntimeInitialized: function () {
-                      resizeUnityContainer();
-                      var overlay = document.querySelector("#loading-overlay");
-                      if (overlay) overlay.remove();
-                      var video = document.querySelector("#loading-video");
-                      if (video) video.remove();
-                  },
-              },
-          });
+        const [asmurl, dataUrl, wasmurl] = await Promise.all([
+          mergeFiles(getParts("Build/Build.asm.code.unityweb", 1, 3), "Build.asm.code.unityweb"),
+          mergeFiles(getParts("Build/Build.data.unityweb", 1, 103), "Build.data.unityweb"),
+          mergeFiles(getParts("Build/Build.wasm.code.unityweb", 1, 2), "Build.wasm.code.unityweb"),
+        ]);
+
+        if (window.filesFromCache === 3) {
+          hideLoadingOverlay();
+        }
+
+        const json = {
+          "companyName": "SpanishFreddy",
+          "productName": "Cuphead",
+          "dataUrl": dataUrl,
+          "wasmCodeUrl": wasmurl,
+          "wasmFrameworkUrl": "Build.wasm.framework.unityweb",
+          "asmCodeUrl": asmurl,
+          "asmMemoryUrl": "Build.asm.memory.unityweb",
+          "asmFrameworkUrl": "Build.asm.framework.unityweb",
+          "TOTAL_MEMORY": 2130706432,
+          "graphicsAPI": ["WebGL 2.0", "WebGL 1.0"],
+          "webglContextAttributes": {"preserveDrawingBuffer": false},
+          "splashScreenStyle": "Dark",
+          "backgroundColor": "#231F20"
+        };
+
+        let blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+        let blobUrl = URL.createObjectURL(blob);
+        window.addEventListener("resize", resizeUnityContainer);
+
+        UnityLoader.instantiate("unityContainer", json, {
+          url: blobUrl,
+          Module: {
+            onRuntimeInitialized: function () {
+              resizeUnityContainer();
+              hideLoadingOverlay();
+            },
+          },
+        });
       })();
-  </script>
+    </script>
   </body>
 </html>
