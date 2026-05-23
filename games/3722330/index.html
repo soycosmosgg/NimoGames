@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en-us">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>3722330</title>
+		<base href="https://cdn-slyte.pages.dev/3722330/" />
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				height: 100%;
+				width: 100%;
+			}
+			#unity-container,
+			#unity-canvas {
+				width: 100%;
+				height: 100%;
+				position: fixed;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body
+		style="
+			text-align: center;
+			padding: 0;
+			border: 0;
+			margin: 0;
+			background: black;
+		"
+	>
+		<div
+			id="loading-text"
+			style="
+				color: white;
+				font-family: Inter, sans-serif;
+				font-size: 48px;
+				text-align: center;
+				margin-top: 20px;
+			"
+		>
+			Parts downloaded (0/5)
+		</div>
+		<div id="unity-container">
+			<canvas id="unity-canvas" tabindex="-1"></canvas>
+		</div>
+		<script src="Build/ShiftAtMidnightPort.loader.js"></script>
+		<script>
+			function mergeFiles(fileParts) {
+				return new Promise((resolve, reject) => {
+					let buffers = [];
+
+					function fetchPart(index) {
+						if (index >= fileParts.length) {
+							let mergedBlob = new Blob(buffers);
+							let mergedFileUrl = URL.createObjectURL(mergedBlob);
+							resolve(mergedFileUrl);
+							return;
+						}
+						fetch(fileParts[index])
+							.then((response) => response.arrayBuffer())
+							.then((data) => {
+								buffers.push(data);
+								document.getElementById("loading-text").textContent =
+									`Parts downloaded (${index + 1}/5)`;
+								fetchPart(index + 1);
+							})
+							.catch(reject);
+					}
+					fetchPart(0);
+				});
+			}
+
+			function getParts(file, start, end) {
+				let parts = [];
+				for (let i = start; i <= end; i++) {
+					parts.push(file + ".part" + i);
+				}
+				return parts;
+			}
+			Promise.all([
+				mergeFiles(getParts("Build/ShiftAtMidnightPort.data", 1, 5)),
+				mergeFiles(getParts("Build/ShiftAtMidnightPort.wasm", 1, 2)),
+			]).then(([dataUrl, wasmUrl]) => {
+				var buildUrl = "Build";
+				var loaderUrl = buildUrl + "/ShiftAtMidnightPort.loader.js";
+				var config = {
+					dataUrl: dataUrl,
+					frameworkUrl: buildUrl + "/ShiftAtMidnightPort.framework.js",
+					codeUrl: wasmUrl,
+					streamingAssetsUrl: "StreamingAssets",
+					companyName: "slqntdevss",
+					productName: "ShiftAtMidnight",
+					productVersion: "1.00",
+				};
+
+				var script = document.createElement("script");
+				script.src = loaderUrl;
+				script.onload = () => {
+					createUnityInstance(
+						document.getElementById("unity-canvas"),
+						config,
+						(progress) => {
+							console.log(progress);
+						},
+					)
+						.then((unityInstance) => {
+							document.querySelector("#loading-text").remove();
+						})
+						.catch((message) => {
+							alert(message);
+						});
+				};
+				document.body.appendChild(script);
+			});
+		</script>
+	</body>
+</html>
