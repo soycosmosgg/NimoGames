@@ -12,8 +12,125 @@
 </head>
 
 <body>
+    <script>
+        (function () {
+            if (window.__slyteCachedFetchEnabled) {
+                return;
+            }
+            window.__slyteCachedFetchEnabled = true;
+
+            const originalFetch = window.fetch.bind(window);
+            const DB_NAME = 'BuckshotRouletteCache';
+            const DB_VERSION = 1;
+            const STORE_NAME = 'files';
+            let dbPromise = null;
+
+            function openDb() {
+                if (dbPromise) {
+                    return dbPromise;
+                }
+
+                dbPromise = new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = () => resolve(request.result);
+                    request.onupgradeneeded = (event) => {
+                        const db = event.target.result;
+                        if (!db.objectStoreNames.contains(STORE_NAME)) {
+                            db.createObjectStore(STORE_NAME);
+                        }
+                    };
+                });
+
+                return dbPromise;
+            }
+
+            function shouldCache(url) {
+                const pathname = url.pathname || '';
+                return pathname.includes('gamedata');
+            }
+
+            function getContentType(url) {
+                const pathname = url.pathname || '';
+                if (pathname.endsWith('.wasm')) {
+                    return 'application/wasm';
+                }
+                if (pathname.endsWith('.pck')) {
+                    return 'application/octet-stream';
+                }
+                if (pathname.endsWith('.js')) {
+                    return 'application/javascript';
+                }
+                return 'application/octet-stream';
+            }
+
+            async function getCachedResponse(url) {
+                try {
+                    const db = await openDb();
+                    return await new Promise((resolve) => {
+                        const tx = db.transaction(STORE_NAME, 'readonly');
+                        const store = tx.objectStore(STORE_NAME);
+                        const request = store.get(url.href);
+                        request.onsuccess = () => resolve(request.result || null);
+                        request.onerror = () => resolve(null);
+                    });
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            async function setCachedResponse(url, blob) {
+                try {
+                    const db = await openDb();
+                    await new Promise((resolve, reject) => {
+                        const tx = db.transaction(STORE_NAME, 'readwrite');
+                        const store = tx.objectStore(STORE_NAME);
+                        const request = store.put(blob, url.href);
+                        request.onsuccess = () => resolve();
+                        request.onerror = () => reject(request.error);
+                    });
+                } catch (error) {
+                    console.warn('No se pudo guardar en cache:', url.href, error);
+                }
+            }
+
+            window.fetch = async function (input, init) {
+                const request = typeof input === 'string' ? new Request(input, init) : input;
+                const url = new URL(request.url, window.location.href);
+
+                if (!shouldCache(url)) {
+                    return originalFetch(request, init);
+                }
+
+                const cachedBlob = await getCachedResponse(url);
+                if (cachedBlob) {
+                    return new Response(cachedBlob, {
+                        status: 200,
+                        statusText: 'OK',
+                        headers: {
+                            'Content-Type': getContentType(url)
+                        }
+                    });
+                }
+
+                const response = await originalFetch(request, init);
+                if (!response.ok) {
+                    return response;
+                }
+
+                const blob = await response.clone().blob();
+                await setCachedResponse(url, blob);
+
+                return new Response(blob, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers
+                });
+            };
+        })();
+    </script>
     <script src="main.js"></script>
-    <div id="loading-text" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: cursive; font-size: 48px; text-align: center; z-index: 9999; pointer-events: none;">LOADING...</div>
+    <div id="loading-text" style="position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: white; font-family: cursive; font-size: 64px; font-weight: 700; text-align: center; z-index: 9999; pointer-events: none;">LOADING...</div>
     <canvas id="canvas"> Your browser does not support the canvas tag. </canvas>
     <noscript> Your browser does not support JavaScript. </noscript>
     <div id="status">
@@ -46,6 +163,7 @@
             const statusOverlay = document.getElementById('status');
             const statusProgress = document.getElementById('status-progress');
             const statusNotice = document.getElementById('status-notice');
+            statusOverlay.style.display = 'none';
             let initializing = true;
             let statusMode = '';
 
