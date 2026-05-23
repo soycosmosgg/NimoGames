@@ -14,9 +14,6 @@
 
 <body>
     <div id="loading-container">
-        <video id="loading-video" autoplay muted loop playsinline preload="auto">
-            <source src="assets/loading.mp4" type="video/mp4">
-        </video>
         <div id="loading-text">LOADING...</div>
     </div>
     <script src="main.js"></script>
@@ -51,7 +48,6 @@
         function run() {
             const loadingContainer = document.getElementById('loading-container');
             const loadingText = document.getElementById('loading-text');
-            const loadingVideo = document.getElementById('loading-video');
             const statusOverlay = document.getElementById('status');
             const statusProgress = document.getElementById('status-progress');
             const statusNotice = document.getElementById('status-notice');
@@ -61,9 +57,6 @@
             function removeLoadingOverlay() {
                 if (loadingText) {
                     loadingText.remove();
-                }
-                if (loadingVideo) {
-                    loadingVideo.remove();
                 }
                 if (loadingContainer) {
                     loadingContainer.remove();
