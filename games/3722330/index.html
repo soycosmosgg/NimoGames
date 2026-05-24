@@ -24,32 +24,16 @@
 			}
 			#loading-text {
   font-weight: bold;
-  background: linear-gradient(
-    270deg,
-    #ff0000,
-    #ff7f00,
-    #ffff00,
-    #00ff00,
-    #0000ff,
-    #4b0082,
-    #8f00ff
-  );
+  background: rgb(255, 255, 255);
   background-size: 400% 400%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: rainbow 3s ease infinite;
-}
-
-@keyframes rainbow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 </style>
   </head>
   <body>
     <div id="loading-text"
-    style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING...
+    style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 430px;"> LOADING...
   </div>
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
