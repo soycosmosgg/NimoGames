@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <base href="https://cdn.jsdelivr.net/gh/web-ports/clover-pit@main/">
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>3314790</title>
-    <base href="https://cdn-slyte.pages.dev/3314790/">
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-</head>
+  </head>
   <body>
     <div id="loading-text"
-    style="color: rgb(255, 255, 255); font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING...
+    style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 430px;"> LOADING...
   </div>
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
@@ -24,161 +24,116 @@
     </div>
     <script>
       var loadingText = document.querySelector("#loading-text");
-      let loadedBytes = 0;
-      const CACHE_DB = 'CloverPitCache';
-      const CACHE_STORE = 'files';
-      const CACHE_VERSION = 1;
-      let dbPromise = null;
+    let totalBytes = 0;
+    let loadedBytes = 0;
 
-      function initIndexedDB() {
-        if (dbPromise) return dbPromise;
+    async function fetchWithProgress(url) {
+      const response = await fetch(url);
+      const reader = response.body.getReader();
+      let chunks = [];
+      let received = 0;
+      while (true) {
+        const {
+          done,
+          value
+        } = await reader.read();
+        if (done) break;
+        received += value.length;
+        loadedBytes += value.length;
+        chunks.push(value);
+        let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+        let mbTotal = '86.96';
+        loadingText.textContent = `LOADING... ${mbDone} MB / ${mbTotal} MB`;
+      }
+      let fullBuffer = new Uint8Array(received);
+      let offset = 0;
+      for (let chunk of chunks) {
+        fullBuffer.set(chunk, offset);
+        offset += chunk.length;
+      }
+      return fullBuffer.buffer;
+    }
 
-        dbPromise = new Promise((resolve, reject) => {
-          const request = indexedDB.open(CACHE_DB, CACHE_VERSION);
+    async function mergeFiles(fileParts, cacheKey) {
+      const buffers = await Promise.all(
+        fileParts.map(part => fetchWithProgress(part))
+      );
+      const mergedBlob = new Blob(buffers);
+      return URL.createObjectURL(mergedBlob);
+    }
 
-          request.onerror = () => reject(request.error);
-          request.onsuccess = () => resolve(request.result);
-          request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(CACHE_STORE)) {
-              db.createObjectStore(CACHE_STORE);
-            }
-          };
+    function getParts(file, start, end) {
+      let parts = [];
+      for (let i = start; i <= end; i++) {
+        parts.push(file + ".part" + i);
+      }
+      return parts;
+    }
+    (async () => {
+      const [dataUrl, wasmUrl] = await Promise.all([
+        mergeFiles(getParts("Build/CloverPit.data", 1, 3), "CloverPit.data"),
+        mergeFiles(getParts("Build/CloverPit.wasm", 1, 3), "CloverPit.wasm"),
+      ]);
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/CloverPit.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: dataUrl,
+        frameworkUrl: buildUrl + "/CloverPit.framework.js",
+        codeUrl: wasmUrl,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Panik Arcade",
+        productName: "CloverPit",
+        productVersion: "1.3",
+        showBanner: unityShowBanner,
+      };
+
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+          loadingBar.style.display = "none";
+        }).catch((message) => {
         });
-
-        return dbPromise;
-      }
-
-      function getFromCache(key) {
-        return initIndexedDB().then((db) => {
-          return new Promise((resolve) => {
-            const tx = db.transaction(CACHE_STORE, 'readonly');
-            const store = tx.objectStore(CACHE_STORE);
-            const request = store.get(key);
-
-            request.onsuccess = () => resolve(request.result || null);
-            request.onerror = () => resolve(null);
-          });
-        }).catch(() => null);
-      }
-
-      function saveToCache(key, blob) {
-        return initIndexedDB().then((db) => {
-          return new Promise((resolve) => {
-            const tx = db.transaction(CACHE_STORE, 'readwrite');
-            const store = tx.objectStore(CACHE_STORE);
-            const request = store.put(blob, key);
-
-            request.onsuccess = () => resolve(true);
-            request.onerror = () => resolve(false);
-          });
-        }).catch(() => false);
-      }
-
-      async function fetchWithProgress(url) {
-        const response = await fetch(url);
-        const reader = response.body.getReader();
-        let chunks = [];
-        let received = 0;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          received += value.length;
-          loadedBytes += value.length;
-          chunks.push(value);
-
-          const mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
-          const mbTotal = '86.96';
-          loadingText.textContent = `LOADING... ${mbDone} MB / ${mbTotal} MB`;
-        }
-
-        const fullBuffer = new Uint8Array(received);
-        let offset = 0;
-
-        for (let chunk of chunks) {
-          fullBuffer.set(chunk, offset);
-          offset += chunk.length;
-        }
-
-        return fullBuffer.buffer;
-      }
-
-      async function mergeFiles(fileParts, cacheKey) {
-        const cachedBlob = await getFromCache(cacheKey);
-        if (cachedBlob) {
-          return URL.createObjectURL(cachedBlob);
-        }
-
-        const buffers = [];
-        for (const part of fileParts) {
-          buffers.push(await fetchWithProgress(part));
-        }
-
-        const mergedBlob = new Blob(buffers);
-        await saveToCache(cacheKey, mergedBlob);
-        return URL.createObjectURL(mergedBlob);
-      }
-
-      function getParts(file, start, end) {
-        let parts = [];
-        for (let i = start; i <= end; i++) {
-          parts.push(file + ".part" + i);
-        }
-        return parts;
-      }
-
-      (async () => {
-        const [dataUrl, wasmUrl] = await Promise.all([
-          mergeFiles(getParts("Build/CloverPit.data", 1, 3), "CloverPit.data"),
-          mergeFiles(getParts("Build/CloverPit.wasm", 1, 3), "CloverPit.wasm"),
-        ]);
-
-        var container = document.querySelector("#unity-container");
-        var canvas = document.querySelector("#unity-canvas");
-        var loadingBar = document.querySelector("#unity-loading-bar");
-        var progressBarFull = document.querySelector("#unity-progress-bar-full");
-        var warningBanner = document.querySelector("#unity-warning");
-
-        function unityShowBanner(msg, type) {
-        }
-
-        var buildUrl = "Build";
-        var loaderUrl = buildUrl + "/CloverPit.loader.js";
-        var config = {
-          arguments: [],
-          dataUrl: dataUrl,
-          frameworkUrl: buildUrl + "/CloverPit.framework.js",
-          codeUrl: wasmUrl,
-          streamingAssetsUrl: "StreamingAssets",
-          companyName: "Panik Arcade",
-          productName: "CloverPit",
-          productVersion: "1.3",
-          showBanner: unityShowBanner,
-        };
-
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-          var meta = document.createElement('meta');
-          meta.name = 'viewport';
-          meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-          document.getElementsByTagName('head')[0].appendChild(meta);
-        }
-
-        loadingBar.style.display = "block";
-
-        var script = document.createElement("script");
-        script.src = loaderUrl;
-        script.onload = () => {
-          createUnityInstance(canvas, config, (progress) => {
-            progressBarFull.style.width = 100 * progress + "%";
-          }).then((unityInstance) => {
-            loadingBar.style.display = "none";
-            loadingText.remove();
-          }).catch((message) => {
-          });
-        };
-        document.body.appendChild(script);
-      })();
+      };
+    });
+      document.body.appendChild(script);
     </script>
+  </body>
 </html>
