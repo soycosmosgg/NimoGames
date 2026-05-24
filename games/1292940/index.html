@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1292940</title>
+<base href="https://cdn.jsdelivr.net/gh/slytegg/UGS-Files/1292940/">
+<head>
+  <link rel="icon" href="icon.png" type="image/x-icon">
+</head>
+
+<style>
+@font-face {
+    font-family: 'font';
+    src: url('fonts/font.ttf') format('truetype');
+    font-display: swap;
+}
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+#start-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    cursor: default;
+}
+
+#start-screen.hidden {
+    display: none;
+}
+
+
+#start-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+#start-button:active {
+    transform: scale(0.98);
+}
+
+#fade-overlay {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    opacity: 1;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.fade-intro {
+    transition: opacity 1.8s ease;
+}
+
+.fade-game {
+    transition: opacity 0.8s ease;
+}
+
+#fade-overlay.hidden {
+    opacity: 0;
+}
+
+#fade-overlay.active {
+    opacity: 1;
+}
+
+
+ruffle-player,
+.ruffle-player,
+.ruffle__container {
+    background: #000 !important;
+}
+.ruffle__logo,
+.ruffle__text,
+.ruffle__splash {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+#menu {
+    width: 100%;
+    height: 100%;
+    background: url('assets/images/background.png') center/cover fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    display: none;
+}
+.menu-visible {
+    display: flex !important;
+}
+
+.title {
+    font-family: 'font', sans-serif;
+    font-size: 48px;
+    color: #fff;
+    margin-bottom: 50px;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 140px);
+    gap: 35px 60px; 
+}
+
+.game-card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 140px;
+}
+.game-image {
+    width: 130px;
+    height: 130px;
+    border-radius: 15px;
+    border: 3px solid #fff;
+    background-size: cover;
+    background-position: center;
+    transition: 0.3s;
+}
+.game-card:hover .game-image {
+    transform: scale(1.1);
+}
+.game-name {
+    margin-top: 8px;
+    font-family: 'font', sans-serif;
+    color: #fff;
+    font-size: 30px;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+    white-space: nowrap; 
+    width: max-content;
+}
+
+#game-container {
+    width: 100%;
+    height: 100%;
+    display: none;
+    background: #000;
+}
+
+#start-prompt {
+    position: fixed;
+    bottom: 30px;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    font-size: 28px;
+    opacity: 0.8;
+    animation: pulse 2s infinite;
+    display: none;
+}
+
+#intro-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#info-button {
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 56px;      
+    height: 56px;    
+    background: url('assets/info.png') center/contain no-repeat;
+    border: none;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    z-index: 5;
+}
+
+#info-button:hover {
+    transform: scale(1.12);
+    opacity: 1;
+}
+
+
+#info-panel {
+    position: fixed;
+    inset: 0;
+    background: url('assets/images/background.png') center/cover fixed;
+    display: none;
+    z-index: 9000;
+}
+
+#info-panel.visible {
+    display: block;
+}
+
+.info-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    color: #fff;
+    font-family: 'font', sans-serif;
+    text-align: center;
+}
+
+.info-content h1 {
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+.info-content p {
+    font-size: 20px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+#info-back {
+    position: absolute;
+    bottom: 70px;             
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;          
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#info-back:hover {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.1);
+}
+
+
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="fade-overlay"></div>
+
+<div id="start-screen">
+    <video id="intro-video" autoplay muted playsinline>
+        <source src="assets/intro.mp4" type="video/mp4">
+    </video>
+</div>
+
+<div id="start-prompt">Click anywhere to start</div>
+
+<div id="menu">
+    <button id="info-button" aria-label="Información"></button>
+    <div class="title">Cube Escape Collection</div>
+    <div class="games-grid">
+        <div class="game-card" data-game="seasons"><div class="game-image" style="background-image:url('assets/images/icons/seasons.webp')"></div><div class="game-name">Seasons</div></div>
+        <div class="game-card" data-game="the-lake"><div class="game-image" style="background-image:url('assets/images/icons/the-lake.webp')"></div><div class="game-name">The Lake</div></div>
+        <div class="game-card" data-game="arles"><div class="game-image" style="background-image:url('assets/images/icons/arles.webp')"></div><div class="game-name">Arles</div></div>
+        <div class="game-card" data-game="harveys-box"><div class="game-image" style="background-image:url('assets/images/icons/harveys-box.webp')"></div><div class="game-name">Harvey's Box</div></div>
+        <div class="game-card" data-game="case-23"><div class="game-image" style="background-image:url('assets/images/icons/case-23.webp')"></div><div class="game-name">Case 23</div></div>
+        <div class="game-card" data-game="the-mill"><div class="game-image" style="background-image:url('assets/images/icons/the-mill.webp')"></div><div class="game-name">The Mill</div></div>
+        <div class="game-card" data-game="birthday"><div class="game-image" style="background-image:url('assets/images/icons/birthday.webp')"></div><div class="game-name">Birthday</div></div>
+        <div class="game-card" data-game="theatre"><div class="game-image" style="background-image:url('assets/images/icons/theatre.webp')"></div><div class="game-name">Theatre</div></div>
+        <div class="game-card" data-game="the-cave"><div class="game-image" style="background-image:url('assets/images/icons/the-cave.webp')"></div><div class="game-name">The Cave</div></div>
+    </div>
+</div>
+
+<div id="info-panel">
+    <div class="info-content">
+        <h1>Welcome to the Cube Escape Collection</h1>
+
+        <p>
+            Cube Escape is the first game series created by Rusty Lake, introducing the strange and
+            mysterious universe that defines their games.
+        </p>
+
+        <p>
+            This collection includes the first nine Cube Escape chapters, originally released as
+            Flash games. They have been preserved and updated to ensure they remain playable after
+            the end of Flash support.
+        </p>
+
+        <p>
+            This version is a remake and browser port developed by <strong>Cosmos</strong>,
+            bringing the Cube Escape experience to modern web browsers while staying faithful
+            to the original games created by Rusty Lake.
+        </p>
+
+        <button id="info-back">←</button>
+    </div>
+</div>
+
+
+<div id="game-container">
+    <div id="game-content" style="width:100%; height:100%;"></div>
+</div>
+
+<script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+
+<script>
+const games = {
+    seasons: { 
+        file: 'assets/games/seasons.swf',
+        music: 'assets/sounds/music/seasons.mp3'
+    },
+    'the-lake': { 
+        file: 'assets/games/the-lake.swf',
+        music: 'assets/sounds/music/the-lake.mp3'
+    },
+    arles: { 
+        file: 'assets/games/arles.swf',
+        music: 'assets/sounds/music/arles.mp3'
+    },
+    'harveys-box': { 
+        file: 'assets/games/harveys-box.swf',
+        music: 'assets/sounds/music/harveys-box.mp3'
+    },
+    'case-23': { 
+        file: 'assets/games/case-23.swf',
+        music: 'assets/sounds/music/case-23.mp3'
+    },
+    'the-mill': { 
+        file: 'assets/games/the-mill.swf',
+        music: 'assets/sounds/music/the-mill.mp3'
+    },
+    birthday: { 
+        file: 'assets/games/birthday.swf',
+        music: 'assets/sounds/music/birthday.mp3'
+    },
+    theatre: { 
+        file: 'assets/games/theatre.swf',
+        music: 'assets/sounds/music/theatre.mp3'
+    },
+    'the-cave': { 
+        file: 'assets/games/the-cave.swf',
+        music: 'assets/sounds/music/the-cave.mp3'
+    }
+};
+
+let currentGameMusic = null;
+let menuBackgroundMusic = null;
+let audioEnabled = false;
+let isFading = false;
+let currentHoveredGame = null;
+let nextGameToPlay = null;
+let fadeTimeout = null;
+const FADE_DURATION = 600;
+const GAME_LOAD_DELAY = 500;
+
+const VOLUMES = {
+    MENU: 0.4,
+    GAME: 0.8
+};
+
+function initializeAudio() {
+    try {
+        menuBackgroundMusic = new Audio('assets/sounds/music/music.mp3');
+        menuBackgroundMusic.loop = true;
+        menuBackgroundMusic.volume = 0;
+        menuBackgroundMusic.muted = false;
+        
+        menuBackgroundMusic.play().then(() => {
+            console.log("Audio autoplay successful");
+            audioEnabled = true;
+            setTimeout(() => {
+                if (menuBackgroundMusic) {
+                    menuBackgroundMusic.volume = VOLUMES.MENU;
+                }
+            }, 300);
+        }).catch(error => {
+            console.log("Autoplay prevented, waiting for user interaction");
+            audioEnabled = false;
+        });
+        
+        Object.keys(games).forEach(gameId => {
+            const game = games[gameId];
+            if (game.music) {
+                const audio = new Audio(game.music);
+                audio.preload = 'auto';
+                audio.volume = 0;
+                audio.muted = true;
+                game.audioElement = audio;
+            }
+        });
+        
+    } catch (error) {
+        console.log("Audio initialization error:", error.message);
+        audioEnabled = false;
+    }
+}
+
+function fadeAudio(audioElement, targetVolume, duration, onComplete = null) {
+    if (!audioElement || audioElement.readyState === 0) return;
+    
+    const startVolume = audioElement.volume;
+    const volumeChange = targetVolume - startVolume;
+    const startTime = performance.now();
+    
+    function fadeStep(currentTime) {
+        const elapsed = currentTime - startTime;
+        let progress = Math.min(elapsed / duration, 1);
+        
+        progress = Math.max(0, Math.min(1, progress));
+        
+        let newVolume = startVolume + (volumeChange * progress);
+        newVolume = Math.max(0, Math.min(1, newVolume));
+        
+        if (Math.abs(audioElement.volume - newVolume) > 0.001) {
+            audioElement.volume = newVolume;
+        }
+        
+        if (progress < 1) {
+            requestAnimationFrame(fadeStep);
+        } else {
+            audioElement.volume = Math.max(0, Math.min(1, targetVolume));
+            
+            if (targetVolume === 0 && !audioElement.paused) {
+                audioElement.pause();
+            }
+            if (onComplete) onComplete();
+        }
+    }
+    
+    requestAnimationFrame(fadeStep);
+}
+
+function fadeInMenuMusic() {
+    if (!audioEnabled || !menuBackgroundMusic) return;
+    
+    if (menuBackgroundMusic.paused) {
+        menuBackgroundMusic.play().then(() => {
+            fadeAudio(menuBackgroundMusic, VOLUMES.MENU, FADE_DURATION);
+        }).catch(error => {
+            console.log("Could not play menu music");
+        });
+    } else {
+        fadeAudio(menuBackgroundMusic, VOLUMES.MENU, FADE_DURATION);
+    }
+}
+
+function playGamePreview(gameId) {
+    if (!audioEnabled) return;
+    
+    if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+        fadeTimeout = null;
+    }
+    
+    if (currentHoveredGame === gameId && currentGameMusic && !currentGameMusic.paused) {
+        return;
+    }
+    
+    currentHoveredGame = gameId;
+    
+    if (currentGameMusic && currentGameMusic !== games[gameId]?.audioElement) {
+        fadeAudio(currentGameMusic, 0, FADE_DURATION / 2, () => {
+            if (currentGameMusic) {
+                currentGameMusic.pause();
+                currentGameMusic = null;
+            }
+            startGameMusic(gameId);
+        });
+    } else {
+        fadeAudio(menuBackgroundMusic, 0, FADE_DURATION / 2, () => {
+            startGameMusic(gameId);
+        });
+    }
+}
+
+function startGameMusic(gameId) {
+    const game = games[gameId];
+    if (!game || !game.music) return;
+    
+    let gameAudio = game.audioElement;
+    
+    if (!gameAudio) {
+        try {
+            gameAudio = new Audio(game.music);
+            game.audioElement = gameAudio;
+        } catch (error) {
+            console.log("Error creating audio element for game:", gameId, error);
+            restoreMenuMusic();
+            return;
+        }
+    }
+    
+    gameAudio.loop = true;
+    gameAudio.currentTime = 0;
+    gameAudio.muted = false;
+    
+    currentGameMusic = gameAudio;
+    
+    gameAudio.play().then(() => {
+        fadeAudio(gameAudio, VOLUMES.GAME, FADE_DURATION);
+    }).catch(error => {
+        console.log("Could not play game preview:", gameId, error);
+        currentGameMusic = null;
+        restoreMenuMusic();
+    });
+}
+
+function restoreMenuMusic() {
+    if (!audioEnabled || !menuBackgroundMusic) return;
+    
+    currentHoveredGame = null;
+    currentGameMusic = null;
+    
+    if (menuBackgroundMusic.paused) {
+        menuBackgroundMusic.play().then(() => {
+            fadeAudio(menuBackgroundMusic, VOLUMES.MENU, FADE_DURATION);
+        }).catch(error => {
+            console.log("Could not restore menu music:", error);
+        });
+    } else {
+        fadeAudio(menuBackgroundMusic, VOLUMES.MENU, FADE_DURATION);
+    }
+}
+
+function stopGamePreview() {
+    if (!audioEnabled) return;
+    
+    if (fadeTimeout) {
+        clearTimeout(fadeTimeout);
+        fadeTimeout = null;
+    }
+    
+    if (currentGameMusic && currentHoveredGame) {
+        fadeAudio(currentGameMusic, 0, FADE_DURATION / 2, () => {
+            if (currentGameMusic) {
+                currentGameMusic.pause();
+                currentGameMusic.currentTime = 0;
+                currentGameMusic = null;
+            }
+            currentHoveredGame = null;
+            restoreMenuMusic();
+        });
+    } else {
+        currentHoveredGame = null;
+        restoreMenuMusic();
+    }
+}
+
+function handleFirstInteraction() {
+    if (!audioEnabled) {
+        initializeAudio();
+    }
+    
+    fadeInMenuMusic();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeAudio();
+    
+    const startScreen = document.getElementById('start-screen');
+    const menu = document.getElementById('menu');
+    const fadeOverlay = document.getElementById('fade-overlay');
+    const introVideo = document.getElementById('intro-video');
+    const infoButton = document.getElementById('info-button');
+    const infoPanel = document.getElementById('info-panel');
+    const infoBack = document.getElementById('info-back');
+
+    infoButton.addEventListener('click', () => {
+        infoPanel.classList.add('visible');
+    });
+
+    infoBack.addEventListener('click', () => {
+        infoPanel.classList.remove('visible');
+    });
+
+
+    document.body.addEventListener('click', handleFirstInteraction, { once: true });
+    document.body.addEventListener('touchstart', handleFirstInteraction, { once: true });
+
+    introVideo.addEventListener('ended', () => {
+        startScreen.classList.add('hidden');
+        menu.classList.add('menu-visible');
+
+        fadeOverlay.classList.remove('fade-game');
+        fadeOverlay.classList.add('fade-intro');
+
+        requestAnimationFrame(() => {
+            fadeOverlay.classList.add('hidden');
+            fadeInMenuMusic();
+        });
+    });
+
+
+
+    const gameCards = document.querySelectorAll('.game-card');
+    let hoverTimeout;
+    
+    gameCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            clearTimeout(hoverTimeout);
+            
+            hoverTimeout = setTimeout(() => {
+                playGamePreview(card.dataset.game);
+            }, 50);
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            clearTimeout(hoverTimeout);
+            
+            fadeTimeout = setTimeout(() => {
+                if (!document.querySelector('.game-card:hover')) {
+                    stopGamePreview();
+                }
+            }, 100);
+        });
+        
+        card.addEventListener('click', () => {
+            clearTimeout(hoverTimeout);
+            if (fadeTimeout) {
+                clearTimeout(fadeTimeout);
+                fadeTimeout = null;
+            }
+            
+            currentHoveredGame = null;
+            
+            if (currentGameMusic) {
+                fadeAudio(currentGameMusic, 0, FADE_DURATION / 3);
+                currentGameMusic = null;
+            }
+            
+            if (menuBackgroundMusic && !menuBackgroundMusic.paused) {
+                fadeAudio(menuBackgroundMusic, 0, FADE_DURATION / 3, () => {
+                    startFade(card.dataset.game);
+                });
+            } else {
+                startFade(card.dataset.game);
+            }
+        });
+    });
+    
+    menu.addEventListener('mousemove', (e) => {
+        if (!e.target.closest('.game-card')) {
+            if (fadeTimeout) {
+                clearTimeout(fadeTimeout);
+            }
+            fadeTimeout = setTimeout(() => {
+                if (!document.querySelector('.game-card:hover')) {
+                    stopGamePreview();
+                }
+            }, 150);
+        }
+    });
+});
+
+function startFade(gameId) {
+    const fade = document.getElementById('fade-overlay');
+
+    document.body.removeEventListener('click', handleFirstInteraction);
+    document.body.removeEventListener('touchstart', handleFirstInteraction);
+
+    if (menuBackgroundMusic) {
+        menuBackgroundMusic.pause();
+        menuBackgroundMusic.currentTime = 0;
+        menuBackgroundMusic.volume = 0;
+        menuBackgroundMusic.muted = true;
+    }
+
+    fade.classList.remove('fade-intro');
+    fade.classList.add('fade-game');
+
+    fade.classList.remove('hidden');
+    fade.classList.add('active');
+
+    setTimeout(() => {
+
+        Object.keys(games).forEach(id => {
+            const game = games[id];
+            if (game.audioElement) {
+                game.audioElement.pause();
+                game.audioElement.currentTime = 0;
+                game.audioElement.volume = 0;
+                game.audioElement.muted = true;
+            }
+        });
+
+        currentGameMusic = null;
+        currentHoveredGame = null;
+
+        document.getElementById('menu').classList.remove('menu-visible');
+        document.getElementById('game-container').style.display = 'block';
+        loadGame(gameId);
+    }, 800);
+}
+
+
+function loadGame(id) {
+    const game = games[id];
+    if (!game) return;
+
+    const container = document.getElementById('game-content');
+    container.innerHTML = '';
+
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
+
+    player.style.width = '100%';
+    player.style.height = '100%';
+
+    container.appendChild(player);
+
+    let gameLoaded = false;
+    let delayTimeout = null;
+
+    player.addEventListener("loadedmetadata", () => {
+        gameLoaded = true;
+        
+        delayTimeout = setTimeout(() => {
+            const fade = document.getElementById('fade-overlay');
+            fade.classList.remove('active');
+            fade.classList.add('hidden');
+        }, GAME_LOAD_DELAY);
+    });
+
+    player.addEventListener("error", () => {
+        if (delayTimeout) {
+            clearTimeout(delayTimeout);
+        }
+        setTimeout(() => {
+            const fade = document.getElementById('fade-overlay');
+            fade.classList.remove('active');
+            fade.classList.add('hidden');
+        }, 1000);
+    });
+
+    player.load({ url: game.file });
+}
+</script>
+
+</body>
+</html>
