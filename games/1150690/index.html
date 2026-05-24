@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="https://rawcdn.githack.com/genizy/web-port/4e018d7f2ca2b3d77ecfd0123d2926421e2b26a5/omori-fixed/">
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="user-scalable=no">
+    <link rel="icon" href="icon/icon.png?fgjdfngjksdgnkdsjgn" type="image/png">
+    <link rel="apple-touch-icon" href="icon/icon.png?fgjdfngjksdgnkdsjgn">
+    <link rel="stylesheet" type="text/css" href="fonts/gamefont.css?fgjdfngjksdgnkdsjgn">
+    <title>1150690</title>
+</head>
+
+<body style="background-color: black">
+    <script type="text/javascript" src="nipplejs.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="gamepad.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/plugins/aaa___bundle.js?fgjdfnghdfghjfgjhfgjfgjfjgjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="data.bundle.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="languages.en.bundle.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="maps.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/js-yaml-master/jsyaml.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/pixi.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/pixi-tilemap.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/pixi-picture.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/lz-string.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/libs/iphone-inline-video.browser.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/rpg_core.js?sdfgsgdhrg3455346366rj5e6h456e6j"></script>
+    <script type="text/javascript" src="js/rpg_managers.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/rpg_objects.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/rpg_scenes.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/rpg_sprites.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/rpg_windows.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/plugins.js?fgjdfngjksdgnkdsjgn"></script>
+    <script type="text/javascript" src="js/main.js?fgjdfngjksdgnkdsjgn"></script>
+    <!-- gn math patch -->
+    <script>
+        // full screen the game ----------------------------------------------------------
+        function applycanvasmode() {
+            let w = 0;
+            let h = 0;
+            let maxW = window.innerWidth;
+            let maxH = window.innerHeight;
+            if ((maxW * 0.75) > maxH) {
+                h = maxH;
+                w = Math.floor((maxH / 3) * 4);
+            } else {
+                w = maxW;
+                h = Math.floor((maxW / 4) * 3);
+            }
+            document.querySelector("#GameCanvas").style.width = w + "px";
+            document.querySelector("#GameCanvas").style.height = h + "px";
+            document.querySelector("#GameVideo").style.width = w + "px";
+            document.querySelector("#GameVideo").style.height = h + "px";
+            document.querySelector("#UpperCanvas").style.width = w + "px";
+            document.querySelector("#UpperCanvas").style.height = h + "px";
+        }
+        setInterval(applycanvasmode, 100);
+
+        // support mobile ----------------------------------------------------------------
+        (function() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (!isMobile) {
+                return;
+            }
+            let i = setInterval(function() {
+                if (window.fullSetupComplete) {
+                    let zoneStatic = document.createElement("div");
+                    zoneStatic.style = "position: fixed; bottom: 0; left: 0; z-index: 9999; width: 500px; height: 500px;";
+                    let internal = document.createElement("div");
+                    internal.style = "position: relative; width: 100%; height: 100%;"
+                    zoneStatic.appendChild(internal);
+                    let joystick = nipplejs.create({
+                        mode: 'semi',
+                        zone: internal,
+                        color: 'red',
+                        catchDistance: 30
+                    });
+                    setTimeout(function() {
+                        joystick.on("dir", function(e, data) {
+                            let dirs = ["up", "down", "left", "right"];
+                            for (let o of dirs) {
+                                if (o !== data.direction.angle) {
+                                    fakeInput.up(o);
+                                } else {
+                                    fakeInput.down(o);
+                                }
+                            }
+                        });
+                        joystick.on("end", function() {
+                            let dirs = ["up", "down", "left", "right"];
+                            for (let o of dirs) {
+                                fakeInput.up(o);
+                            }
+                        });
+                    }, 100);
+                    document.body.appendChild(zoneStatic);
+                    const createButton = (text, key, bottom, right, bgColor) => {
+                        let button = document.createElement("div");
+                        button.style = `
+                    position: fixed; 
+                    bottom: ${bottom}; 
+                    right: ${right}; 
+                    width: 10vw; 
+                    height: 10vw; 
+                    background: ${bgColor}; 
+                    color: white; 
+                    touch-action: none; 
+                    z-index: 999999; 
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center; 
+                    font-family: sans-serif; 
+                    font-size: 3vw;
+                    border-radius: 50%;
+                `;
+                        button.innerText = text;
+                        button.addEventListener("touchstart", function(e) {
+                            e.preventDefault();
+                            fakeInput.down(key);
+                        });
+                        button.addEventListener("touchend", function(e) {
+                            e.preventDefault();
+                            fakeInput.up(key);
+                        });
+                        document.body.appendChild(button);
+                        return button;
+                    };
+
+                    createButton("OK", "ok", "5vw", "5vw", "#0f08");
+                    createButton("ESC", "escape", "5vw", "15vw", "#f008");
+                    createButton("TAG", "tag", "15vw", "15vw", "#00f8");
+                    createButton("RUN", "shift", "15vw", "5vw", "#f0f8");
+                    clearInterval(i);
+                }
+            }, 100);
+        })();
+    </script>
+</html>
