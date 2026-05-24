@@ -133,6 +133,14 @@ const G_DATA = [
     ported: true,
     tags: ["Horror", "Psychological", "Adventure", "Indie"],
     desc: "Omori is a psychological horror adventure game that follows a young boy named Omori as he navigates the complexities of his inner world.",
+  },
+  { 
+    id: '1683460', 
+    n: "Yandere Simulator", 
+    dev: "Breadbb", 
+    ported: true,
+    tags: ["Horror", "Romance", "Adventure", ],
+    desc: "Yandere Simulator is a stealth action game that follows the story of a high school student",
   }
 ];
 
