@@ -166,5 +166,13 @@ const G_DATA = [
     tags: ["Parkour", "Action", "Indie", "First-Person"],
     desc: "Karlson is an action video game currently in development (a first-person shooter) created by the independent developer and YouTuber known as Dani.",
   },
+  { 
+    id: '1292940', 
+    n: "Cube Escape Collection", 
+    dev: "Cosmos", 
+    ported: true,
+    tags: ["Puzzle", "Adventure", "Escape Room"],
+    desc: "Cube Escape Collection is a collection of escape room games featuring challenging puzzles and immersive environments.",
+  },
 ];
 
