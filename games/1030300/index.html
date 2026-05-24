@@ -1,18 +1,14 @@
-<!DOCTYPE html>
 <html lang="en-us">
   <head>
+    <base href="https://cdn.jsdelivr.net/gh/web-ports/hollow-knight-silksong@master/">
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>1030300</title>
-    <base href="https://cdn-slyte.pages.dev/1030300/">
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
-    <div id="loading-container">
-      <div id="loading-text">Loading</div>
-      <div id="loading-subtext"></div>
-    </div>
+    <div id="loading-text" style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING...</div>
     <div id="unity-container">
       <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -26,15 +22,7 @@
     <script src="jszip.js"></script>
 
 <script>
-// Ensure base element exists for the loader
-if (!document.querySelector('base')) {
-  const base = document.createElement('base');
-  base.href = './';
-  document.head.insertBefore(base, document.head.firstChild);
-}
-
 const loadingText = document.querySelector("#loading-text");
-const loadingSubtext = document.querySelector("#loading-subtext");
 const CACHE_NAME = "hksilksongcache-v2"; // bump version if needed
 
 /* ================= FETCH OVERRIDE ================= */
@@ -80,8 +68,7 @@ async function unzipAndStore(zipBlob) {
     throw new Error("ZIP is missing");
   }
 
-  loadingText.textContent = "Extracting assets";
-  loadingSubtext.textContent = "";
+  loadingText.textContent = "EXTRACTING ASSETS...";
 
   const zip = await JSZip.loadAsync(zipBlob);
   const files = Object.values(zip.files).filter(f => !f.dir);
@@ -105,12 +92,13 @@ async function unzipAndStore(zipBlob) {
 
       processed++;
       loadingText.textContent =
-        `Extracting assets (${processed}/${total})`;
+        `EXTRACTING ASSETS... (${processed}/${total})`;
     }));
 
     await new Promise(r => setTimeout(r, 0));
   }
 
+  // ✅ mark cache complete
   await cache.put("CACHE_COMPLETE", new Response("ok"));
 
   console.log("Cache complete");
@@ -141,8 +129,8 @@ async function fetchWithProgress(url) {
     let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
     let mbTotal = '1986.64';
 
-    loadingText.textContent = `Loading`;
-    loadingSubtext.textContent = `${mbDone} MB / ${mbTotal} MB`;
+    loadingText.textContent =
+      `DOWNLOADING ASSETS... (${mbDone} MB / ${mbTotal} MB)`;
   }
 
   let fullBuffer = new Uint8Array(received);
@@ -181,8 +169,7 @@ function getParts(file, start, end) {
   try {
     await cleanupOldCaches(); 
     if (!(await isCached())) {
-      loadingText.textContent = "Loading";
-      loadingSubtext.textContent = "0 MB / 1986.64 MB";
+      loadingText.textContent = "DOWNLOADING ASSETS...";
 
       const webglzip = await mergeFiles(
         getParts("StreamingAssets/aa/WebGL.zip", 1, 100)
@@ -190,8 +177,7 @@ function getParts(file, start, end) {
 
       await unzipAndStore(webglzip);
     } else {
-      loadingText.textContent = "Loading";
-      loadingSubtext.textContent = "";
+      loadingText.textContent = "LOADING FROM CACHE...";
     }
 
     /* ================= UNITY START ================= */
@@ -232,7 +218,7 @@ function getParts(file, start, end) {
       frameworkUrl: buildUrl + "/w-pt.framework.js.unityweb",
       codeUrl: buildUrl + "/w-pt.wasm.unityweb",
       streamingAssetsUrl: "StreamingAssets",
-      companyName: "Nimo Games",
+      companyName: "EDUrocks Group, Truffled, GN-Math",
       productName: "Hollow Knight SilkSong",
       productVersion: "1.0",
       showBanner: unityShowBanner,
@@ -241,14 +227,13 @@ function getParts(file, start, end) {
     loadingBar.style.display = "block";
 
     const script = document.createElement("script");
-    script.src = "Build/w-pt.loader.js";
+    script.src = "https://cdn.jsdelivr.net/gh/web-ports/hollow-knight-silksong@latest/Build/w-pt.loader.js";
 
     script.onload = () => {
       createUnityInstance(canvas, config, (progress) => {
         progressBarFull.style.width = (progress * 100) + "%";
       })
       .then(() => {
-        canvas.style.display = "block";
         loadingBar.remove();
         loadingText.remove();
       })
@@ -263,5 +248,4 @@ function getParts(file, start, end) {
   }
 })();
 </script>
-  </body>
-</html>
+  </html>

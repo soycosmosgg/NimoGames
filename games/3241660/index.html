@@ -1,11 +1,18 @@
-<!DOCTYPE html>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7856P3VNT"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L7856P3VNT');
+</script><!DOCTYPE html>
 <html lang="en-us">
 
 <head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@main/repo/">
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>3241660</title>
-    <base href="https://cdn-slyte.pages.dev/3241660/">
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <style>
@@ -16,20 +23,6 @@
             overflow: hidden;
             height: 100%;
             width: 100%;
-            background: #000;
-        }
-
-        #loading-text {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-family: cursive;
-            font-size: 48px;
-            text-align: center;
-            z-index: 1;
         }
 
         #unity-container {
@@ -39,11 +32,12 @@
             top: 0;
             left: 0;
         }
-    </style>
+    #sidebarad1,
+</style>
 </head>
 
 <body>
-    <div id="loading-text">LOADING...</div>
+    <div id="loading-text" style="color: black; font-family: cursive; font-size: 48px; text-align: center; margin-top: 20px;">LOADING...</div>
     <div id="unity-container" class="unity-desktop" hidden>
         <canvas id="unity-canvas" tabindex="-1"></canvas>
         <div id="unity-loading-bar">
@@ -116,7 +110,7 @@
             var loaderUrl = buildUrl + "/NewestBuild.loader.js";
             var config = {
                 dataUrl: dataUrl,
-                frameworkUrl: buildUrl + "/NewestBuild.framework.js.gz",
+                frameworkUrl: buildUrl + "/NewestBuild.framework.js",
                 codeUrl: wasmUrl,
                 streamingAssetsUrl: "StreamingAssets",
                 companyName: "Stupid Game",
@@ -156,6 +150,4 @@
             document.body.appendChild(script);
         });
     </script>
-</body>
-
 </html>
