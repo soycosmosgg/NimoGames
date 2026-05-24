@@ -145,9 +145,18 @@ const G_DATA = [
   { 
     id: '3242750', 
     n: "Level Devil", 
-    dev: "Cosmos", 
+    dev: "Stonedbybread", 
     ported: true,
     tags: ["Hard", "Indie", "Skill", "Troll"],
     desc: "Level Devil is a challenging platformer that tests your skills and reflexes as you navigate through a series of increasingly difficult levels filled with traps and obstacles.",
   },
+  { 
+    id: '1454400', 
+    n: "Cookie Clicker", 
+    dev: "bubbls", 
+    ported: true,
+    tags: ["Tycoon", "Clicker", "Idle", "Casual"],
+    desc: "Cookie Clicker is a simple idle game where you click a cookie to earn points and purchase upgrades.",
+  },
 ];
+
