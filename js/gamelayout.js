@@ -158,5 +158,13 @@ const G_DATA = [
     tags: ["Tycoon", "Clicker", "Idle", "Casual"],
     desc: "Cookie Clicker is a simple idle game where you click a cookie to earn points and purchase upgrades.",
   },
+  { 
+    id: '1228610', 
+    n: "Karlson", 
+    dev: "Breadbb", 
+    ported: true,
+    tags: ["Parkour", "Action", "Indie", "First-Person"],
+    desc: "Karlson is an action video game currently in development (a first-person shooter) created by the independent developer and YouTuber known as Dani.",
+  },
 ];
 
