@@ -141,6 +141,13 @@ const G_DATA = [
     ported: true,
     tags: ["Horror", "Romance", "Adventure", ],
     desc: "Yandere Simulator is a stealth action game that follows the story of a high school student",
-  }
+  },
+  { 
+    id: '3242750', 
+    n: "Level Devil", 
+    dev: "Cosmos", 
+    ported: true,
+    tags: ["Hard", "Indie", "Skill", "Troll"],
+    desc: "Level Devil is a challenging platformer that tests your skills and reflexes as you navigate through a series of increasingly difficult levels filled with traps and obstacles.",
+  },
 ];
-
