@@ -125,6 +125,14 @@ const G_DATA = [
     img: "https://cdn2.steamgriddb.com/thumb/acdcf6b8403879a636dd97513e4dd55f.jpg",
     tags: ["Horror", "Retro", "3D"],
     desc: "Shift At Midnight is a cooperative horror and investigation video game for up to three players, in which you take on the role of an employee at a convenience store during the night shift.",
+  },
+  { 
+    id: '1150690', 
+    n: "Omori", 
+    dev: "Breadbb", 
+    ported: true,
+    tags: ["Horror", "Psychological", "Adventure", "Indie"],
+    desc: "Omori is a psychological horror adventure game that follows a young boy named Omori as he navigates the complexities of his inner world.",
   }
 ];
 
