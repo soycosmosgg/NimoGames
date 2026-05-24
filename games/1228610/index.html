@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>1228610</title>
+  <base href="https://cdn.jsdelivr.net/gh/genizy/web-port/karlson/">
+  <script src="Build/UnityLoader.js"></script>
+  		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				border: 0;
+				overflow: hidden;
+			}
+
+			body {
+				background: #000;
+				position: fixed;
+				width: 100%;
+				height: 100%;
+			}
+
+			#unityContainer {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    			function resizeUnityContainer() {
+				var container = document.getElementById("unityContainer");
+				container.style.width = window.innerWidth + "px";
+				container.style.height = window.innerHeight + "px";
+			}
+async function loadZip(url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+
+  const jszip = new JSZip();
+  const zip = await jszip.loadAsync(arrayBuffer);
+
+  // look for wasm file inside the zip
+  if (zip.files["tyj.wasm.code.unityweb"]) {
+    const content = await zip.file("tyj.wasm.code.unityweb").async("blob");
+    return URL.createObjectURL(content);
+  }
+
+  throw new Error("tyj.wasm.code.unityweb not found in " + url);
+}
+
+async function startUnity() {
+  // extract wasm blob URL
+  const wasmurl = await loadZip("Build/tyj.wasm.code.unityweb.zip");
+  window.wasmBinaryFilee = wasmurl;
+  // Unity JSON config
+  const json = {
+    companyName: "Dani",
+    productName: "Karlson",
+    productVersion: "0.1",
+    dataUrl: "tyj.data.unityweb",
+    wasmCodeUrl: wasmurl,
+    wasmFrameworkUrl: "tyj.wasm.framework.js",
+    graphicsAPI: ["WebGL 2.0"],
+    webglContextAttributes: { preserveDrawingBuffer: false },
+    splashScreenStyle: "Dark",
+    backgroundColor: "#231F20",
+    developmentBuild: false,
+    multithreading: false,
+    unityVersion: "2019.2.6f1"
+  };
+
+  let blob = new Blob([JSON.stringify(json)], { type: "application/json" });
+  blobUrl = URL.createObjectURL(blob);
+
+  window.addEventListener("resize", resizeUnityContainer);
+  UnityLoader.instantiate("unityContainer", json, {
+    url: blobUrl,
+    Module: {
+      onRuntimeInitialized: function () {
+        resizeUnityContainer();
+        document.querySelector("#loading-text").remove();
+      }
+    }
+  });
+}
+
+window.addEventListener("load", startUnity);
+  </script>
+</head>
+<body>
+  <div
+    id="loading-text"
+    style="
+      color: white;
+      font-size: 48px;
+      font-family: cursive;
+      text-align: center;
+      margin-top: 20px;
+    "
+  >
+    LOADING...
+  </div>
+  <div id="unityContainer" style="width: 960px; height: 600px; margin: auto"></div>
+</body>
+</html>
