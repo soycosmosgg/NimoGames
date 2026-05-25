@@ -122,7 +122,7 @@ const G_DATA = [
     n: "Shift At Midnight", 
     dev: "slqntdevss", 
     ported: true,
-    img: "https://i.ibb.co/F4WvYcJY/library-capsule.jpg",
+    img: "https://cdn2.steamgriddb.com/thumb/acdcf6b8403879a636dd97513e4dd55f.jpg",
     tags: ["Horror", "Retro", "3D"],
     desc: "Shift At Midnight is a cooperative horror and investigation video game for up to three players, in which you take on the role of an employee at a convenience store during the night shift.",
   },
@@ -233,6 +233,14 @@ const G_DATA = [
     bg: "https://cdn2.steamgriddb.com/hero_thumb/5d39eac2733613a7e51d91ac3f0f2273.jpg",
     tags: ["Horror", "Survival", "Atmospheric"],
     desc: "Five Nights at Freddy's: Ultimate Custom Night (UCN) is a horror and strategy video game in which you face off against a customizable selection of up to 50 animatronics.",
+  },
+  { 
+    id: '413150', 
+    n: "Stardew Valley", 
+    dev: "Cirsius", 
+    ported: true,
+    tags: ["Indie", "Farm", "Chill"],
+    desc: "Stardew Valley is a popular role-playing and farm-life simulation video game",
   },
 ];
 
