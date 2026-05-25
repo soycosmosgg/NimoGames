@@ -748,13 +748,39 @@ function collectGameAudioContexts(win) {
   return contexts;
 }
 
+function getPhaserSoundManagers(win) {
+  const managers = new Set();
+  if (!win || typeof win !== 'object') return managers;
+
+  const addSound = (sound) => {
+    if (sound && typeof sound === 'object') managers.add(sound);
+  };
+
+  try {
+    const pool = win.Phaser?.Display?.Canvas?.CanvasPool?.pool;
+    if (pool && typeof pool === 'object') {
+      Object.values(pool).forEach((canvas) => {
+        const game = canvas?.parent?.game;
+        addSound(game?.sound);
+      });
+    }
+  } catch {
+    // Ignore Phaser traversal errors.
+  }
+
+  addSound(win.game?.sound);
+  addSound(win.Phaser?.Game?.prototype?.sound);
+  return managers;
+}
+
 function pauseGameAudio() {
   const win = getGameIframeWindow();
   if (!win) return;
 
   const state = {
     media: [],
-    contexts: []
+    contexts: [],
+    soundManagers: []
   };
 
   try {
@@ -771,6 +797,21 @@ function pauseGameAudio() {
     // Ignore cross-origin iframe access errors.
   }
 
+  getPhaserSoundManagers(win).forEach((sound) => {
+    try {
+      const masterMuteNode = sound.masterMuteNode;
+      const originalMute = sound.mute;
+      const originalGain = masterMuteNode && masterMuteNode.gain ? masterMuteNode.gain.value : null;
+      state.soundManagers.push({ sound, originalMute, originalGain });
+      sound.mute = true;
+      if (masterMuteNode && masterMuteNode.gain) {
+        masterMuteNode.gain.value = 0;
+      }
+    } catch {
+      // Ignore Phaser sound mute failures.
+    }
+  });
+
   collectGameAudioContexts(win).forEach((context) => {
     if (context.state !== 'suspended') {
       state.contexts.push(context);
@@ -782,7 +823,7 @@ function pauseGameAudio() {
     }
   });
 
-  if (!state.media.length && !state.contexts.length) return;
+  if (!state.media.length && !state.contexts.length && !state.soundManagers.length) return;
 
   pauseGameAudio.state = state;
 }
@@ -798,6 +839,17 @@ async function resumeGameAudio() {
       resumePromises.push(Promise.resolve(media.play()).catch(() => {}));
     } catch {
       // Ignore play failures.
+    }
+  });
+
+  state.soundManagers.forEach(({ sound, originalMute, originalGain }) => {
+    try {
+      sound.mute = originalMute;
+      if (sound.masterMuteNode && sound.masterMuteNode.gain) {
+        sound.masterMuteNode.gain.value = originalGain ?? 1;
+      }
+    } catch {
+      // Ignore Phaser sound restore failures.
     }
   });
 
