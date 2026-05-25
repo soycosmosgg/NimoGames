@@ -249,12 +249,14 @@ function chgTab(v) {
 
 function showPopup(id) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.style.display = 'flex';
   setTimeout(() => el.classList.add('show'), 10);
 }
 
 function hidePopup(id) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.classList.remove('show');
   setTimeout(() => { el.style.display = 'none'; }, 300);
 }
@@ -925,9 +927,12 @@ let gInt = null;
 let gSs = 0;
 
 function try2launch() {
-  if (gmWin && !gmWin.closed) {
-    showPopup('p-sess-block');
+  if (!cxG) {
+    console.warn('[try2launch] No game selected; skipping launch.');
     return;
+  }
+  if (gmWin && !gmWin.closed) {
+    clsGm();
   }
   rnLdInt();
 }
