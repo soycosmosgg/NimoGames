@@ -706,10 +706,135 @@ function goToStore() {
   window.open(url, '_blank');
 }
 
+function getHiddenTitle() {
+  const locale = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+  return locale.startsWith('es') ? 'Inicio Classroom' : 'Home - Classroom';
+}
+
+function getGameIframeWindow() {
+  const iframe = document.getElementById('gF');
+  if (!iframe || !iframe.contentWindow) return null;
+  try {
+    iframe.contentWindow.location.href;
+    return iframe.contentWindow;
+  } catch {
+    return null;
+  }
+}
+
+function collectGameAudioContexts(win) {
+  const contexts = new Set();
+  if (!win || typeof win !== 'object') return contexts;
+
+  const seen = new WeakSet();
+
+  const visit = (value) => {
+    if (!value || typeof value !== 'object') return;
+    if (seen.has(value)) return;
+    seen.add(value);
+
+    if (typeof value.suspend === 'function' && typeof value.resume === 'function' && typeof value.state === 'string') {
+      contexts.add(value);
+    }
+
+    try {
+      Object.keys(value).forEach((key) => visit(value[key]));
+    } catch {
+      // Ignore traversal errors for non-enumerable or restricted objects.
+    }
+  };
+
+  visit(win);
+  return contexts;
+}
+
+function pauseGameAudio() {
+  const win = getGameIframeWindow();
+  if (!win) return;
+
+  const state = {
+    media: [],
+    contexts: []
+  };
+
+  try {
+    const doc = win.document;
+    if (doc) {
+      doc.querySelectorAll('audio, video').forEach((media) => {
+        if (!media.paused) {
+          state.media.push(media);
+          media.pause();
+        }
+      });
+    }
+  } catch {
+    // Ignore cross-origin iframe access errors.
+  }
+
+  collectGameAudioContexts(win).forEach((context) => {
+    if (context.state !== 'suspended') {
+      state.contexts.push(context);
+      try {
+        context.suspend();
+      } catch {
+        // Ignore suspend failures.
+      }
+    }
+  });
+
+  if (!state.media.length && !state.contexts.length) return;
+
+  pauseGameAudio.state = state;
+}
+
+async function resumeGameAudio() {
+  const state = pauseGameAudio.state;
+  if (!state) return;
+
+  const resumePromises = [];
+
+  state.media.forEach((media) => {
+    try {
+      resumePromises.push(Promise.resolve(media.play()).catch(() => {}));
+    } catch {
+      // Ignore play failures.
+    }
+  });
+
+  state.contexts.forEach((context) => {
+    if (context && typeof context.resume === 'function') {
+      resumePromises.push(Promise.resolve(context.resume()).catch(() => {}));
+    }
+  });
+
+  if (!resumePromises.length) {
+    pauseGameAudio.state = null;
+    return;
+  }
+
+  await Promise.allSettled(resumePromises);
+  pauseGameAudio.state = null;
+}
+
+function handleGameAudioVisibility() {
+  if (document.hidden || !document.hasFocus()) {
+    pauseGameAudio();
+  } else {
+    resumeGameAudio();
+  }
+}
+
+function startGameAudioVisibilityMonitor() {
+  handleGameAudioVisibility();
+  if (startGameAudioVisibilityMonitor.interval) return;
+  startGameAudioVisibilityMonitor.interval = setInterval(() => {
+    handleGameAudioVisibility();
+  }, 1000);
+}
+
 function updatePageBadge() {
   const iconLink = document.getElementById('page-favicon');
-  const currentTitle = document.title;
-  const hiddenTitle = 'Inicio - Classroom';
+  const hiddenTitle = getHiddenTitle();
   const hiddenIcon = './images/icon.png';
   const defaultTitle = updatePageBadge.defaultTitle || document.title;
   const defaultHref = updatePageBadge.defaultHref || (iconLink ? iconLink.href : '');
@@ -725,9 +850,22 @@ function updatePageBadge() {
   }
 }
 
-window.addEventListener('visibilitychange', updatePageBadge);
-window.addEventListener('focus', updatePageBadge);
-window.addEventListener('blur', updatePageBadge);
+window.addEventListener('visibilitychange', () => {
+  updatePageBadge();
+  handleGameAudioVisibility();
+});
+window.addEventListener('focus', () => {
+  updatePageBadge();
+  handleGameAudioVisibility();
+});
+window.addEventListener('blur', () => {
+  updatePageBadge();
+  handleGameAudioVisibility();
+});
+window.addEventListener('pagehide', handleGameAudioVisibility);
+window.addEventListener('pageshow', handleGameAudioVisibility);
+
+startGameAudioVisibilityMonitor();
 
 let gmWin = null;
 let gmId = null;
