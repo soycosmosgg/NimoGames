@@ -175,14 +175,6 @@ const G_DATA = [
     desc: "Cube Escape Collection is a collection of escape room games featuring challenging puzzles and immersive environments.",
   },
   { 
-    id: '1292940', 
-    n: "Cube Escape Collection", 
-    dev: "Cosmos", 
-    ported: true,
-    tags: ["Puzzle", "Adventure", "Escape Room"],
-    desc: "Cube Escape Collection is a collection of escape room games featuring challenging puzzles and immersive environments.",
-  },
-  { 
     id: '319510', 
     n: "Five Nights at Freddy's", 
     dev: "irv77", 
