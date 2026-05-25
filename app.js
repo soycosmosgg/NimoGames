@@ -1053,6 +1053,39 @@ function rnLd() {
   const gameId = cxG.id;
   const tU = cxG.path || getGamePath(gameId);
   const shouldUseCoiSw = !GAME_BASE_URL || isSameOriginUrl(GAME_BASE_URL);
+  const f = document.getElementById('gF');
+  const s = document.getElementById('bS');
+  const bt = document.getElementById('bS-t');
+  const lo = document.getElementById('lO');
+
+  if (bt) bt.innerText = 'Loading ' + cxG.n + '...';
+  if (s) {
+    s.style.display = 'flex';
+    s.style.opacity = '1';
+  }
+  if (lo) lo.style.display = 'none';
+  document.getElementById('n-game-title').innerText = cxG.n;
+  document.getElementById('n-game').style.display = 'flex';
+  tglV('g');
+  gmWin = { closed: false, close() { clsGm(); } };
+
+  // Attach load/error listeners before setting src.
+  if (f) {
+    f.onload = () => {
+      if (s) {
+        s.style.opacity = '0';
+        setTimeout(() => { s.style.display = 'none'; }, 300);
+      }
+      f.onload = null;
+    };
+    f.onerror = () => {
+      console.warn('[rnLd] iframe load error for', tU);
+      if (s) {
+        s.style.opacity = '0';
+        setTimeout(() => { s.style.display = 'none'; }, 300);
+      }
+    };
+  }
 
   // Try to register the game's COI service worker using an absolute URL
   (async function registerAndLoadIframe() {
@@ -1064,7 +1097,6 @@ function rnLd() {
         const reg = await navigator.serviceWorker.register(swUrl, { scope: `/games/${gameId}/` });
         console.log('[rnLd] Registered game COI service worker:', reg.scope);
 
-        // wait briefly for controller to take over (if it will)
         swControlled = await new Promise(res => {
           if (navigator.serviceWorker.controller) return res(true);
           const onChange = () => { navigator.serviceWorker.removeEventListener('controllerchange', onChange); res(true); };
@@ -1081,24 +1113,10 @@ function rnLd() {
       console.debug('[rnLd] ServiceWorker unavailable or insecure context; skipping COI SW registration.');
     }
 
-    // Attach load/error listeners before setting src
-    f.onload = () => {
-      if (s) {
-        s.style.opacity = '0';
-        setTimeout(() => { s.style.display = 'none'; }, 300);
-      }
-      f.onload = null;
-    };
-    f.onerror = () => {
-      console.warn('[rnLd] iframe load error for', tU);
-      // leave loader hidden shortly and allow user to open in new tab
-      if (s) { s.style.opacity = '0'; setTimeout(() => { s.style.display = 'none'; }, 300); }
-    };
+    if (f) {
+      f.src = tU;
+    }
 
-    // Now start loading iframe (either COI enabled or not)
-    f.src = tU;
-
-    // Fallback: hide loader quickly if iframe doesn't fire load (e.g., cross-origin)
     setTimeout(() => {
       if (s && s.style.display !== 'none') {
         s.style.opacity = '0';
@@ -1106,40 +1124,6 @@ function rnLd() {
       }
     }, 4000);
   })();
-  document.getElementById('n-game-title').innerText = cxG.n;
-  document.getElementById('n-game').style.display = 'flex';
-
-  const f = document.getElementById('gF');
-  const s = document.getElementById('bS');
-  const bt = document.getElementById('bS-t');
-  const lo = document.getElementById('lO');
-
-  if (bt) bt.innerText = 'Loading ' + cxG.n + '...';
-  s.style.display = 'flex';
-  s.style.opacity = '1';
-  lo.style.display = 'none';
-  tglV('g');
-  gmWin = { closed: false, close() { clsGm(); } };
-
-  // Load iframe immediately and hide loader when iframe fires load.
-  f.onload = () => {
-    if (s) {
-      s.style.opacity = '0';
-      setTimeout(() => { s.style.display = 'none'; }, 300);
-    }
-    f.onload = null;
-  };
-
-  // Start loading the game iframe immediately
-  f.src = tU;
-
-  // Fallback: if iframe doesn't fire load (e.g., cross-origin), hide loader quickly
-  setTimeout(() => {
-    if (s && s.style.display !== 'none') {
-      s.style.opacity = '0';
-      setTimeout(() => { s.style.display = 'none'; }, 300);
-    }
-  }, 4000);
 
   trStart(cxG.id);
 }
