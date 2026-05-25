@@ -710,7 +710,7 @@ function goToStore() {
 
 function getHiddenTitle() {
   const locale = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-  return locale.startsWith('es') ? 'Inicio Classroom' : 'Home - Classroom';
+  return locale.startsWith('es') ? 'Inicio - Classroom' : 'Home - Classroom';
 }
 
 function getGameIframeWindow() {
