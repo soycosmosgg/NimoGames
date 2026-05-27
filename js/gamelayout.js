@@ -242,5 +242,13 @@ const G_DATA = [
     tags: ["Indie", "Farm", "Chill"],
     desc: "Stardew Valley is a popular role-playing and farm-life simulation video game",
   },
+  { 
+    id: '2527500', 
+    n: "MiSide", 
+    dev: "genizy", 
+    ported: true,
+    tags: ["Horror", "Psychological", "Indie"],
+    desc: "MiSide is an indie psychological horror video game developed by AIHASTO.",
+  },
 ];
 
