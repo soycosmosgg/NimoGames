@@ -10,6 +10,8 @@
   --accent: #ffffff;
 }
 
+html { scrollbar-gutter: stable; }
+
 body {
   margin: 0;
   padding: 0;
@@ -398,6 +400,64 @@ body {
   cursor: pointer;
   transition: 0.3s;
 }
+
+/* Topbar styles added for header with logo and action buttons */
+.site-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: #070707;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  z-index: 1100;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(4px);
+}
+.site-topbar .left{display:flex;align-items:center;gap:12px}
+.site-topbar img.logo{height:40px}
+.site-topbar .title{color:#fff;font-weight:700;font-size:15px}
+.site-topbar .actions{display:flex;gap:8px;align-items:center}
+.tb-btn{background:transparent;border:1px solid transparent;color:#fff;cursor:pointer;padding:8px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:8px}
+.tb-btn:hover{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.04)}
+.tb-link{color:#fff;text-decoration:none;padding:8px 10px;border-radius:8px;border:1px solid transparent}
+.tb-link:hover{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.04)}
+
+/* Ensure there's space for the fixed topbar */
+body{padding-top:64px}
+
+/* Top dock: mirror bottom main-dock but at top center */
+.top-dock{position:fixed;top:20px;left:50%;right:auto;width:max-content;transform:translateX(-50%);z-index:12000;display:flex;align-items:center;justify-content:center;padding:0 12px;will-change:transform;contain:paint}
+.top-main-dock{background:var(--glass);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);border:1px solid var(--border);border-radius:80px;display:flex;align-items:center;padding:8px 22px;gap:18px;min-width:260px}
+.top-main-dock .logo{height:36px;display:block}
+.top-main-dock .dock-actions{display:flex;align-items:center;gap:8px}
+.d-btn-icon{padding:8px;border-radius:12px;color:var(--text);display:flex;align-items:center;justify-content:center;border:1px solid transparent;background:transparent}
+.d-btn-icon:hover{background:rgba(255,255,255,0.03);border-color:rgba(255,255,255,0.04)}
+.top-main-dock .d-btn img{filter:brightness(100%);display:block}
+/* Size adjustments requested: smaller logo, larger search icon */
+.top-main-dock .logo{height:30px}
+.top-main-dock .d-btn-icon svg{width:22px;height:22px}
+
+/* Visibility and animation helpers for the top dock */
+.top-dock{transition:opacity 0.36s cubic-bezier(.2,.9,.2,1),transform 0.36s cubic-bezier(.2,.9,.2,1)}
+.top-dock.td-hidden{opacity:0;transform:translateX(-50%) translateY(-8px) scale(0.98);pointer-events:none}
+.top-dock.td-visible{opacity:1;transform:translateX(-50%) translateY(0) scale(1);pointer-events:auto}
+
+/* Popup overlay should not affect layout — fixed and full-screen */
+.popup-wrap{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:12500;
+  background: rgba(0,0,0,0.45);
+}
+.popup-wrap.show{display:flex}
+.popup-box{background: #070707; border-radius:12px; padding:22px; border:1px solid var(--border); box-shadow:0 30px 60px rgba(0,0,0,0.6); color:var(--text)}
 
 .d-btn:hover {
   color: #fff;
