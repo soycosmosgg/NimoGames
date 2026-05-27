@@ -108,6 +108,27 @@ window.addEventListener('load', () => {
   document.getElementById('app-wrap').style.opacity = '1';
   if (typeof G_DATA !== 'undefined') dodeLayout();
 
+  // Ensure top dock visibility on load (only for Nimo tab)
+  const td = document.querySelector('.top-dock');
+  if (td) {
+    const nimoView = document.getElementById('v-Nimo');
+    // set initial state after a tick to allow transitions
+    setTimeout(() => {
+      if (nimoView && nimoView.classList.contains('active')) {
+        td.classList.remove('td-hidden');
+        td.classList.add('td-visible');
+        td.setAttribute('aria-hidden', 'false');
+      } else {
+        td.classList.remove('td-visible');
+        td.classList.add('td-hidden');
+        td.setAttribute('aria-hidden', 'true');
+      }
+    }, 20);
+  }
+
+  // Setup listeners to guard show/hide behavior
+  try { setupTopDockListeners(); } catch (e) { console.warn('TopDock listeners setup failed', e); }
+
 });
 
 let heroArr = [];
@@ -240,11 +261,60 @@ function chgTab(v) {
   if (v === 'Nimo') {
     clsGm();
     clsMdl();
+    showTopDock();
+  }
+  else {
+    hideTopDock();
   }
   document.querySelectorAll('.d-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-view').forEach(s => s.classList.remove('active'));
   document.getElementById('b-' + v).classList.add('active');
   document.getElementById('v-' + v).classList.add('active');
+}
+
+// Top dock controls: show/hide with animation
+function showTopDock() {
+  const td = document.querySelector('.top-dock');
+  if (!td) return;
+  console.debug('[TopDock] showTopDock');
+  td.classList.remove('td-hidden');
+  td.classList.add('td-visible');
+  // also set inline styles to override any CSS cascade issues
+  td.style.pointerEvents = 'auto';
+  td.style.opacity = '1';
+  // keep horizontal centering (translateX) when applying vertical animation
+  td.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+  td.setAttribute('aria-hidden', 'false');
+}
+
+function hideTopDock() {
+  const td = document.querySelector('.top-dock');
+  if (!td) return;
+  console.debug('[TopDock] hideTopDock');
+  td.classList.remove('td-visible');
+  td.classList.add('td-hidden');
+  // set inline styles for immediate effect and animation
+  td.style.pointerEvents = 'none';
+  td.style.opacity = '0';
+  // keep horizontal centering (translateX) when applying vertical animation
+  td.style.transform = 'translateX(-50%) translateY(-8px) scale(0.98)';
+  td.setAttribute('aria-hidden', 'true');
+}
+
+// Attach explicit listeners to tab buttons and game cards to ensure dock toggles
+function setupTopDockListeners() {
+  const bLib = document.getElementById('b-lib');
+  const bNimo = document.getElementById('b-Nimo');
+  if (bLib) bLib.addEventListener('click', () => { try { hideTopDock(); } catch(e){} });
+  if (bNimo) bNimo.addEventListener('click', () => { try { showTopDock(); } catch(e){} });
+
+  // Delegate clicks on game cards to hide the dock (cards open modal via onclick too)
+  document.addEventListener('click', (ev) => {
+    const card = ev.target.closest && ev.target.closest('.c-h, .c-v');
+    if (card) {
+      try { hideTopDock(); } catch (e) {}
+    }
+  });
 }
 
 function showPopup(id) {
@@ -337,6 +407,8 @@ function hideModalLoadStatus() {
 }
 
 function opMdl(id) {
+  // hide top dock when opening a game modal (per UX request)
+  try { hideTopDock(); } catch (e) { /* ignore */ }
   cxG = G_DATA.find(x => x.id === id);
   const d = lsDB[id] || { t: 0, l: null };
 
@@ -408,6 +480,11 @@ function clsMdl() {
   const m = document.getElementById('modal-ui');
   m.style.opacity = '0';
   setTimeout(() => { m.style.display = 'none'; }, 500);
+  // restore top dock if still on Nimo view
+  setTimeout(() => {
+    const nimoView = document.getElementById('v-Nimo');
+    if (nimoView && nimoView.classList.contains('active')) showTopDock();
+  }, 520);
 }
 
 function getSteamStoreUrl(game) {
@@ -889,7 +966,7 @@ function startGameAudioVisibilityMonitor() {
 function updatePageBadge() {
   const iconLink = document.getElementById('page-favicon');
   const hiddenTitle = getHiddenTitle();
-  const hiddenIcon = './images/icon.png';
+  const hiddenIcon = 'https://i.ibb.co/fY7wSdfF/icon.png';
   const defaultTitle = updatePageBadge.defaultTitle || document.title;
   const defaultHref = updatePageBadge.defaultHref || (iconLink ? iconLink.href : '');
   if (!updatePageBadge.defaultTitle) updatePageBadge.defaultTitle = defaultTitle;
