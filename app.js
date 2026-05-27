@@ -475,16 +475,18 @@ function opMdl(id) {
   setTimeout(() => { m.style.opacity = '1'; }, 10);
 }
 
-function clsMdl() {
+function clsMdl(restoreTopDock = true) {
   hideModalLoadStatus();
   const m = document.getElementById('modal-ui');
   m.style.opacity = '0';
   setTimeout(() => { m.style.display = 'none'; }, 500);
-  // restore top dock if still on Nimo view
-  setTimeout(() => {
-    const nimoView = document.getElementById('v-Nimo');
-    if (nimoView && nimoView.classList.contains('active')) showTopDock();
-  }, 520);
+  // restore top dock if still on Nimo view (only if explicitly requested)
+  if (restoreTopDock) {
+    setTimeout(() => {
+      const nimoView = document.getElementById('v-Nimo');
+      if (nimoView && nimoView.classList.contains('active')) showTopDock();
+    }, 520);
+  }
 }
 
 function getSteamStoreUrl(game) {
@@ -1124,7 +1126,7 @@ function rnLdInt() {
 
 function rnLdExt() {
   hidePopup('p-launch-choice');
-  clsMdl();
+  clsMdl(false);
   const gameId = cxG.id;
   const tU = cxG.path || getGamePath(gameId);
   gmWin = window.open(tU, '_blank');
@@ -1132,7 +1134,7 @@ function rnLdExt() {
 }
 
 function rnLd() {
-  clsMdl();
+  clsMdl(false);
   const gameId = cxG.id;
   const tU = cxG.path || getGamePath(gameId);
   const shouldUseCoiSw = !GAME_BASE_URL || isSameOriginUrl(GAME_BASE_URL);
