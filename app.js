@@ -1036,6 +1036,7 @@ function clsGm(e) {
   if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
   if (document.exitPointerLock) document.exitPointerLock();
   if (navigator.keyboard) navigator.keyboard.unlock();
+  showTopDock();
   tglV('h');
 }
 
@@ -1148,6 +1149,7 @@ function rnLd() {
   if (lo) lo.style.display = 'none';
   document.getElementById('n-game-title').innerText = cxG.n;
   document.getElementById('n-game').style.display = 'flex';
+  hideTopDock();
   tglV('g');
   gmWin = { closed: false, close() { clsGm(); } };
 
