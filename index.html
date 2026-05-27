@@ -29,6 +29,26 @@
     </div>
   </div>
 
+  <div class="top-dock" aria-hidden="false">
+    <div class="top-main-dock">
+      <img class="logo" src="https://i.ibb.co/23zwhSFh/logo.png" alt="Nimo logo">
+      <div class="dock-actions">
+        <button id="top-search-btn" class="d-btn d-btn-icon" aria-label="Search">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#fff">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+        <a class="d-btn" href="https://dsc.gg/Nimo" target="_blank" rel="noopener" aria-label="Discord">
+          <img src="https://cdn.simpleicons.org/discord/ffffff" alt="Discord" style="height:20px;width:20px;display:block">
+        </a>
+        <a class="d-btn" href="https://github.com/soycosmosgg/Nimo-Online-Games" target="_blank" rel="noopener" aria-label="GitHub">
+          <img src="https://cdn.simpleicons.org/github/ffffff" alt="GitHub" style="height:20px;width:20px;display:block">
+        </a>
+      </div>
+    </div>
+  </div>
+
   <img src="" id="bg-amb" alt="Background">
 
   <div id="app-wrap">
@@ -219,10 +239,22 @@
     </button>
     <div id="tD">3</div>
     <div id="eD">3</div>
-    <iframe id="gF" allow="autoplay;fullscreen;pointer-lock;keyboard-map;clipboard-read;clipboard-write;gamepad" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+    <iframe id="gF" allow="autoplay;fullscreen;pointer-lock;keyboard-map;clipboard-read;clipboard-write;gamepad"></iframe>
   </div>
 
   <script src="js/gamelayout.js"></script>
+  <script>
+    // Topbar behaviour: route search button to Library tab
+    (function(){
+      var topSearch = document.getElementById('top-search-btn');
+      if(topSearch){
+        topSearch.addEventListener('click', function(){
+          var libBtn = document.getElementById('b-lib');
+          if(libBtn) libBtn.click();
+        });
+      }
+    })();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
