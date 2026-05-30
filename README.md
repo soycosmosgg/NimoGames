@@ -3,7 +3,7 @@
 **Ad-free online gaming platform**
 
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://dsc.gg/nimo)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Website](https://img.shields.io/badge/Website-Live-green)](https://nimogames.pages.dev)
 
 Nimo is a web-based gaming platform designed to provide premium online games without advertisements, interruptions, or required downloads. The platform focuses on delivering a streamlined, high-performance, and distraction-free gaming experience directly through the browser.
