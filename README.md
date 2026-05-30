@@ -33,4 +33,4 @@ Nimo is a web-based gaming platform designed to provide premium online games wit
 To access the platform, visit the official live deployment:
 
 ```bash
-[https://nimogames.pages.dev](https://nimogames.pages.dev)
+https://nimogames.pages.dev
