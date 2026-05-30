@@ -966,20 +966,25 @@ function startGameAudioVisibilityMonitor() {
 }
 
 function updatePageBadge() {
-  const iconLink = document.getElementById('page-favicon');
+  const iconLinks = Array.from(document.querySelectorAll("link[rel~='icon'], link[rel='shortcut icon']"));
   const hiddenTitle = getHiddenTitle();
   const hiddenIcon = 'https://i.ibb.co/fY7wSdfF/icon.png';
   const defaultTitle = updatePageBadge.defaultTitle || document.title;
-  const defaultHref = updatePageBadge.defaultHref || (iconLink ? iconLink.href : '');
+  const defaultHrefs = updatePageBadge.defaultHrefs || iconLinks.map((link) => link.href);
   if (!updatePageBadge.defaultTitle) updatePageBadge.defaultTitle = defaultTitle;
-  if (!updatePageBadge.defaultHref) updatePageBadge.defaultHref = defaultHref;
+  if (!updatePageBadge.defaultHrefs) updatePageBadge.defaultHrefs = defaultHrefs;
 
   if (document.hidden || !document.hasFocus()) {
     document.title = hiddenTitle;
-    if (iconLink) iconLink.href = hiddenIcon;
+    iconLinks.forEach((link) => {
+      link.href = hiddenIcon;
+    });
   } else {
     document.title = updatePageBadge.defaultTitle;
-    if (iconLink) iconLink.href = updatePageBadge.defaultHref;
+    iconLinks.forEach((link, index) => {
+      const originalHref = updatePageBadge.defaultHrefs[index];
+      if (originalHref) link.href = originalHref;
+    });
   }
 }
 
