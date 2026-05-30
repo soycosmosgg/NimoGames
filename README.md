@@ -1,48 +1,36 @@
-# 🎮 Nimo Games
+# Nimo Games
 
-**Ad-free online gaming platform | Plataforma de juegos online sin anuncios**
+**Ad-free online gaming platform**
 
 [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://dsc.gg/nimo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Website](https://img.shields.io/badge/Website-Live-green)](https://nimogames.pages.dev)
 
-Nimo is a revolutionary web platform designed to enjoy **premium online games without ads, without interruptions, and without downloads**. We offer a pure, fast, and distraction-free gaming experience.
+Nimo is a web-based gaming platform designed to provide premium online games without advertisements, interruptions, or required downloads. The platform focuses on delivering a streamlined, high-performance, and distraction-free gaming experience directly through the browser.
 
-Nimo es una plataforma web revolucionaria diseñada para disfrutar de **juegos online premium sin anuncios, sin interrupciones y sin descargas**. Ofrecemos una experiencia de gaming pura, rápida y libre de distracciones.
+## Why Choose Nimo?
 
-## ✨ Why Choose Nimo? | ¿Por qué elegir Nimo?
+| Feature | Benefit |
+|---------|---------|
+| No Advertisements | Uninterrupted gameplay experience |
+| Instant Loading | Play directly from any modern web browser |
+| Multiplayer Support | Connect and play with users worldwide |
 
-| Feature | Benefit | Característica | Beneficio |
-|---------|---------|----------------|-----------|
-| 🚫 **No ads** | Uninterrupted gaming experience | 🚫 **Sin anuncios** | Experiencia de gaming ininterrumpida |
-| ⚡ **Instant loading** | Play directly from browser | ⚡ **Carga instantánea** | Juega directamente desde el navegador |
-| 🎯 **Multiplayer** | Connect with friends worldwide | 🎯 **Multijugador** | Conecta con amigos mundialmente |
+## Key Features
 
-## 🎮 Key Features | Características destacadas
+### Uninterrupted Experience
+* **Zero Advertisements:** Play without video ads, banners, or pop-ups.
+* **No Downloads Required:** Instant access to the entire catalog without installation.
+* **No Registration Mandatory:** Start playing immediately without creating an account.
 
-### 🕹️ Uninterrupted Experience | Experiencia Sin Interrupciones
-- **Zero ads** - Play without advertising interruptions
-- **Zero downloads** - Instant access from browser
-- **Zero registration** - Start playing immediately
+### Community & Support
+* Bug reporting and technical tracking.
+* Feature request and game suggestion pipeline.
+* Active community engagement via Discord.
 
-- **Cero anuncios** - Juega sin interrupciones publicitarias
-- **Cero descargas** - Acceso instantáneo desde el navegador
-- **Cero registro** - Comienza a jugar inmediatamente
+## Get Started
 
-### 👥 Community | Comunidad
-- **Report bugs** 
-- **Submit suggestions**
-- **Join our Discord**
-
-- **Comparte errores** 
-- **Envía sugerencias**
-- **Únete a nuestro Discord**
-
-## 🚀 Get Started | Comenzar
-
-It's very simple! Just visit:
-
-¡Es muy simple! Solo visita:
+To access the platform, visit the official live deployment:
 
 ```bash
-https://nimogames.pages.dev
+[https://nimogames.pages.dev](https://nimogames.pages.dev)
