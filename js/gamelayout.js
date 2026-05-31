@@ -250,5 +250,13 @@ const G_DATA = [
     tags: ["Horror", "Psychological", "Indie"],
     desc: "MiSide is an indie psychological horror video game developed by AIHASTO.",
   },
+  { 
+    id: '3205080', 
+    n: "Bad Parenting 1: Mr. Red Face", 
+    dev: "98cornbins", 
+    ported: true,
+    tags: ["Horror", "Psychological", "Indie"],
+    desc: "Bad Parenting is a popular indie psychological horror video game that tells the story of Ron, a boy who suffers from abuse and neglect at home.",
+  },
 ];
 
