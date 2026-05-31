@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>https://nimogames.qzz.io/</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  
+  <!-- Favicon files -->
+  <url>
+    <loc>https://nimogames.qzz.io/favicon/favicon.ico</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://nimogames.qzz.io/favicon/favicon.svg</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://nimogames.qzz.io/favicon/favicon-96x96.png</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://nimogames.qzz.io/favicon/apple-touch-icon.png</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <url>
+    <loc>https://nimogames.qzz.io/favicon/site.webmanifest</loc>
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>never</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>

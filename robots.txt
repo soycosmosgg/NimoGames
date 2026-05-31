@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /js/
+Disallow: /favicon/
+
+Sitemap: https://nimogames.qzz.io/sitemap.xml
