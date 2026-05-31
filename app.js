@@ -129,6 +129,24 @@ window.addEventListener('load', () => {
   // Setup listeners to guard show/hide behavior
   try { setupTopDockListeners(); } catch (e) { console.warn('TopDock listeners setup failed', e); }
 
+  // Attach settings button handler
+  const settingsBtn = document.getElementById('top-settings-btn');
+  if (settingsBtn) settingsBtn.addEventListener('click', () => showPopup('p-settings'));
+  const saveBtn = document.getElementById('settings-save');
+  const removeBtn = document.getElementById('settings-remove');
+  if (saveBtn) saveBtn.addEventListener('click', saveHiddenSiteSettings);
+  if (removeBtn) removeBtn.addEventListener('click', removeHiddenSiteSettings);
+  // populate modal with existing config
+  populateSettingsModal();
+  // favicon preview handler
+  const faviconIn = document.getElementById('settings-favicon');
+  if (faviconIn) faviconIn.addEventListener('input', () => {
+    const p = document.getElementById('favicon-preview');
+    if (!p) return;
+    const v = (faviconIn.value || '').trim();
+    if (v) { p.src = v; p.style.display = 'inline-block'; } else { p.src = ''; p.style.display = 'none'; }
+  });
+
 });
 
 let heroArr = [];
@@ -967,8 +985,9 @@ function startGameAudioVisibilityMonitor() {
 
 function updatePageBadge() {
   const iconLinks = Array.from(document.querySelectorAll("link[rel~='icon'], link[rel='shortcut icon']"));
-  const hiddenTitle = getHiddenTitle();
-  const hiddenIcon = 'https://i.ibb.co/fY7wSdfF/icon.png';
+  const cfg = getHiddenSiteConfig();
+  const hiddenTitle = cfg?.title || 'Inicio - Classroom';
+  const hiddenIcon = cfg?.favicon || 'https://ssl.gstatic.com/classroom/favicon.png';
   const defaultTitle = updatePageBadge.defaultTitle || document.title;
   const defaultHrefs = updatePageBadge.defaultHrefs || iconLinks.map((link) => link.href);
   if (!updatePageBadge.defaultTitle) updatePageBadge.defaultTitle = defaultTitle;
@@ -976,6 +995,7 @@ function updatePageBadge() {
 
   if (document.hidden || !document.hasFocus()) {
     document.title = hiddenTitle;
+    console.debug('[updatePageBadge] applying hidden icon:', hiddenIcon);
     iconLinks.forEach((link) => {
       link.href = hiddenIcon;
     });
@@ -986,6 +1006,61 @@ function updatePageBadge() {
       if (originalHref) link.href = originalHref;
     });
   }
+}
+
+// --- Hidden site settings helpers ---
+function getHiddenSiteConfig() {
+  try {
+    const raw = localStorage.getItem('Nimo_hidden_site');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+function setHiddenSiteConfig(cfg) {
+  try { localStorage.setItem('Nimo_hidden_site', JSON.stringify(cfg)); } catch (e) { console.warn('Failed to save hidden site config', e); }
+}
+
+function removeHiddenSiteSettings() {
+  localStorage.removeItem('Nimo_hidden_site');
+  populateSettingsModal();
+  document.getElementById('settings-msg').innerText = 'Configuration removed.';
+}
+
+function populateSettingsModal() {
+  const cfg = getHiddenSiteConfig();
+  const titleIn = document.getElementById('settings-title');
+  const favIn = document.getElementById('settings-favicon');
+  const favPrev = document.getElementById('favicon-preview');
+  if (!titleIn) return;
+  if (cfg) {
+    titleIn.value = cfg.title || '';
+    if (favIn) favIn.value = cfg.favicon || '';
+    if (favPrev) {
+      if (cfg.favicon) { favPrev.src = cfg.favicon; favPrev.style.display = 'inline-block'; } else { favPrev.src = ''; favPrev.style.display = 'none'; }
+    }
+  } else {
+    titleIn.value = 'Inicio - Classroom';
+    if (favIn) favIn.value = 'https://ssl.gstatic.com/classroom/favicon.png';
+    if (favPrev) { favPrev.src = 'https://ssl.gstatic.com/classroom/favicon.png'; favPrev.style.display = 'inline-block'; }
+  }
+}
+
+async function saveHiddenSiteSettings() {
+  const titleIn = document.getElementById('settings-title');
+  const msg = document.getElementById('settings-msg');
+  if (!titleIn) return;
+  const manualTitle = (titleIn && titleIn.value) ? titleIn.value.trim() : '';
+  const manualFavicon = (document.getElementById('settings-favicon') && document.getElementById('settings-favicon').value) ? document.getElementById('settings-favicon').value.trim() : '';
+  if (!manualTitle && !manualFavicon) {
+    if (msg) msg.innerText = 'Enter a manual title or favicon URL to save.';
+    return;
+  }
+
+  const cfg = { title: manualTitle, favicon: manualFavicon };
+  setHiddenSiteConfig(cfg);
+  populateSettingsModal();
+  if (msg) msg.innerText = 'Saved. Will be used when the tab is hidden.';
 }
 
 window.addEventListener('visibilitychange', () => {
