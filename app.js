@@ -605,11 +605,21 @@ function getSteamStoreUrl(game) {
 
 async function fetchSteamStorePage(appId) {
   const storeUrl = `https://store.steampowered.com/app/${appId}/`;
+  // client-side cache: store fetched page HTML for 24h to avoid repeated proxy usage
+  try {
+    const cacheKey = `steam_page_cache_${appId}`;
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && cached.ts && (Date.now() - cached.ts) < 1000 * 60 * 60 * 24) {
+      return cached.html;
+    }
+  } catch (e) {
+    // ignore cache errors
+  }
+
+  // Reduced proxy list: prefer AllOrigins then Codetabs. Removed known-bad services.
   const proxyList = [
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(storeUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(storeUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(storeUrl)}`,
-    `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(storeUrl)}`
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(storeUrl)}`
   ];
 
   for (const url of proxyList) {
@@ -620,7 +630,10 @@ async function fetchSteamStorePage(appId) {
       clearTimeout(timeoutId);
       if (!resp.ok) continue;
       const html = await resp.text();
-      if (html && html.length > 0) return html;
+      if (html && html.length > 0) {
+        try { localStorage.setItem(`steam_page_cache_${appId}`, JSON.stringify({ ts: Date.now(), html })); } catch (e) {}
+        return html;
+      }
     } catch (e) {
       continue;
     }
@@ -748,11 +761,19 @@ function applyAchievementCount(game, count) {
 
 async function fetchSteamAppDetails(appId) {
   const steamApiUrl = `https://store.steampowered.com/api/appdetails?appids=${appId}&l=english`;
+  // client-side cache for API responses (24h)
+  try {
+    const cacheKey = `steam_api_cache_${appId}`;
+    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+    if (cached && cached.ts && (Date.now() - cached.ts) < 1000 * 60 * 60 * 24) {
+      return cached.data;
+    }
+  } catch (e) { }
+
+  // Prefer AllOrigins first, then Codetabs. Removed unstable proxies.
   const apiUrls = [
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(steamApiUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(steamApiUrl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(steamApiUrl)}`,
-    `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(steamApiUrl)}`
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(steamApiUrl)}`
   ];
 
   for (const proxyUrl of apiUrls) {
@@ -766,6 +787,7 @@ async function fetchSteamAppDetails(appId) {
       let json = await resp.json();
       if (json.contents) json = JSON.parse(json.contents);
       if (!json || !json[appId] || !json[appId].success) continue;
+      try { localStorage.setItem(`steam_api_cache_${appId}`, JSON.stringify({ ts: Date.now(), data: json[appId].data })); } catch (e) {}
       return json[appId].data;
     } catch (e) {
       continue;
