@@ -34,9 +34,6 @@ function ensureGameAssets(game) {
   if (!game.img) game.img = steamAssetUrl(game.id, 'library_600x900.jpg');
   if (!game.bg) game.bg = steamAssetUrl(game.id, 'library_hero.jpg');
   if (!game.path) game.path = getGamePath(game.id);
-  if (game.img || game.bg) {
-    console.debug('[ensureGameAssets]', game.id, 'img=', game.img, 'bg=', game.bg);
-  }
 }
 
 function parsePortedInfo(game) {
@@ -294,7 +291,6 @@ function chgTab(v) {
 function showTopDock() {
   const td = document.querySelector('.top-dock');
   if (!td) return;
-  console.debug('[TopDock] showTopDock');
   td.classList.remove('td-hidden');
   td.classList.add('td-visible');
   // also set inline styles to override any CSS cascade issues
@@ -308,7 +304,6 @@ function showTopDock() {
 function hideTopDock() {
   const td = document.querySelector('.top-dock');
   if (!td) return;
-  console.debug('[TopDock] hideTopDock');
   td.classList.remove('td-visible');
   td.classList.add('td-hidden');
   // set inline styles for immediate effect and animation
@@ -434,7 +429,6 @@ function opMdl(id) {
   const mdlBg = document.getElementById('mdl-bg');
   const bgAmb = document.getElementById('bg-amb');
   const mdlPost = document.getElementById('mdl-post');
-  console.debug('[opMdl] opening', id, 'img=', cxG.img, 'bg=', cxG.bg);
   mdlBg.onerror = () => { console.error('[mdl-bg onerror]', cxG.id, mdlBg.src); mdlBg.onerror = null; mdlBg.src = steamAssetUrlFallback(cxG.id, 'library_hero.jpg'); };
   bgAmb.onerror = () => { console.error('[bg-amb onerror]', cxG.id, bgAmb.src); bgAmb.onerror = null; bgAmb.src = steamAssetUrlFallback(cxG.id, 'library_hero.jpg'); };
   mdlPost.onerror = () => { console.error('[mdl-post onerror]', cxG.id, mdlPost.src); mdlPost.onerror = null; mdlPost.src = steamAssetUrlFallback(cxG.id, 'library_600x900.jpg'); };
@@ -473,7 +467,6 @@ function opMdl(id) {
   (async () => {
     try {
       await loadSteamDetails(cxG);
-      console.log('Steam details fetched, updating UI...');
       document.getElementById('mdl-d').innerText = getDeveloperLabel(cxG);
       document.getElementById('hc-dev').innerText = getDeveloperLabel(cxG);
       const descText = decodeHtmlEntities(cxG.desc || (cxG.tags && Array.isArray(cxG.tags) ? cxG.tags.join(' • ') : ''));
@@ -534,7 +527,6 @@ async function fetchSteamStorePage(appId) {
       const html = await resp.text();
       if (html && html.length > 0) return html;
     } catch (e) {
-      console.log(`Steam page proxy failed for ${appId}:`, e.message);
       continue;
     }
   }
@@ -682,7 +674,6 @@ async function fetchSteamAppDetails(appId) {
       if (!json || !json[appId] || !json[appId].success) continue;
       return json[appId].data;
     } catch (e) {
-      console.log(`Steam API proxy failed for ${appId}:`, e.message);
       continue;
     }
   }
@@ -719,7 +710,6 @@ async function loadSteamDetails(game) {
           game.desc = pageDesc;
         }
         pageReqs = parseSteamRequirementsFromStorePage(pageHtml);
-        console.log(`Steam page requirements parsed for ${appId}:`, pageReqs);
         if (!game.steamReq) {
           game.steamReq = {
             minimum: (pageReqs && pageReqs.minimum) || emptySteamRequirements(),
@@ -735,7 +725,6 @@ async function loadSteamDetails(game) {
         return pageHtml;
       })
       .catch(e => {
-        console.log(`Steam page proxy failed for ${appId}:`, e.message || e);
         return null;
       });
 
@@ -750,7 +739,6 @@ async function loadSteamDetails(game) {
 
         if (dev) {
           game.devBase = dev;
-          console.log(`✓ Steam dev loaded: ${dev}`);
         }
         if (!game.desc || game.desc.length < 30) {
           if (shortDesc) game.desc = shortDesc;
@@ -771,7 +759,6 @@ async function loadSteamDetails(game) {
         return data;
       })
       .catch(e => {
-        console.log(`Steam API fetch failed for ${appId}:`, e.message || e);
         return null;
       });
 
@@ -995,7 +982,6 @@ function updatePageBadge() {
 
   if (document.hidden || !document.hasFocus()) {
     document.title = hiddenTitle;
-    console.debug('[updatePageBadge] applying hidden icon:', hiddenIcon);
     iconLinks.forEach((link) => {
       link.href = hiddenIcon;
     });
@@ -1261,7 +1247,6 @@ function rnLd() {
     if (shouldUseCoiSw && 'serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
       try {
         const reg = await navigator.serviceWorker.register(swUrl, { scope: `/games/${gameId}/` });
-        console.log('[rnLd] Registered game COI service worker:', reg.scope);
 
         swControlled = await new Promise(res => {
           if (navigator.serviceWorker.controller) return res(true);
@@ -1269,14 +1254,13 @@ function rnLd() {
           navigator.serviceWorker.addEventListener('controllerchange', onChange);
           setTimeout(() => { navigator.serviceWorker.removeEventListener('controllerchange', onChange); res(false); }, 1500);
         });
-        console.log('[rnLd] serviceWorker controller ready=', swControlled);
       } catch (err) {
         console.warn('[rnLd] Failed to register game COI service worker:', err);
       }
     } else if (!shouldUseCoiSw) {
-      console.debug('[rnLd] External CDN base detected; skipping COI SW registration for iframe game URL.');
+      // External CDN used, skip local COI service worker registration.
     } else {
-      console.debug('[rnLd] ServiceWorker unavailable or insecure context; skipping COI SW registration.');
+      // ServiceWorker unavailable or insecure context, skip registration.
     }
 
     if (f) {
