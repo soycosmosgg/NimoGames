@@ -34,6 +34,7 @@ const G_DATA = [
   { 
     id: '3241660', 
     n: "R.E.P.O.", 
+    desc: "R.E.P.O. (which stands for Retrieve, Extract, Profit Operation) is an online cooperative survival horror video game",
     dev: "98cornbins, Kaiden's Arcade", 
     ported: true,
   },
