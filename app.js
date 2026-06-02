@@ -1,12 +1,72 @@
 const lsDB = JSON.parse(localStorage.getItem('Nimo_store_v10') || '{}');
 const NIMO_CONFIG = window.NIMO_CONFIG || {};
 const GAME_BASE_URL = (NIMO_CONFIG.gameBaseUrl || '').replace(/\/+$/, '');
+const NIMO_BASE_TITLE = document.title;
+const NIMO_BASE_URL = location.pathname;
 
 function getGamePath(gameId) {
   if (GAME_BASE_URL) {
     return `${GAME_BASE_URL}/games/${gameId}/index.html`;
   }
   return `./games/${gameId}/index.html`;
+}
+
+function normalizeGameSlug(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[’'`]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
+
+function getGameSlug(game) {
+  if (!game) return '';
+  if (typeof game === 'string') return normalizeGameSlug(game);
+  return game.slug || normalizeGameSlug(game.n);
+}
+
+function getGameBySlug(slug) {
+  if (!slug) return null;
+  const normalized = normalizeGameSlug(slug);
+  return G_DATA.find(g => normalizeGameSlug(g.n) === normalized || normalizeGameSlug(g.slug || '') === normalized) || null;
+}
+
+function resolveGameIdentifier(value) {
+  if (!value) return null;
+  if (typeof value === 'object' && value.id) {
+    return value;
+  }
+  const byId = G_DATA.find(g => g.id === value);
+  if (byId) return byId;
+  return getGameBySlug(value);
+}
+
+function getGameIdFromUrl() {
+  const params = new URLSearchParams(location.search);
+  return params.get('game');
+}
+
+function getGameUrl(gameOrSlug) {
+  if (!gameOrSlug) return NIMO_BASE_URL;
+  const slug = typeof gameOrSlug === 'object' ? getGameSlug(gameOrSlug) : getGameSlug(gameOrSlug);
+  return `${location.pathname}?game=${encodeURIComponent(slug)}`;
+}
+
+function setPageTitle(game) {
+  document.title = game ? `${game.n} | Play on Nimo Games` : NIMO_BASE_TITLE;
+}
+
+function updateGameHistory(gameId, opts = {}) {
+  const game = resolveGameIdentifier(gameId);
+  const url = getGameUrl(game);
+  const state = { gameId: game ? game.id : null, gameSlug: game ? getGameSlug(game) : null };
+  if (opts.replace) {
+    history.replaceState(state, '', url);
+  } else if (opts.push) {
+    history.pushState(state, '', url);
+  }
+  setPageTitle(game);
 }
 
 function isSameOriginUrl(url) {
@@ -98,12 +158,21 @@ function formatPlaytimeHover(secs) {
 }
 
 window.addEventListener('load', () => {
-  if (!localStorage.getItem('Nimo_legal_accepted')) {
-    showPopup('p-legal-block');
-  }
+  showLegalPopupIfNeeded();
 
   document.getElementById('app-wrap').style.opacity = '1';
-  if (typeof G_DATA !== 'undefined') dodeLayout();
+  if (typeof G_DATA !== 'undefined') {
+    dodeLayout();
+    const deepLinkGameSlug = getGameIdFromUrl();
+    if (deepLinkGameSlug) {
+      const deepGame = getGameBySlug(deepLinkGameSlug);
+      if (deepGame) {
+        opMdl(deepGame.id, { pushHistory: false });
+      } else {
+        history.replaceState({ gameId: null, gameSlug: null }, '', NIMO_BASE_URL);
+      }
+    }
+  }
 
   // Ensure top dock visibility on load (only for Nimo tab)
   const td = document.querySelector('.top-dock');
@@ -361,6 +430,18 @@ function acceptLegal() {
   hidePopup('p-legal-block');
 }
 
+function showLegalPopupIfNeeded() {
+  if (!localStorage.getItem('Nimo_legal_accepted')) {
+    showPopup('p-legal-block');
+  }
+}
+
+if (document.readyState !== 'loading') {
+  showLegalPopupIfNeeded();
+} else {
+  document.addEventListener('DOMContentLoaded', showLegalPopupIfNeeded);
+}
+
 let cxG = null;
 let modalLoadStatusTimer = null;
 
@@ -419,11 +500,16 @@ function hideModalLoadStatus() {
   }, 320);
 }
 
-function opMdl(id) {
+function opMdl(idOrSlug, opts = {}) {
   // hide top dock when opening a game modal (per UX request)
   try { hideTopDock(); } catch (e) { /* ignore */ }
-  cxG = G_DATA.find(x => x.id === id);
-  const d = lsDB[id] || { t: 0, l: null };
+  const resolvedGame = resolveGameIdentifier(idOrSlug);
+  if (!resolvedGame) {
+    console.warn('[opMdl] Game not found:', idOrSlug);
+    return;
+  }
+  cxG = resolvedGame;
+  const d = lsDB[cxG.id] || { t: 0, l: null };
 
   ensureGameAssets(cxG);
   const mdlBg = document.getElementById('mdl-bg');
@@ -437,7 +523,6 @@ function opMdl(id) {
   mdlPost.src = cxG.img;
   document.getElementById('mdl-t').innerText = cxG.n;
   const info = parsePortedInfo(cxG);
-  // Solo asignar devBase si no es ported (para no sobrescribir lo que Steam va a cargar)
   if (!info.isPorted && info.baseDev) {
     cxG.devBase = info.baseDev;
   }
@@ -459,6 +544,14 @@ function opMdl(id) {
   } else {
     buyBtn.style.display = 'none';
     buyBtn.onclick = null;
+  }
+
+  if (opts.replaceHistory === true) {
+    updateGameHistory(cxG, { replace: true });
+  } else if (opts.pushHistory !== false) {
+    updateGameHistory(cxG, { push: true });
+  } else {
+    setPageTitle(cxG);
   }
 
   showModalLoadStatus();
@@ -486,11 +579,14 @@ function opMdl(id) {
   setTimeout(() => { m.style.opacity = '1'; }, 10);
 }
 
-function clsMdl(restoreTopDock = true) {
+function clsMdl(restoreTopDock = true, updateHistory = true) {
   hideModalLoadStatus();
   const m = document.getElementById('modal-ui');
   m.style.opacity = '0';
   setTimeout(() => { m.style.display = 'none'; }, 500);
+  if (updateHistory) {
+    updateGameHistory(null, { replace: true });
+  }
   // restore top dock if still on Nimo view (only if explicitly requested)
   if (restoreTopDock) {
     setTimeout(() => {
@@ -512,7 +608,6 @@ async function fetchSteamStorePage(appId) {
   const proxyList = [
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(storeUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(storeUrl)}`,
-    `https://api.allorigins.cf/raw?url=${encodeURIComponent(storeUrl)}`,
     `https://corsproxy.io/?${encodeURIComponent(storeUrl)}`,
     `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(storeUrl)}`
   ];
@@ -656,7 +751,6 @@ async function fetchSteamAppDetails(appId) {
   const apiUrls = [
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(steamApiUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(steamApiUrl)}`,
-    `https://api.allorigins.cf/raw?url=${encodeURIComponent(steamApiUrl)}`,
     `https://corsproxy.io/?${encodeURIComponent(steamApiUrl)}`,
     `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(steamApiUrl)}`
   ];
@@ -975,18 +1069,20 @@ function updatePageBadge() {
   const cfg = getHiddenSiteConfig();
   const hiddenTitle = cfg?.title || 'Inicio - Classroom';
   const hiddenIcon = cfg?.favicon || 'https://ssl.gstatic.com/classroom/favicon.png';
-  const defaultTitle = updatePageBadge.defaultTitle || document.title;
+  const currentTitle = document.title;
+  const defaultTitle = updatePageBadge.defaultTitle || currentTitle;
   const defaultHrefs = updatePageBadge.defaultHrefs || iconLinks.map((link) => link.href);
   if (!updatePageBadge.defaultTitle) updatePageBadge.defaultTitle = defaultTitle;
   if (!updatePageBadge.defaultHrefs) updatePageBadge.defaultHrefs = defaultHrefs;
 
   if (document.hidden || !document.hasFocus()) {
+    updatePageBadge.lastVisibleTitle = currentTitle;
     document.title = hiddenTitle;
     iconLinks.forEach((link) => {
       link.href = hiddenIcon;
     });
   } else {
-    document.title = updatePageBadge.defaultTitle;
+    document.title = updatePageBadge.lastVisibleTitle || updatePageBadge.defaultTitle;
     iconLinks.forEach((link, index) => {
       const originalHref = updatePageBadge.defaultHrefs[index];
       if (originalHref) link.href = originalHref;
@@ -1063,6 +1159,17 @@ window.addEventListener('blur', () => {
 });
 window.addEventListener('pagehide', handleGameAudioVisibility);
 window.addEventListener('pageshow', handleGameAudioVisibility);
+window.addEventListener('popstate', (event) => {
+  const stateGameSlug = event.state && event.state.gameSlug ? event.state.gameSlug : getGameIdFromUrl();
+  if (stateGameSlug) {
+    const game = getGameBySlug(stateGameSlug);
+    if (game) {
+      opMdl(game.id, { pushHistory: false });
+      return;
+    }
+  }
+  clsMdl(false, false);
+});
 
 startGameAudioVisibilityMonitor();
 
