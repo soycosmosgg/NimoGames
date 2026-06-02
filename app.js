@@ -346,8 +346,17 @@ function chgTab(v) {
     clsGm();
     clsMdl();
     showTopDock();
-  }
-  else {
+  } else {
+    // If a game is currently open (iframe view or n-game overlay), close it before switching tabs
+    try {
+      const nGame = document.getElementById('n-game');
+      const gameLayer = document.getElementById('game-layer');
+      const isNGameVisible = nGame && (nGame.style.display === 'flex' || window.getComputedStyle(nGame).display === 'flex');
+      const isGameLayerVisible = gameLayer && (gameLayer.style.display === 'block' || window.getComputedStyle(gameLayer).display === 'block');
+      if (isNGameVisible || isGameLayerVisible || (gmWin && !gmWin.closed)) {
+        try { clsGm(); } catch (e) { /* ignore */ }
+      }
+    } catch (e) { /* ignore DOM errors */ }
     hideTopDock();
   }
   document.querySelectorAll('.d-btn').forEach(b => b.classList.remove('active'));
