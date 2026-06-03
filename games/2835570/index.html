@@ -2,42 +2,36 @@
 <html lang="en">
 
 <head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@main/buckshot-roulette/">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
     <title>2835570</title>
-    <base href="https://cdn-slyte.pages.dev/2835570/">
-    <link rel="shortcut icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="style.css">
-    <link id="-gd-engine-icon" rel="icon" type="image/png" href="assets/images/icon.webp" />
-    <link rel="apple-touch-icon" href="assets/images/icon2.webp" />
+    <link id="-gd-engine-icon" rel="icon" type="image/png" href="buckshot-roulette.icon.png" />
+    <link rel="apple-touch-icon" href="buckshot-roulette.apple-touch-icon.png" />
 </head>
 
 <body>
-    <div id="loading-container">
-        <div id="loading-text">LOADING...</div>
-    </div>
     <script src="main.js"></script>
+    <div id="loading-text" style="color: white; font-family: cursive; font-size: 48px; text-align: center; margin-top: 20px;">LOADING...</div>
     <canvas id="canvas"> Your browser does not support the canvas tag. </canvas>
     <noscript> Your browser does not support JavaScript. </noscript>
     <div id="status">
-        <img id="status-splash" class="show-image--true use-filter--true" src="assets/images/logo.webp" alt="">
-        <div id="progress-bar-empty">
-            <div id="progress-bar-full"></div>
-        </div>
+        <img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="buckshot-roulette.png" alt="">
         <progress id="status-progress"></progress>
         <div id="status-notice"></div>
     </div>
-    <script src="assets/scripts/data.js"></script>
+    <script src="buckshot-roulette.js"></script>
     <script>
         const GODOT_CONFIG = {
             "args": [],
             "canvasResizePolicy": 2,
             "ensureCrossOriginIsolationHeaders": false,
-            "executable": "gamedata",
+            "executable": "buckshot-roulette",
             "experimentalVK": false,
             "fileSizes": {
-                "gamedata.pck": 344705792,
-                "gamedata.wasm": 43444261
+                "buckshot-roulette.pck": 344705792,
+                "buckshot-roulette.wasm": 43444261
             },
             "focusCanvas": false,
             "gdextensionLibs": []
@@ -46,22 +40,13 @@
         const engine = new Engine(GODOT_CONFIG);
 
         function run() {
-            const loadingContainer = document.getElementById('loading-container');
             const loadingText = document.getElementById('loading-text');
             const statusOverlay = document.getElementById('status');
             const statusProgress = document.getElementById('status-progress');
             const statusNotice = document.getElementById('status-notice');
+            loadingText.remove();
             let initializing = true;
             let statusMode = '';
-
-            function removeLoadingOverlay() {
-                if (loadingText) {
-                    loadingText.remove();
-                }
-                if (loadingContainer) {
-                    loadingContainer.remove();
-                }
-            }
 
             function setStatusMode(mode) {
                 if (statusMode === mode || !initializing) {
@@ -142,10 +127,6 @@
                         if (current > 0 && total > 0) {
                             statusProgress.value = current;
                             statusProgress.max = total;
-                            const barFull = document.getElementById("progress-bar-full");
-                            const percent = (current / total) * 100;
-                            barFull.style.width = percent + "%";
-
                         } else {
                             statusProgress.removeAttribute('value');
                             statusProgress.removeAttribute('max');
@@ -153,7 +134,6 @@
                     },
                 }).then(() => {
                     setStatusMode('hidden');
-                    removeLoadingOverlay();
                 }, displayFailureNotice);
             }
         };
