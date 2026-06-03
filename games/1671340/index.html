@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-us">
 	<head>
-		<link rel="shortcut icon" href="TemplateData/favicon.ico" />
+		<base href="https://cdn.jsdelivr.net/gh/genizy/web-port@main/fears-to-fathom/home-alone/">
 		<meta charset="utf-8" />
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta
@@ -9,7 +9,6 @@
 			content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		/>
 		<title>1671340</title>
-		<base href="https://cdn-slyte.pages.dev/1671340/" />
 		<style>
 			* {
 				margin: 0;
@@ -30,8 +29,9 @@
 				width: 100%;
 				height: 100%;
 				display: flex;
-				align-items: center;
+				flex-direction: column;
 				justify-content: center;
+				align-items: center;
 			}
 
 			#unityContainer {
@@ -101,15 +101,15 @@
 				container.style.height = window.innerHeight + "px";
 			}
 			Promise.all([
-				mergeFiles(getParts("Build/game.data.unityweb", 1, 39)),
+				mergeFiles(getParts("Build/FTFHAPort.data.unityweb", 1, 39)),
 			]).then(([dataUrl]) => {
 				window.dataUrll = dataUrl;
 				var json = {
 					companyName: "Rayll",
 					productName: "Fears To Fathom",
-					dataUrl: "game.data.unityweb",
-					wasmCodeUrl: "game.wasm.code.unityweb",
-					wasmFrameworkUrl: "game.wasm.framework.unityweb",
+					dataUrl: "FTFHAPort.data.unityweb",
+					wasmCodeUrl: "FTFHAPort.wasm.code.unityweb",
+					wasmFrameworkUrl: "FTFHAPort.wasm.framework.unityweb",
 					TOTAL_MEMORY: 536870912,
 					graphicsAPI: ["WebGL 2.0", "WebGL 1.0"],
 					webglContextAttributes: { preserveDrawingBuffer: false },
@@ -140,16 +140,11 @@
 			<div
 				id="loading-text"
 				style="
-					position: absolute;
-					left: 50%;
-					top: 50%;
-					transform: translate(-50%, -50%);
 					color: white;
 					font-size: 48px;
 					font-family: cursive;
 					text-align: center;
-					z-index: 10;
-					pointer-events: none;
+					margin-top: 20px;
 				"
 			>
 				LOADING...
