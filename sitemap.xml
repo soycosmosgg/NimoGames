@@ -38,6 +38,12 @@
   </url>
   
   <url>
+    <loc>https://nimogames.qzz.io/privacy.html</loc>
+    <lastmod>2026-06-04</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://nimogames.qzz.io/favicon/site.webmanifest</loc>
     <lastmod>2026-05-31</lastmod>
     <changefreq>never</changefreq>
