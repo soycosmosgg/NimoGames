@@ -1,7 +1,4 @@
 const G_DATA = [
-  // steam / Steam: true = fetch Steam page/details, requirements, achievements, developer info
-  // steam / Steam: false = skip Steam lookups, hide requirements section, keep local metadata only
-  // Non-Steam games do not require a Steam app id if you provide a local `path`.
   { 
     id: '367520', 
     n: "Hollow Knight", 
