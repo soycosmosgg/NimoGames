@@ -1107,12 +1107,17 @@ function updatePageBadge() {
   if (!updatePageBadge.defaultHrefs) updatePageBadge.defaultHrefs = defaultHrefs;
 
   if (document.hidden || !document.hasFocus()) {
-    updatePageBadge.lastVisibleTitle = currentTitle;
+    if (currentTitle !== hiddenTitle) {
+      updatePageBadge.lastVisibleTitle = currentTitle;
+    }
     document.title = hiddenTitle;
     iconLinks.forEach((link) => {
       link.href = hiddenIcon;
     });
   } else {
+    if (currentTitle !== hiddenTitle) {
+      updatePageBadge.lastVisibleTitle = currentTitle;
+    }
     document.title = updatePageBadge.lastVisibleTitle || updatePageBadge.defaultTitle;
     iconLinks.forEach((link, index) => {
       const originalHref = updatePageBadge.defaultHrefs[index];
