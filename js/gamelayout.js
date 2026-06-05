@@ -1,4 +1,7 @@
 const G_DATA = [
+  // steam / Steam: true = fetch Steam page/details, requirements, achievements, developer info
+  // steam / Steam: false = skip Steam lookups, hide requirements section, keep local metadata only
+  // Non-Steam games do not require a Steam app id if you provide a local `path`.
   { 
     id: '367520', 
     n: "Hollow Knight", 
@@ -258,6 +261,17 @@ const G_DATA = [
     ported: true,
     tags: ["Horror", "Psychological", "Indie"],
     desc: "Bad Parenting is a popular indie psychological horror video game that tells the story of Ron, a boy who suffers from abuse and neglect at home.",
+  },
+  { 
+    id: '9734614', 
+    n: "PolyTrack", 
+    dev: "Breadbb", 
+    ported: true,
+    steam: false,
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/c9a1812df586d1d151716b30823d8544.jpg",
+    img: "https://i.ibb.co/0pLK7v9G/polytrack.png",
+    tags: ["Racing", "Cars", "Chill"],
+    desc: "PolyTrack is an exciting low-poly racing game heavily inspired by the Trackmania series.",
   },
 ];
 
