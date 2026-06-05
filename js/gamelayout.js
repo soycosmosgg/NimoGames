@@ -1,4 +1,7 @@
 const G_DATA = [
+  // steam / Steam: true = fetch Steam page/details, requirements, achievements, developer info
+  // steam / Steam: false = skip Steam lookups, hide requirements section, keep local metadata only
+  // Non-Steam games do not require a Steam app id if you provide a local `path`.
   { 
     id: '367520', 
     n: "Hollow Knight", 
@@ -292,5 +295,15 @@ const G_DATA = [
     tags: ["long", "cat", "hard", "skill"],
     desc: "Long Cat is a fun and challenging platformer game where you control a long cat and navigate through various levels.",
   },
+  { 
+    id: '6394207', 
+    n: "Dino Bros", 
+    dev: "MichaelMcKenny", 
+    ported: true,
+    steam: false,
+    bg: "https://i.ibb.co/0jjdxxZJ/dinobros-heroe.png",
+    img: "https://i.ibb.co/pjZ1FM32/dinobros.png",
+    tags: ["skill", "dino", "bros", "hard"],
+    desc: "Dino Bros is a fun and challenging platformer game where you control a dinosaur and navigate through various levels.",
+  },
 ];
-
