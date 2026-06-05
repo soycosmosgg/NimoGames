@@ -273,5 +273,16 @@ const G_DATA = [
     tags: ["Racing", "Cars", "Chill"],
     desc: "PolyTrack is an exciting low-poly racing game heavily inspired by the Trackmania series.",
   },
+  { 
+    id: '8439152', 
+    n: "Ragdoll Archers", 
+    dev: "freebuisness", 
+    ported: true,
+    steam: false,
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/3b100796436aea6c360a29aa02c83504.jpg",
+    img: "https://cdn2.steamgriddb.com/thumb/70ebe0a59aa6b1fb31aee28f0bfae939.jpg",
+    tags: ["Archery", "Physics", "Indie"],
+    desc: "Ragdoll Archers is an exciting physics-based archery game where you control a ragdoll character and shoot arrows at targets.",
+  },
 ];
 
