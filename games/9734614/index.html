@@ -5,35 +5,74 @@
     <base href="https://cdn.jsdelivr.net/gh/genizy/polytrack@latest/">
     <script>
         window.jkdfgnjkndfg = document.querySelector('base').href;
-        fetch("simulation_worker.bundle.js").then(res => res.text()).then(text => {
-            const blob = new Blob([text.replaceAll("replacethisplease", window.jkdfgnjkndfg)], {
-                type: 'application/javascript'
+        const simulationWorkerReady = fetch("simulation_worker.bundle.js")
+            .then(res => res.text())
+            .then(text => {
+                const blob = new Blob([text.replaceAll("replacethisplease", window.jkdfgnjkndfg)], {
+                    type: 'application/javascript'
+                });
+                window.simulationworker = URL.createObjectURL(blob);
+                return window.simulationworker;
+            })
+            .catch(error => {
+                console.error('Failed to load simulation worker bundle:', error);
+                throw error;
             });
-            window.simulationworker = URL.createObjectURL(blob);
-        });
+
         const ogworker = window.Worker;
-        window.Worker = function (scriptUrl, options) {
-            if (typeof scriptUrl === 'string' && scriptUrl.toLowerCase() === "simulation_worker.bundle.js") {
-                const wrapper = {};
-                    const actualWorker = new ogworker(window.simulationworker, options);
-                    Object.assign(wrapper, actualWorker);
-                    if (typeof wrapper.onmessage === 'function') {
-                        actualWorker.onmessage = wrapper.onmessage;
+        function createSimulationWorkerProxy(options) {
+            let realWorker = null;
+            const pendingCalls = [];
+            const pendingSets = [];
+            const proxy = new Proxy({ onmessage: null, onerror: null, onmessageerror: null }, {
+                get(target, prop) {
+                    if (prop === 'then') return undefined;
+                    if (realWorker) {
+                        const value = realWorker[prop];
+                        return typeof value === 'function' ? value.bind(realWorker) : value;
                     }
-                    return actualWorker;
-                return new Proxy(wrapper, {
-                    get(target, prop) {
+                    if (prop === 'postMessage' || prop === 'terminate' || prop === 'addEventListener' || prop === 'removeEventListener') {
                         return (...args) => {
-                            promise.then(realWorker => realWorker[prop](...args));
+                            pendingCalls.push({ name: prop, args });
                         };
-                    },
-                    set(target, prop, value) {
-                        promise.then(realWorker => {
-                            realWorker[prop] = value;
-                        });
+                    }
+                    return target[prop];
+                },
+                set(target, prop, value) {
+                    if (prop === 'onmessage' || prop === 'onerror' || prop === 'onmessageerror') {
+                        target[prop] = value;
+                        if (realWorker) realWorker[prop] = value;
                         return true;
                     }
+                    pendingSets.push({ name: prop, value });
+                    if (realWorker) realWorker[prop] = value;
+                    return true;
+                }
+            });
+
+            simulationWorkerReady.then(workerUrl => {
+                realWorker = new ogworker(workerUrl, options);
+                pendingCalls.forEach(call => {
+                    if (typeof realWorker[call.name] === 'function') {
+                        realWorker[call.name](...call.args);
+                    }
                 });
+                pendingSets.forEach(set => {
+                    realWorker[set.name] = set.value;
+                });
+                if (proxy.onmessage) realWorker.onmessage = proxy.onmessage;
+                if (proxy.onerror) realWorker.onerror = proxy.onerror;
+                if (proxy.onmessageerror) realWorker.onmessageerror = proxy.onmessageerror;
+            }).catch(() => {
+                console.error('Simulation worker failed to initialize');
+            });
+
+            return proxy;
+        }
+
+        window.Worker = function (scriptUrl, options) {
+            if (typeof scriptUrl === 'string' && scriptUrl.toLowerCase() === "simulation_worker.bundle.js") {
+                return createSimulationWorkerProxy(options);
             }
             return new ogworker(scriptUrl, options);
         };
