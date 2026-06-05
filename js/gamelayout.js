@@ -12,10 +12,9 @@ const G_DATA = [
     n: "Cuphead", 
     dev: "Breadbb", 
     ported: true,
-    tags: ["Platformer", "Difficult", "Run and Gun", "Cartoon"],const G_DATA = [
-  // steam / Steam: true = fetch Steam page/details, requirements, achievements, developer info
-  // steam / Steam: false = skip Steam lookups, hide requirements section, keep local metadata only
-  // Non-Steam games do not require a Steam app id if you provide a local `path`.
+    tags: ["Platformer", "Difficult", "Run and Gun", "Cartoon"],
+    desc: "A classic run and gun action game heavily focused on boss battles, inspired by cartoons of the 1930s with traditional hand-drawn cel animation.",
+  },
   { 
     id: '367520', 
     n: "Hollow Knight", 
