@@ -90,10 +90,23 @@ function steamAssetUrlFallback(id, file) {
 }
 
 function ensureGameAssets(game) {
-  if (!game || !game.id) return;
+  if (!game) return;
+  if (game.steam === false) {
+    if (!game.path && game.id) {
+      game.path = getGamePath(game.id);
+    }
+    return;
+  }
+  if (!game.id) return;
   if (!game.img) game.img = steamAssetUrl(game.id, 'library_600x900.jpg');
   if (!game.bg) game.bg = steamAssetUrl(game.id, 'library_hero.jpg');
   if (!game.path) game.path = getGamePath(game.id);
+}
+
+function isSteamGame(game) {
+  // steam / Steam defaults to true when the property is absent.
+  const steamFlag = game?.steam ?? game?.Steam;
+  return steamFlag !== false;
 }
 
 function parsePortedInfo(game) {
@@ -547,12 +560,17 @@ function opMdl(idOrSlug, opts = {}) {
 
   const buyBtn = document.getElementById('mdl-buy');
   const storeUrl = getSteamStoreUrl(cxG);
-  if (storeUrl) {
+  if (storeUrl && isSteamGame(cxG)) {
     buyBtn.style.display = 'flex';
     buyBtn.onclick = () => window.open(storeUrl, '_blank');
   } else {
     buyBtn.style.display = 'none';
     buyBtn.onclick = null;
+  }
+
+  const reqSection = document.querySelector('.m-req');
+  if (reqSection) {
+    reqSection.style.display = isSteamGame(cxG) ? 'flex' : 'none';
   }
 
   if (opts.replaceHistory === true) {
@@ -563,25 +581,29 @@ function opMdl(idOrSlug, opts = {}) {
     setPageTitle(cxG);
   }
 
-  showModalLoadStatus();
+  if (isSteamGame(cxG)) {
+    showModalLoadStatus();
 
-  // Fetch Steam data and update asynchronously
-  (async () => {
-    try {
-      await loadSteamDetails(cxG);
-      document.getElementById('mdl-d').innerText = getDeveloperLabel(cxG);
-      document.getElementById('hc-dev').innerText = getDeveloperLabel(cxG);
-      const descText = decodeHtmlEntities(cxG.desc || (cxG.tags && Array.isArray(cxG.tags) ? cxG.tags.join(' • ') : ''));
-      document.getElementById('mdl-dc').innerText = descText;
-      if (cxG.tags && cxG.tags.length > 0) {
-        document.getElementById('mdl-tg').innerHTML = cxG.tags.map(t => `<div class="m-tg">${t}</div>`).join('');
+    // Fetch Steam data and update asynchronously
+    (async () => {
+      try {
+        await loadSteamDetails(cxG);
+        document.getElementById('mdl-d').innerText = getDeveloperLabel(cxG);
+        document.getElementById('hc-dev').innerText = getDeveloperLabel(cxG);
+        const descText = decodeHtmlEntities(cxG.desc || (cxG.tags && Array.isArray(cxG.tags) ? cxG.tags.join(' • ') : ''));
+        document.getElementById('mdl-dc').innerText = descText;
+        if (cxG.tags && cxG.tags.length > 0) {
+          document.getElementById('mdl-tg').innerHTML = cxG.tags.map(t => `<div class="m-tg">${t}</div>`).join('');
+        }
+        setSteamRequirementFields('m', cxG.steamReq ? cxG.steamReq.minimum : emptySteamRequirements());
+        setSteamRequirementFields('r', cxG.steamReq ? cxG.steamReq.recommended : emptySteamRequirements());
+      } finally {
+        completeModalLoadStatus();
       }
-      setSteamRequirementFields('m', cxG.steamReq ? cxG.steamReq.minimum : emptySteamRequirements());
-      setSteamRequirementFields('r', cxG.steamReq ? cxG.steamReq.recommended : emptySteamRequirements());
-    } finally {
-      completeModalLoadStatus();
-    }
-  })();
+    })();
+  } else {
+    hideModalLoadStatus();
+  }
 
   const m = document.getElementById('modal-ui');
   m.style.display = 'block';
@@ -606,7 +628,7 @@ function clsMdl(restoreTopDock = true, updateHistory = true) {
 }
 
 function getSteamStoreUrl(game) {
-  if (!game) return null;
+  if (!game || !isSteamGame(game)) return null;
   if (game.buyUrl) return game.buyUrl;
   if (game.id) return `https://store.steampowered.com/app/${game.id}/`;
   return null;
@@ -625,8 +647,8 @@ async function fetchSteamStorePage(appId) {
     // ignore cache errors
   }
 
-  // Reduced proxy list: prefer AllOrigins then Codetabs. Removed known-bad services.
   const proxyList = [
+    `https://allorigins.hexlet.app/raw?url=${encodeURIComponent(storeUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(storeUrl)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(storeUrl)}`
   ];
@@ -779,8 +801,8 @@ async function fetchSteamAppDetails(appId) {
     }
   } catch (e) { }
 
-  // Prefer AllOrigins first, then Codetabs. Removed unstable proxies.
   const apiUrls = [
+    `https://allorigins.hexlet.app/raw?url=${encodeURIComponent(steamApiUrl)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(steamApiUrl)}`,
     `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(steamApiUrl)}`
   ];
@@ -813,12 +835,18 @@ function updateSteamModalFields(game) {
   if (game.tags && game.tags.length > 0) {
     document.getElementById('mdl-tg').innerHTML = game.tags.map(t => `<div class="m-tg">${t}</div>`).join('');
   }
-  setSteamRequirementFields('m', game.steamReq ? game.steamReq.minimum : emptySteamRequirements());
-  setSteamRequirementFields('r', game.steamReq ? game.steamReq.recommended : emptySteamRequirements());
+  const reqSection = document.querySelector('.m-req');
+  if (reqSection) {
+    reqSection.style.display = isSteamGame(game) ? 'flex' : 'none';
+  }
+  if (isSteamGame(game)) {
+    setSteamRequirementFields('m', game.steamReq ? game.steamReq.minimum : emptySteamRequirements());
+    setSteamRequirementFields('r', game.steamReq ? game.steamReq.recommended : emptySteamRequirements());
+  }
 }
 
 async function loadSteamDetails(game) {
-  if (!game || !game.id) return null;
+  if (!isSteamGame(game) || !game || !game.id) return null;
   if (game._steamLoading) return game._steamPromise || null;
   ensureGameAssets(game);
 
