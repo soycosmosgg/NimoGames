@@ -352,6 +352,8 @@ const G_DATA = [
     n: "Penalty Shooters 2", 
     dev: "Cosmos", 
     ported: true,
+    bg: "https://shared.steamstatic.com/store_item_assets/steam/apps/4051880/99df322c9ca392c797285a2d3367d8c454b091e9/library_hero_2x.jpg?t=1758973413",
+    img: "https://shared.steamstatic.com/store_item_assets/steam/apps/4051880/243f6af77e4a2242fa5b389d3361a25fe3cb3a93/library_capsule_2x.jpg?t=1758973413",
     tags: ["Football", "Teams", "Ball"],
     desc: "Penalty Shooters 2 is a popular turn-based soccer game in which players compete in various leagues, tournaments, and levels by taking on penalty kick challenges.",
   },
