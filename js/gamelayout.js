@@ -314,5 +314,16 @@ const G_DATA = [
     tags: ["skill", "physics", "racing", "cars"],
     desc: "Drive Mad is an exciting physics-based racing game where you must drive through tracks filled with obstacles and creative stunts.",
   },
+  { 
+    id: '8482729', 
+    n: "Monkey Mart", 
+    dev: "EvilMonke", 
+    ported: true,
+    steam: false,
+    bg: "https://i.ibb.co/ymFStbLK/monkey-mart-heroe.png",
+    img: "https://i.ibb.co/4nGXgH8T/monkey-mart.png",
+    tags: ["Chill", "Monkey", "Mart", "Indie"],
+    desc: "Monkey Mart is a popular casual management and simulation game where you control a cute monkey who runs his own supermarket.",
+  },
 ];
 
