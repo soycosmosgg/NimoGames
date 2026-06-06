@@ -1308,7 +1308,10 @@ window.addEventListener('keydown', (e) => {
           if (!document.fullscreenElement) {
             document.body.requestFullscreen().then(() => {
               if (navigator.keyboard) navigator.keyboard.lock(['Escape']);
+              document.body.requestPointerLock();
             }).catch(() => {});
+          } else {
+            document.body.requestPointerLock();
           }
         }
       }, 1000);
