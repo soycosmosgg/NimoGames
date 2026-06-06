@@ -343,7 +343,7 @@ const G_DATA = [
     ported: true,
     steam: false,
     bg: "https://i.postimg.cc/GpFLGdk2/apple-worm-heroe.png",
-    img: "https://i.postimg.cc/j23mrbcw/apple-worm.png",
+    img: "https://i.postimg.cc/MT3YD2SV/apple-worm.png",
     tags: ["Puzzle", "Logic", "Plataformer"],
     desc: "Apple Worm is a popular puzzle and logic game in which you control a hungry worm.",
   },
