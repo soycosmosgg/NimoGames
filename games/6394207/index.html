@@ -12,6 +12,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <link rel="stylesheet" href="webapp/fancade.css">
     <link rel="icon" href="webapp/favicon.ico">
+    <script>
+      (function() {
+        try {
+          Object.defineProperty(document, 'hidden', { get: function() { return false; }, configurable: true });
+          Object.defineProperty(document, 'visibilityState', { get: function() { return 'visible'; }, configurable: true });
+        } catch (e) {
+          // ignore if not allowed
+        }
+        const originalDocAddEvent = document.addEventListener.bind(document);
+        document.addEventListener = function(type, listener, options) {
+          if (type === 'visibilitychange') return;
+          return originalDocAddEvent(type, listener, options);
+        };
+        const originalWinAddEvent = window.addEventListener.bind(window);
+        window.addEventListener = function(type, listener, options) {
+          if (type === 'visibilitychange' || type === 'blur' || type === 'focus') return;
+          return originalWinAddEvent(type, listener, options);
+        };
+        document.onvisibilitychange = null;
+        window.onblur = null;
+        window.onfocus = null;
+      })();
+    </script>
     <script src="./poki-sdk.js"></script>
 </head>
 
