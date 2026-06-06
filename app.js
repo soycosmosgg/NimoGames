@@ -951,12 +951,7 @@ function getHiddenTitle() {
 function getGameIframeWindow() {
   const iframe = document.getElementById('gF');
   if (!iframe || !iframe.contentWindow) return null;
-  try {
-    iframe.contentWindow.location.href;
-    return iframe.contentWindow;
-  } catch {
-    return null;
-  }
+  return iframe.contentWindow;
 }
 
 function collectGameAudioContexts(win) {
@@ -1014,6 +1009,15 @@ function pauseGameAudio() {
   const win = getGameIframeWindow();
   if (!win) return;
 
+  let doc;
+  try {
+    doc = win.document;
+  } catch {
+    // Cross-origin iframe: skip audio control to avoid freezing the page.
+    return;
+  }
+  if (!doc) return;
+
   const state = {
     media: [],
     contexts: [],
@@ -1021,17 +1025,14 @@ function pauseGameAudio() {
   };
 
   try {
-    const doc = win.document;
-    if (doc) {
-      doc.querySelectorAll('audio, video').forEach((media) => {
-        if (!media.paused) {
-          state.media.push(media);
-          media.pause();
-        }
-      });
-    }
+    doc.querySelectorAll('audio, video').forEach((media) => {
+      if (!media.paused) {
+        state.media.push(media);
+        media.pause();
+      }
+    });
   } catch {
-    // Ignore cross-origin iframe access errors.
+    // Ignore same-origin traversal errors.
   }
 
   getPhaserSoundManagers(win).forEach((sound) => {
@@ -1115,10 +1116,7 @@ function handleGameAudioVisibility() {
 
 function startGameAudioVisibilityMonitor() {
   handleGameAudioVisibility();
-  if (startGameAudioVisibilityMonitor.interval) return;
-  startGameAudioVisibilityMonitor.interval = setInterval(() => {
-    handleGameAudioVisibility();
-  }, 1000);
+  // Use event handlers only; polling can trigger repeated suspend/resume cycles.
 }
 
 function updatePageBadge() {
@@ -1211,6 +1209,7 @@ window.addEventListener('visibilitychange', () => {
   updatePageBadge();
   handleGameAudioVisibility();
 });
+
 window.addEventListener('focus', () => {
   updatePageBadge();
   handleGameAudioVisibility();
@@ -1283,7 +1282,6 @@ function mnLk() {
       if (navigator.keyboard) navigator.keyboard.lock(['Escape']);
     }).catch(() => {});
   }
-  document.body.requestPointerLock();
 }
 
 let aZc = 3;
@@ -1312,7 +1310,6 @@ window.addEventListener('keydown', (e) => {
               if (navigator.keyboard) navigator.keyboard.lock(['Escape']);
             }).catch(() => {});
           }
-          document.body.requestPointerLock();
         }
       }, 1000);
     }
