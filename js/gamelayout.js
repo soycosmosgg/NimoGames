@@ -343,9 +343,17 @@ const G_DATA = [
     ported: true,
     steam: false,
     bg: "https://i.postimg.cc/GpFLGdk2/apple-worm-heroe.png",
-    img: "https://i.postimg.cc/MT3YD2SV/apple-worm.png",
+    img: "https://i.postimg.cc/j23mrbcw/apple-worm.png",
     tags: ["Puzzle", "Logic", "Plataformer"],
     desc: "Apple Worm is a popular puzzle and logic game in which you control a hungry worm.",
+  },
+  { 
+    id: '4051880', 
+    n: "Penalty Shooters 2", 
+    dev: "Cosmos", 
+    ported: true,
+    tags: ["Football", "Teams", "Ball"],
+    desc: "Penalty Shooters 2 is a popular turn-based soccer game in which players compete in various leagues, tournaments, and levels by taking on penalty kick challenges.",
   },
 ];
 
