@@ -1107,16 +1107,8 @@ async function resumeGameAudio() {
 }
 
 function handleGameAudioVisibility() {
-  if (document.hidden || !document.hasFocus()) {
-    pauseGameAudio();
-  } else {
-    resumeGameAudio();
-  }
-}
-
-function startGameAudioVisibilityMonitor() {
-  handleGameAudioVisibility();
-  // Use event handlers only; polling can trigger repeated suspend/resume cycles.
+  // Disable auto-pause/resume on tab visibility changes for iframe games.
+  // This keeps games like Long Cat and Dino Bros running even when the user switches tabs.
 }
 
 function updatePageBadge() {
@@ -1231,8 +1223,6 @@ window.addEventListener('popstate', (event) => {
   }
   clsMdl(false, false);
 });
-
-startGameAudioVisibilityMonitor();
 
 let gmWin = null;
 let gmId = null;
