@@ -357,5 +357,15 @@ const G_DATA = [
     tags: ["Football", "Teams", "Ball"],
     desc: "Penalty Shooters 2 is a popular turn-based soccer game in which players compete in various leagues, tournaments, and levels by taking on penalty kick challenges.",
   },
+  { 
+    id: '4837261', 
+    n: "Plonky", 
+    dev: "Cosmos", 
+    ported: true,
+    bg: "https://i.postimg.cc/76sZZDv1/plonky-heroe.png",
+    img: "https://i.postimg.cc/fLKB325K/plonky.png",
+    tags: ["Physics", "Platformer", "Puzzle"],
+    desc: "Plonky is a platformer and puzzle game featuring ragdoll physics, packed with chaos, creativity, and humor.",
+  },
 ];
 
