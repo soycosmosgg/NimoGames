@@ -294,6 +294,17 @@ const G_DATA = [
   },
   { 
     id: '6394207', 
+    n: "Dino Bros", 
+    dev: "MichaelMcKenny", 
+    ported: true,
+    steam: false,
+    bg: "https://i.ibb.co/0jjdxxZJ/dinobros-heroe.png",
+    img: "https://i.ibb.co/pjZ1FM32/dinobros.png",
+    tags: ["skill", "dino", "bros", "hard"],
+    desc: "Dino Bros is a fun and challenging platformer game where you control a dinosaur and navigate through various levels.",
+  },
+  { 
+    id: '6986464', 
     n: "Drive Mad", 
     dev: "EvilMonke", 
     ported: true,
