@@ -367,5 +367,15 @@ const G_DATA = [
     tags: ["Physics", "Platformer", "Puzzle"],
     desc: "Plonky is a platformer and puzzle game featuring ragdoll physics, packed with chaos, creativity, and humor.",
   },
+  { 
+    id: '7395142', 
+    n: "Ping Pong Go!", 
+    dev: "Cosmos", 
+    ported: true,
+    bg: "https://i.ibb.co/t6Mz0Y7/ping-pong-go-heroe.png",
+    img: "https://i.ibb.co/DfL326Mp/ping-pong-go.png",
+    tags: ["Ball", "Arcade", "Skill"],
+    desc: "Ping Pong Go! is a popular casual sports video game for browsers and mobile devices. The gameplay involves swiping your finger or moving the mouse to control a paddle, hitting the ball, and competing in various arcade and classic table tennis modes.",
+  },
 ];
 
