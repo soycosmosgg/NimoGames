@@ -1,23 +1,74 @@
 <!doctype html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+    <title>9734614</title>
+    <base href="https://cdn.jsdelivr.net/gh/Hikidsmmmm/Polytrack-0.6.0@main/">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2328346a'/%3E%3C/svg%3E">
+    <link rel="preload" href="forced_square.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml">
+    <link rel="preload" href="images/discord.svg" as="image" type="image/svg+xml">
 
-<head>
-    <base href="https://cdn.jsdelivr.net/gh/genizy/polytrack@latest/">
     <script>
         window.jkdfgnjkndfg = document.querySelector('base').href;
-        const simulationWorkerReady = fetch("simulation_worker.bundle.js")
-            .then(res => res.text())
-            .then(text => {
-                const blob = new Blob([text.replaceAll("replacethisplease", window.jkdfgnjkndfg)], {
-                    type: 'application/javascript'
+        const simulationWorkerReady = (async () => {
+            const baseUrl = window.jkdfgnjkndfg.replace(/\/?$/, '/');
+            const workerUrl = `${baseUrl}simulation_worker.bundle.js`;
+            const text = await fetch(workerUrl).then(res => res.text());
+            const scriptBase = `${baseUrl}lib/`;
+            const workerPrefix = [
+                `self.POLYTRACK_BASE_URL=${JSON.stringify(scriptBase)};`,
+                `const __POLYTRACK_ROOT_URL=${JSON.stringify(baseUrl)};`,
+                `const __ORIGINAL_fetch = self.fetch.bind(self);`,
+
+                `self.fetch = function(input, init) {`,
+                `    if (typeof input === 'string' && !/^[a-zA-Z][a-zA-Z\\d+\\-.]*:/.test(input) && !input.startsWith('//')) {`,
+                `        input = self.POLYTRACK_BASE_URL + input.replace('./', '');`,
+                `    }`,
+
+                `    return __ORIGINAL_fetch(input, init);`,
+                `};`,
+                `const __ORIGINAL_XHR_open = XMLHttpRequest.prototype.open;`,
+                `XMLHttpRequest.prototype.open = function(method, url, ...rest) {`,
+                `    if (typeof url === 'string' && !/^[a-zA-Z][a-zA-Z\\d+\\-.]*:/.test(url) && !url.startsWith('//')) {`,
+                `        url = self.POLYTRACK_BASE_URL + url.replace('./', '');`,
+                `    }`,
+
+                `    return __ORIGINAL_XHR_open.call(this, method, url, ...rest);`,
+                `};`,
+                `self.__POLYTRACK_WRAP = function() {`,
+                `    if (typeof PolyTrackPhysics !== 'function') return;`,
+                `    const __ORIGINAL_PolyTrackPhysics = PolyTrackPhysics;`,
+                `    PolyTrackPhysics = function(options = {}) {`,
+                `        if (!options.locateFile) {`,
+                `            options.locateFile = function(path) {`,
+                `                if (/\.wasm$/.test(path)) {`,
+                `                    return __POLYTRACK_ROOT_URL + path.replace('./', '');`,
+                `                }`,
+
+                `                return self.POLYTRACK_BASE_URL + path.replace('./', '');`,
+
+                `            };`,
+                `        }`,
+
+                `        return __ORIGINAL_PolyTrackPhysics(options);`,
+                `    };`,
+                `};`
+            ].join('\n');
+            const patchedText = workerPrefix + '\n' + text
+                .replaceAll("replacethisplease", baseUrl)
+                .replace(/importScripts\((['"])lib\/polytrack_physics\.js\1\)/g, (match, quote) => {
+                    return `importScripts(${quote}${baseUrl}lib/polytrack_physics.js${quote});\n` +
+                        `self.__POLYTRACK_WRAP();`;f
                 });
-                window.simulationworker = URL.createObjectURL(blob);
-                return window.simulationworker;
-            })
-            .catch(error => {
-                console.error('Failed to load simulation worker bundle:', error);
-                throw error;
-            });
+            const blob = new Blob([patchedText], { type: 'application/javascript' });
+            window.simulationworker = URL.createObjectURL(blob);
+            return window.simulationworker;
+        })().catch(error => {
+            console.error('Failed to load simulation worker bundle:', error);
+            throw error;
+        });
 
         const ogworker = window.Worker;
         function createSimulationWorkerProxy(options) {
@@ -70,45 +121,34 @@
             return proxy;
         }
 
+        function isSimulationWorkerScript(scriptUrl) {
+            if (typeof scriptUrl === 'string') {
+                return scriptUrl.toLowerCase().endsWith('simulation_worker.bundle.js');
+            }
+            if (scriptUrl instanceof URL) {
+                return scriptUrl.pathname.toLowerCase().endsWith('simulation_worker.bundle.js');
+            }
+            if (scriptUrl instanceof Request) {
+                return scriptUrl.url.toLowerCase().endsWith('simulation_worker.bundle.js');
+            }
+            return false;
+        }
+
         window.Worker = function (scriptUrl, options) {
-            if (typeof scriptUrl === 'string' && scriptUrl.toLowerCase() === "simulation_worker.bundle.js") {
+            if (isSimulationWorkerScript(scriptUrl)) {
                 return createSimulationWorkerProxy(options);
             }
             return new ogworker(scriptUrl, options);
         };
         window.Worker.prototype = ogworker.prototype;
-        const ogfetch = window.fetch;
-        window.fetch = async function (input, init) {
-            if (typeof input === "string") {
-                input = input.replace("vps.kodub.com", "vpskodub.tmena1565.workers.dev");
-            } else if (input instanceof Request) {
-                const newUrl = input.url.replace("vps.kodub.com", "vpskodub.tmena1565.workers.dev");
-                input = new Request(newUrl, input);
-            }
-            return ogfetch(input, init);
-        };
-        const ogxml = XMLHttpRequest.prototype.open;
-        XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-            if (typeof url === "string") {
-                url = url.replace("vps.kodub.com", "vpskodub.tmena1565.workers.dev");
-            }
-            return ogxml.call(this, method, url, ...rest);
-        };
     </script>
-    <meta charset="utf-8">
-    <link rel="preload" href="forced_square.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
-    <link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml" />
-    <link rel="preload" href="images/discord.svg" as="image" type="image/svg+xml" />
-    <link rel="manifest" href="manifest.json" />
-    <meta name="viewport"
-        content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
-    <script defer="defer" src="error_screen.bundle.js"></script>
-    <script defer="defer" src="main.bundle.js"></script>
-</head>
+    <script defer src="error_screen.bundle.js"></script>
+    <script defer src="main.bundle.js"></script>
+  </head>
 
-<body><canvas id="screen"></canvas>
+  <body>
+    <canvas id="screen"></canvas>
     <div id="ui"></div>
     <div id="transition-layer"></div>
-</body>
-
+  </body>
 </html>
