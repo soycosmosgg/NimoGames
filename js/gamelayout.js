@@ -123,7 +123,7 @@ const G_DATA = [
     n: "Shift At Midnight", 
     dev: "slqntdevss", 
     ported: true,
-    img: "https://i.ibb.co/F4WvYcJY/library-capsule.jpg",
+    img: "https://shared.steamstatic.com/store_item_assets/steam/apps/3722330/768fbfe538d460db97c8c7bfaefbdc6778efc859/library_600x900_2x.jpg?t=1758557348",
     tags: ["Horror", "Retro", "3D"],
     desc: "Shift At Midnight is a cooperative horror and investigation video game for up to three players, in which you take on the role of an employee at a convenience store during the night shift.",
   },
