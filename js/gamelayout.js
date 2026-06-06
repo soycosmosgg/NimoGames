@@ -262,7 +262,7 @@ const G_DATA = [
   { 
     id: '9734614', 
     n: "PolyTrack", 
-    dev: "AZURE2077", 
+    dev: "Breadbb", 
     ported: true,
     steam: false,
     bg: "https://cdn2.steamgriddb.com/hero_thumb/c9a1812df586d1d151716b30823d8544.jpg",
@@ -335,6 +335,17 @@ const G_DATA = [
     img: "https://i.postimg.cc/j23mrbcw/blacktop-police-chase.png",
     tags: ["Blacktop", "Police", "Chase", "Indie"],
     desc: "Blacktop Police Chase is a popular driving video game in which you take on the role of a driver helping a gang of robbers escape from the law.",
+  },
+  { 
+    id: '6734542', 
+    n: "Apple Worm", 
+    dev: "Cosmos", 
+    ported: true,
+    steam: false,
+    bg: "https://i.postimg.cc/GpFLGdk2/apple-worm-heroe.png",
+    img: "https://i.postimg.cc/j23mrbcw/apple-worm.png",
+    tags: ["Puzzle", "Logic", "Plataformer"],
+    desc: "Apple Worm is a popular puzzle and logic game in which you control a hungry worm.",
   },
 ];
 
