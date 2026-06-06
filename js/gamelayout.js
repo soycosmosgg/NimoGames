@@ -325,5 +325,16 @@ const G_DATA = [
     tags: ["Chill", "Monkey", "Mart", "Indie"],
     desc: "Monkey Mart is a popular casual management and simulation game where you control a cute monkey who runs his own supermarket.",
   },
+  { 
+    id: '5648798', 
+    n: "Blacktop Police Chase", 
+    dev: "scammerdad", 
+    ported: true,
+    steam: false,
+    bg: "https://i.ibb.co/B58nhYzt/blacktop-police-chase-heroe.png",
+    img: "https://i.ibb.co/1YFktxqK/blacktop-police-chase.png",
+    tags: ["Blacktop", "Police", "Chase", "Indie"],
+    desc: "Blacktop Police Chase is a popular driving video game in which you take on the role of a driver helping a gang of robbers escape from the law.",
+  },
 ];
 
