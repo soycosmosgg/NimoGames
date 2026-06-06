@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>7395142</title>
+	<base href="https://cdn.jsdelivr.net/gh/nimogamesdev/ng-source@main/game5/">
+	<meta charset="utf-8">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="viewport" content="initial-scale=1.0,maximum-scale=1.01, minimal-ui" />
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+			width: 100%;
+			overflow:hidden
+		}	
+
+		canvas {	
+			-ms-touch-action: none;
+			image-rendering: -o-crisp-edges;           
+			image-rendering: optimize-contrast;        
+			-ms-interpolation-mode: nearest-neighbor;  
+			-webkit-tap-highlight-color: rgba(0,0,0,0);
+			-moz-tap-highlight-color: rgba(0,0,0,0);
+			tap-highlight-color: rgba(0,0,0,0);
+			user-select: none;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+		} 
+	</style>
+	
+
+<style type="text/css">	
+
+		@font-face{
+		font-family:"luckiestGuy";
+		src:url("fonts/LuckiestGuy-Regular.ttf") format("opentype");
+		}
+		
+		@font-face{
+		font-family:"benchNine";
+		src:url("fonts/BenchNine-Regular.ttf") format("opentype");
+		}
+					
+	</style> 
+</head>
+	<script src="./patch/poki-sdk.js"></script>
+	<body> 
+		<div id="canvas-wrapper" style="overflow:visible; width:100%; height:100%; margin:0; padding:0; position:absolute;">
+		   <canvas id="canvas" moz-opaque></canvas>
+		</div>
+	</body>
+	<script src="netlib.js"></script>
+   	<script src="seedRandom.js"></script>
+	<script src="gsap.min.js"></script>
+	<script src="Howler.min.js"></script>
+	<script src="VisibilityManager.js"></script>
+	<script src="app.js"></script>
+	<script type="text/javascript"> 
+	
+		var tempBrowserLang = (navigator.language).slice(0, 2)
+		var tempLang = "en"
+		
+		if(tempBrowserLang == "fr" || tempBrowserLang == "de" || tempBrowserLang == "pt" ||tempBrowserLang == "es" ){
+			tempLang = tempBrowserLang
+		}
+		
+		
+		PokiSDK.init().then(() => {
+			console.log("Poki SDK successfully initialized");
+			// fire your function to continue to game
+			
+			loadLang(tempLang);
+		}).catch(() => {
+			console.log("Initialized, something went wrong, load you game anyway");
+			// fire your function to continue to game
+			
+			loadLang(tempLang);
+		});
+	</script>
+</html>
