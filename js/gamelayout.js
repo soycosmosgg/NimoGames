@@ -1,7 +1,4 @@
 const G_DATA = [
-  // steam / Steam: true = fetch Steam page/details, requirements, achievements, developer info
-  // steam / Steam: false = skip Steam lookups, hide requirements section, keep local metadata only
-  // Non-Steam games do not require a Steam app id if you provide a local `path`.
   { 
     id: '367520', 
     n: "Hollow Knight", 
@@ -297,13 +294,14 @@ const G_DATA = [
   },
   { 
     id: '6394207', 
-    n: "Dino Bros", 
-    dev: "MichaelMcKenny", 
+    n: "Drive Mad", 
+    dev: "EvilMonke", 
     ported: true,
     steam: false,
-    bg: "https://i.ibb.co/0jjdxxZJ/dinobros-heroe.png",
-    img: "https://i.ibb.co/pjZ1FM32/dinobros.png",
-    tags: ["skill", "dino", "bros", "hard"],
-    desc: "Dino Bros is a fun and challenging platformer game where you control a dinosaur and navigate through various levels.",
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/710c8330cdf354bd19901cb6829ac26d.png",
+    img: "https://cdn2.steamgriddb.com/thumb/720a3d2fe9867a586078a3f40847bd57.jpg",
+    tags: ["skill", "physics", "racing", "cars"],
+    desc: "Drive Mad is an exciting physics-based racing game where you must drive through tracks filled with obstacles and creative stunts.",
   },
 ];
+
