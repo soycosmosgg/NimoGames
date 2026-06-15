@@ -379,5 +379,16 @@ const G_DATA = [
     tags: ["Ball", "Arcade", "Skill"],
     desc: "Ping Pong Go! is a popular casual sports video game for browsers and mobile devices. The gameplay involves swiping your finger or moving the mouse to control a paddle, hitting the ball, and competing in various arcade and classic table tennis modes.",
   },
+  { 
+    id: '4892564', 
+    n: "Fireboy and Watergirl 2: In The Light Temple", 
+    dev: "AlgebraHelper", 
+    ported: true,
+    steam: false,
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/06910ba3989a880b0ac05ffd02f43f60.jpg",
+    img: "https://cdn2.steamgriddb.com/thumb/ff37bcc804a8739db6d186c0c76b4dd2.jpg",
+    tags: ["Plataformer", "2players", "Skill"],
+    desc: "Fireboy and Watergirl 2: Light Temple is a cooperative adventure game for two players, though it can also be played solo.",
+  },
 ];
 
