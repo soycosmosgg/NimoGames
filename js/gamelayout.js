@@ -390,5 +390,15 @@ const G_DATA = [
     tags: ["Plataformer", "2players", "Skill"],
     desc: "Fireboy and Watergirl 2: Light Temple is a cooperative adventure game for two players, though it can also be played solo.",
   },
+  { 
+    id: '8429105', 
+    n: "Fortnite", 
+    ported: false,
+    steam: false,
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/8b153b9a0ea56c71cde2f517c9db1fa3.webm",
+    img: "https://cdn2.steamgriddb.com/thumb/6dc3399d124d4cf965d4d62d0663228e.jpg",
+    tags: ["Multiplayer", "Shooter", "Skill"],
+    desc: "Fortnite is a popular survival and action video game developed by Epic Games.",
+  },
 ];
 
