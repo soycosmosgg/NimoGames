@@ -395,7 +395,7 @@ const G_DATA = [
     n: "Fortnite", 
     ported: false,
     steam: false,
-    bg: "https://cdn2.steamgriddb.com/hero_thumb/8b153b9a0ea56c71cde2f517c9db1fa3.webm",
+    bg: "https://cdn2.steamgriddb.com/hero_thumb/bcf6d4bfd37c57ff328e4a761497ca70.jpg",
     img: "https://cdn2.steamgriddb.com/thumb/6dc3399d124d4cf965d4d62d0663228e.jpg",
     tags: ["Multiplayer", "Shooter", "Skill"],
     desc: "Fortnite is a popular survival and action video game developed by Epic Games.",
