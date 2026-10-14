@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>Gang Beasts | Nimo Games</title>
+    <meta name="description" content="Juega Gang Beasts en Nimo Games.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/285900/index.html">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/teaserlua/GangBeast-WebPort@main/"
+            data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+            data-probe="Build/WebGLValidation.loader.js"
+            data-game-id="285900"></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <script>
+      document.write('<link rel="stylesheet" href="' +
+        window.NIMO_CDN_BASE + 'TemplateData/style.css">');
+    </script>
+    <style>
+      html, body, #unity-container { width: 100%; height: 100%; margin: 0; }
+      body { overflow: hidden; background: #000; }
+      #unity-container { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+      #unity-canvas {
+        display: block;
+        width: 100vw !important;
+        height: 100vh !important;
+      }
+      #unity-footer { display: none !important; }
+      #unity-loading-bar { display: none !important; }
+      #nimo-loading {
+        position: fixed;
+        z-index: 2147483647;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #000;
+        color: #fff;
+        transition: opacity 240ms ease;
+      }
+      #nimo-loading.is-hidden { opacity: 0; pointer-events: none; }
+      #nimo-loading-content {
+        display: flex;
+        width: min(420px, 82vw);
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+      }
+      #nimo-loading img {
+        display: block;
+        width: min(200px, 46vw);
+        height: auto;
+        object-fit: contain;
+      }
+      #nimo-loading-progress { position: relative; width: min(360px, 76vw); }
+      #nimo-loading-track {
+        height: 16px;
+        overflow: hidden;
+        border-radius: 4px;
+        background: #363636;
+      }
+      #nimo-loading-fill {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: #fff;
+        transition: width 180ms ease-out;
+      }
+      #nimo-loading-percent {
+        position: absolute;
+        top: 50%;
+        left: calc(100% + 16px);
+        min-width: 38px;
+        transform: translateY(-50%);
+        color: #fff;
+        font: 500 13px/1 system-ui, sans-serif;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      #nimo-loading-status {
+        max-width: 82vw;
+        color: #aab4c0;
+        font: 12px/1.5 system-ui, sans-serif;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+      #nimo-loading-status.is-error { color: #ff8b8b; }
+      @media (prefers-reduced-motion: reduce) {
+        #nimo-loading, #nimo-loading-fill { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=1280 height=720></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-mobile-warning">
+        WebGL builds are not supported on mobile devices.
+      </div>
+    </div>
+    <div id="nimo-loading" role="status" aria-label="Cargando Gang Beasts">
+      <div id="nimo-loading-content">
+        <img src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+        <div id="nimo-loading-progress">
+          <div id="nimo-loading-track" role="progressbar" aria-label="Progreso de carga"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div id="nimo-loading-fill"></div>
+          </div>
+          <span id="nimo-loading-percent">0%</span>
+        </div>
+        <span id="nimo-loading-status" aria-live="polite">Preparando Gang Beasts...</span>
+      </div>
+    </div>
+    <script>
+      async function loadGameData(manifestUrl, onProgress) {
+        var cdnBases = [
+          window.NIMO_CDN_BASE,
+          ...(window.NIMO_CDN_BASES || []).map(function (cdn) { return cdn.base; })
+        ].filter(function (base, index, bases) {
+          return base && bases.indexOf(base) === index;
+        }).map(function (base) {
+          return base.endsWith("/") ? base : base + "/";
+        });
+        if (!cdnBases.length) throw new Error("Nimo SDK did not provide a CDN base.");
+
+        async function fetchFromCdn(path, signal) {
+          var lastError;
+          for (var index = 0; index < cdnBases.length; index++) {
+            var url = new URL(path, cdnBases[index]).href;
+            try {
+              var response = await fetch(url, { signal: signal });
+              if (!response.ok) throw new Error(url + ": HTTP " + response.status);
+              var bytes = await response.arrayBuffer();
+              if (index > 0) {
+                console.warn("[Gang Beasts] CDN request failed; using fallback CDN.", url);
+              }
+              return bytes;
+            } catch (error) {
+              if (signal && signal.aborted) throw error;
+              lastError = error;
+            }
+          }
+          throw lastError || new Error("No CDN could load " + path);
+        }
+
+        var manifestBytes = await fetchFromCdn(manifestUrl);
+        var manifest = JSON.parse(new TextDecoder().decode(manifestBytes));
+        if (!Array.isArray(manifest.parts) || !manifest.parts.length ||
+            !Number.isFinite(manifest.size) || manifest.size <= 0) {
+          throw new Error("Invalid game data manifest.");
+        }
+
+        var buffers = new Array(manifest.parts.length);
+        var controller = new AbortController();
+        var nextPart = 0;
+        var received = 0;
+
+        async function worker() {
+          while (nextPart < manifest.parts.length) {
+            var index = nextPart++;
+            var part = manifest.parts[index];
+            var bytes = await fetchFromCdn(part.url, controller.signal);
+            if (bytes.byteLength !== part.size) {
+              throw new Error("Incomplete game data part: " + part.url);
+            }
+            buffers[index] = bytes;
+            received += bytes.byteLength;
+            onProgress(received / manifest.size);
+          }
+        }
+
+        try {
+          await Promise.all([worker(), worker()]);
+          if (received !== manifest.size) throw new Error("Incomplete game data package.");
+          return URL.createObjectURL(new Blob(buffers, {
+            type: "application/octet-stream"
+          }));
+        } catch (error) {
+          controller.abort();
+          throw error;
+        }
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/WebGLValidation.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/WebGLValidation.data",
+        frameworkUrl: buildUrl + "/WebGLValidation.framework.js",
+        codeUrl: "https://raw.githack.com/teaserlua/GangBeast-WebPort/main/Build/WebGLValidation.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Boneloaf",
+        productName: "Gang Beasts",
+        productVersion: "1.0",
+      };
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var mobileWarning = document.querySelector("#unity-mobile-warning");
+      var nimoLoading = document.querySelector("#nimo-loading");
+      var nimoProgress = document.querySelector("#nimo-loading-track");
+      var nimoFill = document.querySelector("#nimo-loading-fill");
+      var nimoPercent = document.querySelector("#nimo-loading-percent");
+      var nimoStatus = document.querySelector("#nimo-loading-status");
+
+      function setNimoProgress(value, status) {
+        var percent = Math.max(0, Math.min(100, Math.round(value)));
+        nimoFill.style.width = percent + "%";
+        nimoPercent.textContent = percent + "%";
+        nimoProgress.setAttribute("aria-valuenow", String(percent));
+        if (status) nimoStatus.textContent = status;
+      }
+
+      function showLoadingError(error) {
+        var message = error && error.message ? error.message : String(error);
+        nimoStatus.textContent = "Error loading: " + message;
+        nimoStatus.classList.add("is-error");
+        console.error("[Gang Beasts] Loading failed.", error);
+      }
+
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        // Avoid draining fillrate performance on mobile devices,
+        // and default/override low DPI mode on mobile browsers.
+        config.devicePixelRatio = 1;
+        mobileWarning.style.display = "block";
+        setTimeout(() => {
+          mobileWarning.style.display = "none";
+        }, 5000);
+      }
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = async () => {
+        var dataBlobUrl;
+        try {
+          setNimoProgress(0, "Loading missing files...");
+          dataBlobUrl = await loadGameData("Build/data-manifest.json", (progress) => {
+            setNimoProgress(80 * progress, "Downloading game files...");
+          });
+          config.dataUrl = dataBlobUrl;
+          setNimoProgress(80, "Starting Gang Beasts...");
+          var unityInstance = await createUnityInstance(canvas, config, (progress) => {
+            setNimoProgress(80 + 20 * progress, "Starting Gang Beasts...");
+          });
+          setNimoProgress(100, "Listo");
+          nimoLoading.classList.add("is-hidden");
+          setTimeout(() => nimoLoading.remove(), 260);
+        } catch (error) {
+          showLoadingError(error);
+        } finally {
+          if (dataBlobUrl) URL.revokeObjectURL(dataBlobUrl);
+        }
+      };
+      script.onerror = () => showLoadingError(new Error("Error loading Unity loader."));
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>

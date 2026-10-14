@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>CloverPit | Nimo Games</title>
+    <meta name="description" content="Play CloverPit, a roguelite horror game of luck and debt, right in your browser on Nimo Games.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/3314790/index.html">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/web-ports/clover-pit@main/"
+            data-probe="Build/CloverPit.loader.js"
+            data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+            data-game-id="3314790"></script>
+    <script>
+      const cloverPitBase = window.NIMO_CDN_BASE;
+      for (const [rel, path] of [
+        ["shortcut icon", "TemplateData/favicon.ico"],
+        ["stylesheet", "TemplateData/style.css"]
+      ]) {
+        const link = document.createElement("link");
+        link.rel = rel;
+        link.href = new URL(path, cloverPitBase).href;
+        document.head.appendChild(link);
+      }
+    </script>
+  </head>
+  <body>
+    <div id="loading-text"
+    style="color: rgb(255, 255, 255); font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING...
+  </div>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script>
+      var loadingText = document.querySelector("#loading-text");
+    let loadedBytes = 0;
+    const cdnBases = (window.NIMO_CDN_BASES || [])
+      .map(cdn => cdn.base)
+      .filter((base, index, bases) => base && bases.indexOf(base) === index);
+    const preferredBase = window.NIMO_CDN_BASE || cdnBases[0];
+    if (preferredBase) {
+      const preferredIndex = cdnBases.indexOf(preferredBase);
+      if (preferredIndex >= 0) cdnBases.splice(preferredIndex, 1);
+      cdnBases.unshift(preferredBase);
+    }
+    const ASSET_IDLE_TIMEOUT_MS = 30000;
+
+    function setLoadingError(error) {
+      console.error("[CloverPit] No se pudo cargar el juego.", error);
+      loadingText.textContent = "No se pudo cargar CloverPit. Recarga la página para intentarlo de nuevo.";
+      loadingText.style.color = "#ff8b8b";
+      loadingText.style.fontSize = "18px";
+      loadingText.style.fontFamily = "system-ui, sans-serif";
+      loadingText.style.overflowWrap = "anywhere";
+    }
+
+    async function fetchWithProgress(url) {
+      let lastError;
+      for (const base of cdnBases) {
+        const controller = new AbortController();
+        let idleTimeout;
+        const resetIdleTimeout = () => {
+          clearTimeout(idleTimeout);
+          idleTimeout = setTimeout(() => controller.abort(), ASSET_IDLE_TIMEOUT_MS);
+        };
+        resetIdleTimeout();
+        try {
+          const response = await fetch(new URL(url, base), { signal: controller.signal });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status} al descargar ${url} desde ${base}`);
+          }
+          if (!response.body) throw new Error(`La respuesta de ${url} no contiene datos.`);
+          const reader = response.body.getReader();
+          const chunks = [];
+          let received = 0;
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              resetIdleTimeout();
+              received += value.length;
+              chunks.push(value);
+              const mbDone = ((loadedBytes + received) / (1024 * 1024)).toFixed(2);
+              loadingText.textContent = `LOADING... ${mbDone} MB / 86.96 MB`;
+            }
+          } finally {
+            await reader.cancel().catch(() => {});
+            reader.releaseLock();
+          }
+          loadedBytes += received;
+          const fullBuffer = new Uint8Array(received);
+          let offset = 0;
+          for (const chunk of chunks) {
+            fullBuffer.set(chunk, offset);
+            offset += chunk.length;
+          }
+          if (base !== preferredBase) {
+            console.warn("[CloverPit] CDN no disponible; usando alternativa.", {
+              failedUrl: new URL(url, preferredBase).href,
+              fallbackUrl: new URL(url, base).href
+            });
+          }
+          return fullBuffer.buffer;
+        } catch (error) {
+          lastError = error;
+          console.warn(`[CloverPit] Falló la descarga desde ${base}; probando el siguiente CDN.`, error);
+        } finally {
+          clearTimeout(idleTimeout);
+        }
+      }
+      throw lastError || new Error("No hay CDN disponible para descargar los archivos de CloverPit.");
+    }
+
+    async function mergeFiles(fileParts) {
+      const buffers = await Promise.all(
+        fileParts.map(part => fetchWithProgress(part))
+      );
+      const mergedBlob = new Blob(buffers);
+      return URL.createObjectURL(mergedBlob);
+    }
+
+    function getParts(file, start, end) {
+      let parts = [];
+      for (let i = start; i <= end; i++) {
+        parts.push(file + ".part" + i);
+      }
+      return parts;
+    }
+    async function loadUnityLoader(canvas, config, progressBarFull, loadingBar) {
+      let lastError;
+      for (const base of cdnBases) {
+        try {
+          const loaderUrl = new URL("Build/CloverPit.loader.js", base);
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = loaderUrl.href;
+            script.onload = resolve;
+            script.onerror = () => {
+              script.remove();
+              reject(new Error(`No se pudo cargar el loader desde ${loaderUrl.href}`));
+            };
+            document.body.appendChild(script);
+          });
+          config.frameworkUrl = new URL("Build/CloverPit.framework.js", base).href;
+          config.streamingAssetsUrl = new URL("StreamingAssets", base).href;
+          if (base !== preferredBase) {
+            console.warn("[CloverPit] Loader cargado desde una CDN alternativa.", loaderUrl.href);
+          }
+          const unityInstance = await createUnityInstance(canvas, config, progress => {
+            progressBarFull.style.width = 100 * progress + "%";
+          });
+          loadingBar.style.display = "none";
+          loadingText.remove();
+          return unityInstance;
+        } catch (error) {
+          lastError = error;
+          console.warn(`[CloverPit] Falló el arranque desde ${base}; probando el siguiente CDN.`, error);
+        }
+      }
+      throw lastError || new Error("No hay CDN disponible para arrancar CloverPit.");
+    }
+
+    (async () => {
+      try {
+      const [dataUrl, wasmUrl] = await Promise.all([
+        mergeFiles(getParts("Build/CloverPit.data", 1, 3)),
+        mergeFiles(getParts("Build/CloverPit.wasm", 1, 3)),
+      ]);
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+      }
+
+      var config = {
+        arguments: [],
+        dataUrl: dataUrl,
+        frameworkUrl: "Build/CloverPit.framework.js",
+        codeUrl: wasmUrl,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Panik Arcade",
+        productName: "CloverPit",
+        productVersion: "1.3",
+        showBanner: unityShowBanner,
+      };
+
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
+      loadingBar.style.display = "block";
+      await loadUnityLoader(canvas, config, progressBarFull, loadingBar);
+      } catch (error) {
+        setLoadingError(error);
+      }
+    })();
+    </script>
+</html>

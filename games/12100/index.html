@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>Grand Theft Auto III | Nimo Games</title>
+  <meta name="description" content="Explore Liberty City in Grand Theft Auto III, an open-world action game playable from your browser on Nimo Games.">
+  <link rel="canonical" href="https://nimogames.qzz.io/games/12100/index.html">
+  <script src="/assets/js/nimo-sdk.js"
+          data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/gta3/"
+          data-probe="opfs-cache.js?v=20261009-worker-origin"
+          data-providers="rawcdn"
+          data-game-id="12100"></script>
+  <script>
+    const selectedCdnHost = window.NIMO_CDN_BASE;
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = new URL("styles.css?v=20261009-trim-unused", selectedCdnHost).href;
+    document.head.appendChild(stylesheet);
+    const backgroundPreload = document.createElement("link");
+    backgroundPreload.rel = "preload";
+    backgroundPreload.as = "image";
+    backgroundPreload.href = new URL("background.webp", selectedCdnHost).href;
+    document.head.appendChild(backgroundPreload);
+    document.documentElement.style.setProperty(
+      "--gta-background-image",
+      `url("${new URL("background.webp", selectedCdnHost).href}")`
+    );
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style id="critical-ui-v20260922-1">
+    .home-manager-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin-top:8px!important}
+    .home-manager-btn{display:block!important;width:100%!important;min-height:44px!important;visibility:visible!important;opacity:1!important}
+    body.game-window-open #app>.runtime-strip,body.game-window-open #app>#play{display:none!important}
+    #loading-overlay:not(.hidden){display:grid!important;position:absolute!important;inset:0!important;z-index:50!important;background:linear-gradient(rgba(7,13,22,.38),rgba(7,13,22,.62)),var(--gta-background-image) center/cover no-repeat!important}
+    #loading-overlay .loading-card{width:min(650px,92%)!important;border:0!important;background:transparent!important;box-shadow:none!important;text-align:center!important}
+    #loading-overlay #loading-title{margin:0!important;color:#f5f7fb!important;font-family:"Bebas Neue",Impact,sans-serif!important;font-size:clamp(48px,9vw,78px)!important;font-weight:400!important;letter-spacing:.09em!important;line-height:1!important;text-transform:uppercase!important}
+    #loading-overlay .progress-track{width:min(440px,90%)!important;height:22px!important;margin:20px auto 0!important;border:1px solid #425774!important;background:#111d2d!important}
+    #loading-overlay .progress-fill{height:100%!important;background:#d2deec!important}
+    #loading-overlay .loading-stage-label,#loading-overlay .loading-percent,#loading-overlay .loading-transfer,#loading-overlay .loading-eta,#loading-overlay .loading-status,#loading-overlay .loading-detail,#loading-overlay .loading-resume-note,#loading-overlay .loading-tip-wrap{display:none!important}
+    #ui-build-marker{margin-top:8px;color:#40566f;font-size:8px;letter-spacing:.08em;text-align:center}
+  .new-feature-badge{display:inline-block;margin-left:8px;padding:2px 5px;border:1px solid #5b7898;color:#9eb8d1;font-size:7px;letter-spacing:.08em;vertical-align:middle}
+  </style>
+</head>
+<body>
+  <noscript>This page requires JavaScript and WebAssembly.</noscript>
+
+  <div id="app" class="page-wrap">
+        <!-- Internal runtime hooks kept hidden so existing launcher code remains stable. -->
+        <div class="runtime-hooks" aria-hidden="true">
+          <span id="status-dot" data-state="loading"></span>
+          <span id="status-text">Starting browser runtime…</span>
+          <span id="fps-badge">FPS: -</span>
+          <button id="fullscreen-btn" type="button" tabindex="-1">Fullscreen</button>
+          <button id="download-play-btn" type="button" tabindex="-1">Download &amp; Play</button>
+          <button id="pick-zip-btn" type="button" tabindex="-1">Select ZIP</button>
+          <button id="pick-folder-btn" type="button" tabindex="-1">Select Folder</button>
+          <button id="clear-cache-btn" type="button" tabindex="-1">Clear Cache</button>
+          <button id="diagnostics-btn" type="button" tabindex="-1">Diagnostics</button>
+          <button id="input-debug-btn" type="button" tabindex="-1">Input</button>
+          <label id="debug-mode-toggle"><input type="checkbox" id="debug-mode-checkbox" tabindex="-1"> Debug</label>
+        </div>
+              <div id="ui-build-marker">UI BUILD 2026.09.26-OPFS8</div>
+      </section>
+
+      <section id="game-window" class="game-window hidden" aria-label="GTA III full-screen game window">
+        <div class="game-window-toolbar">
+          <div class="game-window-status">
+            <span class="game-window-brand">GTA III</span>
+          </div>
+
+          <div class="game-window-actions">
+            <button id="save-manager-btn" type="button" aria-label="Save Manager">
+              <span class="game-toolbar-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5V3Z"/><path d="M8 3v6h8V3M8 21v-7h8v7"/></svg>
+              </span>
+              <span class="game-toolbar-label">Save Manager</span>
+            </button>
+            <button id="audio-unlock-btn" class="audio-unlock-btn hidden" type="button" aria-label="Enable sound">
+              <span class="game-toolbar-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 10v4h4l5 4V6l-5 4H5Z"/><path d="M17 9c1.8 1.6 1.8 4.4 0 6m2-8c3 2.8 3 7.2 0 10"/></svg>
+              </span>
+              <span class="game-toolbar-label">Enable Sound</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="game-stage-card">
+        <section id="viewport" aria-label="GTA III game viewport">
+          <div id="error-banner">
+            <div class="error-title">Runtime error</div>
+            <div class="error-detail" id="error-detail"></div>
+          </div>
+
+          <canvas id="canvas" tabindex="-1"></canvas>
+
+          <div id="loading-overlay">
+            <div class="loading-card">
+              <div class="loading-stage-label" id="loading-stage">WASM</div>
+              <h2 id="loading-title">LOADING...</h2>
+
+              <div class="progress-track" aria-label="Game loading progress">
+                <div class="progress-fill indeterminate" id="progress-fill"></div>
+              </div>
+
+              <div id="loading-percent" class="loading-percent">Loading…</div>
+              <div id="loading-transfer" class="loading-transfer">Preparing browser runtime…</div>
+              <div id="loading-eta" class="loading-eta">Calculating time remaining…</div>
+              <div id="loading-status" class="loading-status">Loading WebAssembly module…</div>
+              <div id="loading-detail" class="loading-detail">Initializing the GTA III browser engine.</div>
+              <div id="loading-resume-note" class="loading-resume-note hidden"></div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-layer" aria-hidden="true">
+            <div class="city-grid"></div>
+            <div class="city-silhouette"></div>
+            <div class="hero-copy">
+              <span>PORTLAND • STAUNTON • SHORESIDE VALE</span>
+              <strong>LIBERTY<br>CITY</strong>
+              <p>Run the re3 engine directly in your browser and keep the large game archive cached locally.</p>
+            </div>
+          </div>
+
+          <button id="pointerlock-hint" class="hidden" type="button">Click to capture mouse — Esc to release</button>
+
+          <div id="assets-overlay" class="hidden">
+            <div class="assets-card">
+              <div class="setup-label">ONE-TIME BROWSER SETUP</div>
+              <h2>Prepare GTA III</h2>
+              <p class="assets-hint">Download the authorized archive, keep it in private OPFS storage, validate the GTA III files, then launch the re3 WebAssembly runtime.</p>
+
+              <div class="setup-steps">
+                <div><b>1</b><span><strong>Download</strong><small>Fetch the compressed archive through the configured proxy.</small></span></div>
+                <div><b>2</b><span><strong>Cache</strong><small>Store the ZIP in private browser OPFS storage.</small></span></div>
+                <div><b>3</b><span><strong>Play</strong><small>Extract, validate and start GTA III automatically.</small></span></div>
+              </div>
+
+              <div id="assets-status" class="asset-status">Checking browser storage…</div>
+              <ul id="assets-missing-list"></ul>
+
+              <div class="asset-buttons">
+                <button id="start-engine-btn" class="vc-btn-play" type="button" disabled>PLAY GTA III</button>
+                <button id="dev-mount-btn" type="button" style="display:none">Load from dev server</button>
+              </div>
+
+              <p class="legal-note">Independent re3 WebAssembly project. GTA III and related trademarks belong to their respective owners. Use game data only where you are authorized to do so.</p>
+
+              <input type="file" id="folder-input" webkitdirectory multiple hidden>
+              <input type="file" id="zip-input" accept=".zip,application/zip" hidden>
+            </div>
+          </div>
+        </section>
+
+        <aside id="sidepanel">
+          <div class="panel-header">
+            <strong>Runtime Tools</strong>
+            <span>re3 / WASM</span>
+          </div>
+
+          <div class="panel-section" id="boot-progress-section">
+            <h2>Boot progress</h2>
+            <ol id="boot-progress-list">
+              <li data-stage="1">WASM loaded</li>
+              <li data-stage="2">Filesystem initialized</li>
+              <li data-stage="3">Renderer initialized</li>
+              <li data-stage="4">Audio initialized</li>
+              <li data-stage="5">Game data loaded</li>
+              <li data-stage="6">Engine initialized</li>
+              <li data-stage="7">Main menu</li>
+            </ol>
+          </div>
+
+          <div class="panel-section" id="input-debug-section">
+            <h2>Input debug</h2>
+            <table id="input-summary-table"></table>
+            <div class="input-subhead">Keyboard</div>
+            <div id="input-keys-list" class="input-chip-list">(none)</div>
+            <div class="input-subhead">Mouse</div>
+            <table id="input-mouse-table"></table>
+            <div class="input-subhead">Gamepad</div>
+            <div id="input-gamepad-info">No gamepad connected.</div>
+          </div>
+
+          <div class="panel-section" id="diagnostics-section">
+            <h2>Diagnostics</h2>
+            <table id="diagnostics-table"></table>
+          </div>
+
+          <div class="panel-section" id="perf-section">
+            <h2>Frame timing</h2>
+            <table id="perf-table"></table>
+          </div>
+
+          <div class="panel-section" id="save-section">
+            <h2>Save system</h2>
+            <table id="save-table"></table>
+            <div class="save-actions">
+              <button id="save-force-sync-btn" type="button">Force Save Sync</button>
+              <button id="save-clear-btn" type="button">Clear Browser Saves…</button>
+            </div>
+          </div>
+
+          <div class="panel-section" id="log-section">
+            <h2>Log</h2>
+            <pre id="log-output"></pre>
+          </div>
+        </aside>
+        </div>
+
+
+      </section>
+
+      <div id="save-manager-overlay" class="save-manager-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="save-manager-title">
+        <div class="save-manager-card">
+          <div class="save-manager-head">
+            <div>
+              <span class="save-manager-kicker">GTA III BROWSER</span>
+              <h2 id="save-manager-title">Save Manager</h2>
+            </div>
+            <button id="save-manager-close" type="button" aria-label="Close save manager">×</button>
+          </div>
+          <p id="save-manager-status" class="save-manager-status">Save storage is preparing…</p>
+          <div id="save-manager-list" class="save-manager-list"></div>
+          <p class="save-manager-help">GTA III uses 8 native save slots. Uploading a compatible <code>.b</code> save places it into the selected slot and immediately loads it after validation.</p>
+          <input id="save-upload-input" type="file" accept=".b,application/octet-stream" hidden>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    function loadGtaScript(path) {
+      return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = new URL(path, selectedCdnHost).href;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error(`Failed to load GTA III script: ${script.src}`));
+        document.head.appendChild(script);
+      });
+    }
+    const gtaCoreScriptsReady = (async () => {
+      await loadGtaScript("build/re3_wasm.js");
+      await loadGtaScript("asset-source.js?v=5");
+      await loadGtaScript("opfs-cache.js?v=20261009-worker-origin");
+    })();
+  </script>
+  <script>
+    (() => {
+      const NativeWorker = window.Worker;
+      if (!NativeWorker) return;
+      window.Worker = class extends NativeWorker {
+        constructor(scriptURL, options) {
+          const workerUrl = new URL(scriptURL, window.location.href);
+          if (workerUrl.pathname.endsWith("/opfs-cache-worker.js")) {
+            super(new URL("opfs-cache-worker.js", window.location.href), options);
+            return;
+          }
+          super(scriptURL, options);
+        }
+      };
+    })();
+  </script>
+  <script>
+    (async () => {
+      try {
+        await gtaCoreScriptsReady;
+        for (const path of [
+          "https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js",
+          "vfs.js?v=20260926-ziproot2",
+          "saves.js?v=20260922-3",
+          "save-manager.js?v=20260922-3",
+          "input.js?v=20260922-esc1",
+          "perf.js?v=20260922-1",
+          "boot.js?v=20260922-1",
+          "launcher.js?v=20261009-null-hooks",
+          "touch-controls.js?v=20261009-mobile-only"
+        ]) {
+          if (/^[a-z][a-z\d+.-]*:/i.test(path)) {
+            const script = document.createElement("script");
+            script.src = path;
+            await new Promise((resolve, reject) => {
+              script.onload = resolve;
+              script.onerror = () => reject(new Error(`Failed to load GTA III script: ${script.src}`));
+              document.body.appendChild(script);
+            });
+          } else {
+            await loadGtaScript(path);
+          }
+        }
+      } catch (error) {
+        console.error("[GTA III] Failed to load game scripts.", error);
+        const status = document.getElementById("status-text");
+        if (status) status.textContent = "Could not load GTA III. Check your connection and reload.";
+      }
+    })();
+  </script>
+  <script>
+    (() => {
+      const internalPlayBtn = document.getElementById("download-play-btn");
+      const gameWindow = document.getElementById("game-window");
+      const audioUnlockBtn = document.getElementById("audio-unlock-btn");
+      let fpsSetter = null;
+
+      function applyFpsLimit() {
+        try { localStorage.setItem("gta3.fpsLimit", "60"); } catch {}
+        if (fpsSetter) fpsSetter(60);
+      }
+
+      window.addEventListener("gta3-audio-unlock-needed", () => {
+        audioUnlockBtn?.classList.remove("hidden");
+      });
+
+      const confirmAudioGesture = () => {
+        if (!audioUnlockBtn || audioUnlockBtn.classList.contains("hidden")) return;
+        audioUnlockBtn.classList.add("hidden");
+      };
+      audioUnlockBtn?.addEventListener("click", confirmAudioGesture);
+      document.addEventListener("pointerdown", confirmAudioGesture, { passive: true });
+      document.addEventListener("keydown", confirmAudioGesture);
+
+      window.addEventListener("gta3-launcher-ready", () => {
+        try {
+          if (window.re3Module) {
+            fpsSetter = window.re3Module.cwrap("re3_SetFPSLimit", null, ["number"]);
+            applyFpsLimit();
+          }
+        } catch {
+          fpsSetter = null;
+        }
+        internalPlayBtn.click();
+      }, { once: true });
+
+      const saveHome = document.getElementById("home-save-manager-btn");
+      saveHome?.addEventListener("click", () => {
+        const modal = document.getElementById("save-manager-overlay");
+        if (modal) modal.classList.remove("hidden");
+      });
+
+      document.addEventListener("fullscreenchange", () => {
+        const nativeNow = !!document.fullscreenElement;
+        if (!nativeNow && !gameWindow.classList.contains("hidden")) {
+          document.body.classList.add("game-window-open");
+        }
+      });
+
+      gameWindow.classList.remove("hidden");
+      document.body.classList.add("game-window-open");
+    })();
+  </script>
+</body>
+</html>

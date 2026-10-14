@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Five Nights at Freddy's 2 | Nimo Games</title>
+  <script src="../../assets/js/nimo-sdk.js"
+          data-base="https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/2/"
+          data-probe="src/Runtime.js"
+          data-providers="jsdelivr"
+          data-providers-exact="true"
+          data-game-id="332800"
+          data-loading="true"></script>
+  <style>
+    html,
+    body,
+    iframe {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      border: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    iframe {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="fnaf2-game" title="Five Nights at Freddy's 2" allow="autoplay; gamepad" allowfullscreen></iframe>
+  <script>
+    const gameFrame = document.getElementById('fnaf2-game');
+    async function loadGamePage() {
+      const gameUrl = new URL('index.html', window.NIMO_CDN_BASE);
+      const response = await fetch(gameUrl);
+      if (!response.ok) {
+        throw new Error(`No se pudo descargar FNAF 2 (HTTP ${response.status}).`);
+      }
+
+      const source = await response.text();
+      const remoteDocument = new DOMParser().parseFromString(source, 'text/html');
+      const base = remoteDocument.createElement('base');
+      base.href = window.NIMO_CDN_BASE;
+      remoteDocument.head.prepend(base);
+      gameFrame.srcdoc = `<!doctype html>${remoteDocument.documentElement.outerHTML}`;
+    }
+
+    loadGamePage().catch(error => {
+      console.error('[FNAF 2] No se pudo iniciar el juego.', error);
+      document.body.textContent = error.message;
+    });
+  </script>
+</body>
+</html>

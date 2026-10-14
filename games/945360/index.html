@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=no">
+  <title>Among Us | Nimo Games</title>
+  <meta name="description" content="Join crewmates, complete tasks, and identify the impostor in Among Us. Play the browser version on Nimo Games.">
+  <link rel="canonical" href="https://nimogames.qzz.io/games/945360/index.html">
+  <script src="/assets/js/nimo-sdk.js"
+          data-base="https://cdn.jsdelivr.net/gh/wasmdotrip/AmongUsPort@7b6881186a73a3165ad7274b5e5dd31e3290cbfc/"
+          data-probe="Build/AmongUsWeb.loader.js"
+          data-providers="jsdelivr,jsdelivr-gcore,rawcdn"
+          data-game-id="945360"></script>
+  <style>
+    html,body,#game{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
+    #game{position:fixed;inset:0}
+    #unity-canvas{display:block;width:100%;height:100%;border:0;outline:0;background:#000}
+    #loader{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;background:#000;color:#fff;font:16px Arial,sans-serif;opacity:1;transition:opacity .24s ease}
+    #loader-box{display:flex;width:min(420px,82vw);flex-direction:column;align-items:center;gap:28px}
+    #nimo-logo{display:block;width:min(200px,46vw);height:auto;object-fit:contain}
+    #status{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .nimo-progress{position:relative;display:flex;width:min(360px,76vw);align-items:center}
+    .nimo-track{width:100%;height:16px;overflow:hidden;background:#363636;border-radius:3px}
+    .nimo-fill{width:0;height:100%;background:#fff;border-radius:inherit;transition:width .18s ease-out}
+    #nimo-percent{position:absolute;left:calc(100% + 16px);min-width:38px;color:#fff;font:500 13px/1 system-ui,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
+    .download-row{display:none}
+    #error{color:#ff6961;white-space:pre-wrap}
+    #loader.is-hidden{opacity:0;pointer-events:none}
+    @media(prefers-reduced-motion:reduce){#loader,#nimo-fill{transition:none}}
+  </style>
+</head>
+<body>
+  <div id="game"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+  <div id="loader"><div id="loader-box">
+    <img id="nimo-logo" src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+    <div class="nimo-progress">
+      <div class="nimo-track" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="nimo-track">
+        <div class="nimo-fill" id="nimo-fill"></div>
+      </div>
+      <span id="nimo-percent">0%</span>
+    </div>
+    <div id="status" role="status" aria-live="polite">Loading game files… 0%</div>
+        <div class="download-row">
+          <div class="download-label"><span>Data</span><span id="data-percent">0%</span></div>
+          <div class="download-track" role="progressbar" aria-label="Data" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="data-bar"><div class="download-fill" id="data-fill"></div></div>
+        </div>
+        <div class="download-row">
+          <div class="download-label"><span>WASM</span><span id="wasm-percent">0%</span></div>
+          <div class="download-track" role="progressbar" aria-label="WASM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="wasm-bar"><div class="download-fill" id="wasm-fill"></div></div>
+        </div>
+        <div class="download-row">
+          <div class="download-label"><span>Assets</span><span id="assets-percent">0%</span></div>
+          <div class="download-track" role="progressbar" aria-label="Assets" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="assets-bar"><div class="download-fill" id="assets-fill"></div></div>
+        </div>
+    <div id="error"></div>
+  </div></div>
+  <script>
+
+    const JSDELIVR = (window.NIMO_CDN_BASE ||
+      "https://cdn.jsdelivr.net/gh/wasmdotrip/AmongUsPort@7b6881186a73a3165ad7274b5e5dd31e3290cbfc").replace(/\/$/, "");
+    const CDN_BASES = [JSDELIVR].concat(
+      (window.NIMO_CDN_BASES || [])
+        .map(cdn => cdn.base.replace(/\/$/, ""))
+        .filter(base => base !== JSDELIVR)
+    );
+    const BUILD = JSDELIVR + "/Build";
+    const STREAMING_ASSETS = JSDELIVR + "/StreamingAssets";
+    const LARGE_BUNDLE = "defaultlocalgroup_assets__db69efd6d6015cdfb90e3e77a7544e5b.bundle";
+    const CACHE_REVISION = "7b6881186a73a3165ad7274b5e5dd31e3290cbfc-catalog1";
+    const STREAMING_FILES = [
+      [
+            "aa/AddressablesLink/link.xml",
+            28453,
+            "application/xml"
+      ],
+      [
+            "aa/catalog.json",
+            1099514,
+            "application/json"
+      ],
+      [
+            "aa/settings.json",
+            844,
+            "application/json"
+      ],
+      [
+            "aa/WebGL/453b0a9b2ef9b8a4080b2014844ce426_unitybuiltinshaders_2536dfd3f978a44e0658621a7478bc60.bundle",
+            56557,
+            "application/octet-stream"
+      ],
+      [
+            "CustomAssetPacksData.json",
+            137,
+            "application/json"
+      ],
+      [
+            "UnityServicesProjectConfiguration.json",
+            1131,
+            "application/json"
+      ]
+];
+    const TOTAL_BYTES = 106373377 + 166806921 + 589939296 + 20642 + 523455 +
+      STREAMING_FILES.reduce((sum, file) => sum + file[1], 0);
+    const ASSET_IDLE_TIMEOUT_MS = 30000;
+
+    const canvas = document.getElementById("unity-canvas");
+    const loader = document.getElementById("loader");
+    const statusText = document.getElementById("status");
+    const nimoFill = document.getElementById("nimo-fill");
+    const nimoTrack = document.getElementById("nimo-track");
+    const nimoPercent = document.getElementById("nimo-percent");
+    const errorText = document.getElementById("error");
+    const browserFetch = window.fetch.bind(window);
+    const BrowserXMLHttpRequest = window.XMLHttpRequest;
+    const preloadAbort = new AbortController();
+    const assetUrls = new Map();
+    let downloadedBytes = 0;
+    let progressFrame = null;
+    let loadingFailed = false;
+    let displayedProgress = 0;
+
+    function renderNimoProgress(progress) {
+      displayedProgress = Math.max(displayedProgress, Math.min(100, Math.floor(progress)));
+      nimoFill.style.width = displayedProgress + "%";
+      nimoPercent.textContent = displayedProgress + "%";
+      nimoTrack.setAttribute("aria-valuenow", String(displayedProgress));
+    }
+
+      const downloadGroups = {
+        data: { total: 106373377, bytes: 0, complete: false },
+        wasm: { total: 166806921, bytes: 0, complete: false },
+        assets: { total: 589939296 + STREAMING_FILES.reduce((sum, file) => sum + file[1], 0), bytes: 0, complete: false }
+      };
+      Object.keys(downloadGroups).forEach(name => {
+        const group = downloadGroups[name];
+        group.fill = document.querySelector("#" + name + "-fill");
+        group.percent = document.querySelector("#" + name + "-percent");
+        group.bar = document.querySelector("#" + name + "-bar");
+      });
+
+      function renderDownloadProgress() {
+        if (loadingFailed) return;
+        Object.keys(downloadGroups).forEach(name => {
+          const group = downloadGroups[name];
+          const progress = group.complete ? 1 : Math.min(group.bytes / group.total, 0.99);
+          const percent = Math.floor(progress * 100);
+          group.fill.style.width = (progress * 100) + "%";
+          group.percent.textContent = percent + "%";
+          group.bar.setAttribute("aria-valuenow", String(percent));
+        });
+        const progress = Math.min(downloadedBytes / TOTAL_BYTES, 1);
+        const percent = Math.floor(progress * 90);
+        renderNimoProgress(percent);
+        statusText.textContent = "Loading game files… " + percent + "%";
+      }
+
+      function recordBytes(bytes, url) {
+        if (loadingFailed) return;
+        downloadedBytes += bytes;
+        const path = new URL(url, location.href).pathname;
+        const name = path.includes("/StreamingAssets/") ? "assets" :
+          path.endsWith(".data") || /\.data\.part\d+$/.test(path) ? "data" :
+          path.endsWith(".wasm") || /\.wasm\.part\d+$/.test(path) ? "wasm" : null;
+        if (name) downloadGroups[name].bytes += bytes;
+        if (progressFrame !== null) return;
+        progressFrame = requestAnimationFrame(() => {
+          progressFrame = null;
+          renderDownloadProgress();
+        });
+      }
+
+      async function finishDownloadGroup(name, promise) {
+        const result = await promise;
+        downloadGroups[name].complete = true;
+        renderDownloadProgress();
+        return result;
+      }
+
+    const CACHE_DB = "amongus-web-cache";
+    const CACHE_STORE = "files";
+    let cacheDbPromise = null;
+
+    function openCacheDb() {
+      if (cacheDbPromise) return cacheDbPromise;
+      cacheDbPromise = new Promise(resolve => {
+        try {
+          const request = indexedDB.open(CACHE_DB, 1);
+          request.onupgradeneeded = () => request.result.createObjectStore(CACHE_STORE);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = request.onblocked = () => resolve(null);
+        } catch (error) { resolve(null); }
+      });
+      return cacheDbPromise;
+    }
+
+    async function cacheGet(url) {
+      const db = await openCacheDb();
+      if (!db) return undefined;
+      return new Promise(resolve => {
+        try {
+          const tx = db.transaction(CACHE_STORE, "readonly");
+          const request = tx.objectStore(CACHE_STORE).get(CACHE_REVISION + ":" + url);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = tx.onabort = () => resolve(undefined);
+        } catch (error) { resolve(undefined); }
+      });
+    }
+
+    async function cacheSet(url, blob) {
+      const db = await openCacheDb();
+      if (!db) return;
+      return new Promise(resolve => {
+        try {
+          const tx = db.transaction(CACHE_STORE, "readwrite");
+          tx.objectStore(CACHE_STORE).put(blob, CACHE_REVISION + ":" + url);
+          tx.oncomplete = tx.onerror = tx.onabort = () => resolve();
+        } catch (error) { resolve(); }
+      });
+    }
+
+    function resourceUrl(resource) {
+      return typeof resource === "string" ? resource : resource instanceof URL ? resource.href : resource.url;
+    }
+
+    function assetKey(url) {
+      const target = new URL(url, location.href);
+      target.search = "";
+      target.hash = "";
+      return target.href;
+    }
+
+    const overrideServer = new URLSearchParams(location.search).get("server");
+    let serverReplacement = null;
+    if (overrideServer) {
+      try { serverReplacement = new URL(overrideServer); } catch (error) {}
+    }
+
+    function toHttpProtocol(protocol) {
+      return protocol === "ws:" ? "http:" : protocol === "wss:" ? "https:" : protocol;
+    }
+
+    function toWsProtocol(protocol) {
+      return protocol === "http:" ? "ws:" : protocol === "https:" ? "wss:" : protocol;
+    }
+
+    function rewriteToServer(url, wantWs) {
+      if (!serverReplacement) return url;
+      let target;
+      try { target = new URL(url, location.href); } catch (error) { return url; }
+      if (target.protocol === "blob:" || CDN_BASES.some(base => target.href.startsWith(base + "/"))) return url;
+      if (target.host === location.host) return url;
+      target.protocol = wantWs ? toWsProtocol(serverReplacement.protocol) : toHttpProtocol(serverReplacement.protocol);
+      target.host = serverReplacement.host;
+      return target.toString();
+    }
+
+    function cdnUrls(url) {
+      const base = CDN_BASES.find(candidate => url.startsWith(candidate + "/"));
+      if (!base) return [url];
+      const path = url.slice(base.length + 1);
+      return CDN_BASES.map(candidate => candidate + "/" + path);
+    }
+
+    function externalFetch(url, resource, options) {
+      const sourceHeaders = options && options.headers ? options.headers :
+        (typeof Request !== "undefined" && resource instanceof Request ? resource.headers : undefined);
+      const headers = new Headers(sourceHeaders || undefined);
+      headers.delete("Authorization");
+      headers.delete("Proxy-Authorization");
+      headers.delete("Content-Type");
+      return browserFetch(url, Object.assign({}, options || {}, {
+        method: (options && options.method) || (typeof Request !== "undefined" && resource instanceof Request ? resource.method : "GET"),
+        headers: headers,
+        credentials: "omit"
+      }));
+    }
+
+    function fetchWithFallback(resource, options) {
+      const url = resourceUrl(resource);
+      const rewritten = rewriteToServer(url, false);
+      if (rewritten !== url) return browserFetch(rewritten, options);
+      return CDN_BASES.some(base => url.startsWith(base + "/")) || url.startsWith("blob:")
+        ? externalFetch(url, resource, options) : browserFetch(resource, options);
+    }
+
+    async function downloadBlob(url, mimeType) {
+      const cached = await cacheGet(url);
+      if (cached instanceof Blob) {
+        recordBytes(cached.size, url);
+        return cached;
+      }
+      let lastError;
+      const urls = cdnUrls(url);
+      for (let providerIndex = 0; providerIndex < urls.length; providerIndex++) {
+        for (let attempt = 0; attempt < 2; attempt++) {
+          let receivedBytes = 0;
+          let reader;
+          const requestController = new AbortController();
+          const abortForPreload = () => requestController.abort();
+          preloadAbort.signal.addEventListener("abort", abortForPreload, {once:true});
+          let idleTimeout;
+          const resetIdleTimeout = () => {
+            clearTimeout(idleTimeout);
+            idleTimeout = setTimeout(() => requestController.abort(), ASSET_IDLE_TIMEOUT_MS);
+          };
+          resetIdleTimeout();
+          try {
+            const response = await fetchWithFallback(urls[providerIndex], {
+              signal:requestController.signal,
+              cache:"reload"
+            });
+            if (!response.ok) {
+              throw new Error("Failed to load " + urls[providerIndex] +
+                " (HTTP " + response.status + ")");
+            }
+            let blob;
+            if (!response.body || !response.body.getReader) {
+              const buffer = await response.arrayBuffer();
+              receivedBytes = buffer.byteLength;
+              recordBytes(receivedBytes, url);
+              blob = new Blob([buffer], {type:mimeType});
+            } else {
+              reader = response.body.getReader();
+              const chunks = [];
+              while (true) {
+                const chunk = await reader.read();
+                if (chunk.done) break;
+                resetIdleTimeout();
+                chunks.push(chunk.value);
+                receivedBytes += chunk.value.byteLength;
+                recordBytes(chunk.value.byteLength, url);
+              }
+              blob = new Blob(chunks, {type:mimeType});
+            }
+            if (providerIndex > 0) {
+              console.warn("[Among Us] CDN failed; downloaded asset from fallback CDN.", {
+                failedUrl: urls[0],
+                fallbackUrl: urls[providerIndex]
+              });
+            }
+            await cacheSet(url, blob);
+            return blob;
+          } catch (error) {
+            if (reader) {
+              try { await reader.cancel(); } catch (cancelError) {}
+            }
+            if (receivedBytes) recordBytes(-receivedBytes, url);
+            if (preloadAbort.signal.aborted) throw error;
+            lastError = error;
+            if (attempt === 0) await new Promise(resolve =>
+              setTimeout(resolve, 500)
+            );
+          } finally {
+            clearTimeout(idleTimeout);
+            preloadAbort.signal.removeEventListener("abort", abortForPreload);
+            if (reader) reader.releaseLock();
+          }
+        }
+      }
+      throw lastError || new Error("No CDN could download " + url);
+    }
+
+    async function combineParts(baseUrl, count, mimeType, numberWidth = 0) {
+      const blobs = await Promise.all(Array.from({length:count}, (_, index) =>
+        downloadBlob(baseUrl + ".part" + String(index + 1).padStart(numberWidth, "0"), mimeType)
+      ));
+      return new Blob(blobs, {type:mimeType});
+    }
+
+    async function validateAssetCatalog(blob) {
+      const catalog = JSON.parse(await blob.text());
+      const expected = new Set([LARGE_BUNDLE].concat(
+        STREAMING_FILES.filter(file => file[0].endsWith(".bundle")).map(file => file[0].split("/").pop())
+      ));
+      const actual = (catalog.m_InternalIds || []).filter(id => id.endsWith(".bundle")).map(id => id.split("/").pop());
+      if (actual.length !== expected.size || actual.some(name => !expected.has(name))) {
+        throw new Error("The asset catalog belongs to a different build. Update the loader and game files together.");
+      }
+    }
+
+    async function preloadStreamingAssets() {
+      const regularFiles = STREAMING_FILES.map(async file => {
+        const url = STREAMING_ASSETS + "/" + file[0];
+        const blob = await downloadBlob(url, file[2]);
+        if (file[0] === "aa/catalog.json") await validateAssetCatalog(blob);
+        assetUrls.set(assetKey(url), URL.createObjectURL(blob));
+      });
+      const bundle = combineParts(STREAMING_ASSETS + "/aa/WebGL/" + LARGE_BUNDLE, 34, "application/octet-stream", 2)
+        .then(blob => assetUrls.set(assetKey(STREAMING_ASSETS + "/aa/WebGL/" + LARGE_BUNDLE), URL.createObjectURL(blob)));
+      await Promise.all(regularFiles.concat(bundle));
+    }
+
+    window.fetch = function(resource, options) {
+      const cachedUrl = assetUrls.get(assetKey(resourceUrl(resource)));
+      return cachedUrl ? externalFetch(cachedUrl, resource, options) : fetchWithFallback(resource, options);
+    };
+
+    window.XMLHttpRequest = function() {
+      const xhr = new BrowserXMLHttpRequest();
+      const originalOpen = xhr.open;
+      const originalSetRequestHeader = xhr.setRequestHeader;
+      let externalGet = false;
+      xhr.open = function(method, url) {
+        const target = assetUrls.get(assetKey(String(url))) || rewriteToServer(String(url), false);
+        externalGet = /^(GET|HEAD)$/i.test(method) && (target.startsWith(JSDELIVR + "/") || target.startsWith("blob:"));
+        const args = Array.prototype.slice.call(arguments);
+        args[1] = target;
+        return originalOpen.apply(xhr, args);
+      };
+      xhr.setRequestHeader = function(name, value) {
+        if (externalGet && !/^(accept|accept-language|range)$/i.test(String(name))) return;
+        return originalSetRequestHeader.call(xhr, name, value);
+      };
+      return xhr;
+    };
+    window.XMLHttpRequest.prototype = BrowserXMLHttpRequest.prototype;
+
+    if (serverReplacement) {
+      const BrowserWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        const target = rewriteToServer(url, true);
+        return protocols !== undefined ? new BrowserWebSocket(target, protocols) : new BrowserWebSocket(target);
+      };
+      window.WebSocket.prototype = BrowserWebSocket.prototype;
+    }
+
+    async function executeUnityLoader(blob) {
+      const script = document.createElement("script");
+      const url = URL.createObjectURL(blob);
+      script.src = url;
+      try {
+        await new Promise((resolve, reject) => {
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("Unity loader could not be executed."));
+          document.head.appendChild(script);
+        });
+      } finally { URL.revokeObjectURL(url); }
+    }
+
+    async function start() {
+      renderDownloadProgress();
+      const [dataBlob, wasmBlob, loaderBlob, frameworkBlob] = await Promise.all([
+        finishDownloadGroup("data", combineParts(BUILD + "/AmongUsWeb.data", 6, "application/octet-stream")),
+        finishDownloadGroup("wasm", combineParts(BUILD + "/AmongUsWeb.wasm", 9, "application/wasm")),
+        downloadBlob(BUILD + "/AmongUsWeb.loader.js", "text/javascript"),
+        downloadBlob(BUILD + "/AmongUsWeb.framework.js", "text/javascript"),
+        finishDownloadGroup("assets", preloadStreamingAssets())
+      ]);
+      if (progressFrame !== null) { cancelAnimationFrame(progressFrame); progressFrame = null; }
+      renderDownloadProgress();
+      renderNimoProgress(90);
+      statusText.textContent = "Starting game… 90%";
+      await executeUnityLoader(loaderBlob);
+      const config = {
+        dataUrl:URL.createObjectURL(dataBlob),
+        frameworkUrl:URL.createObjectURL(frameworkBlob),
+        codeUrl:URL.createObjectURL(wasmBlob),
+        streamingAssetsUrl:STREAMING_ASSETS,
+        cacheControl:() => "no-store",
+        companyName:"Innersloth",
+        productName:"Among Us",
+        productVersion:"2026.6.5",
+        showBanner:(message,type) => type === "error" ? errorText.textContent = message : console.warn(message)
+      };
+      await createUnityInstance(canvas, config, value => {
+        const percent = 90 + Math.floor(Math.max(0, Math.min(1, value)) * 9);
+        renderNimoProgress(percent);
+        statusText.textContent = "Starting game… " + percent + "%";
+      });
+      renderNimoProgress(100);
+      loader.classList.add("is-hidden");
+      setTimeout(() => { loader.style.display = "none"; }, 250);
+    }
+
+    start().catch(error => {
+      loadingFailed = true;
+      preloadAbort.abort();
+      if (progressFrame !== null) cancelAnimationFrame(progressFrame);
+      statusText.textContent = "Unable to start the game.";
+      errorText.textContent = error && error.message ? error.message : String(error);
+      console.error(error);
+    });
+  </script>
+</body>
+</html>

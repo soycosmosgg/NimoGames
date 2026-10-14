@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/">
+    <script>
+        (() => {
+            const cdnBase = "https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/";
+            const sdk = document.createElement("script");
+            sdk.src = new URL("/assets/js/nimo-sdk.js", location.origin).href;
+            sdk.dataset.base = cdnBase;
+            sdk.dataset.probe = "assets/scripts/game/allObjects.js?latest";
+            sdk.dataset.providers = "jsdelivr,jsdelivr-gcore,rawcdn";
+            sdk.dataset.gameId = "322170";
+            sdk.dataset.loading = "true";
+            document.head.appendChild(sdk);
+        })();
+    </script>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<title>Geometry Dash | Nimo Games</title>
+	<meta name="description" content="Jump, dodge obstacles, and follow the rhythm in Geometry Dash, a fast-paced platform game available to play in your browser.">
+	<link rel="canonical" href="https://nimogames.qzz.io/games/322170/index.html">
+	<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+	<link rel="stylesheet" href="assets/style.css">
+	
+	<!-- Libraries and stuff -->
+	<script src="assets/scripts/game/allObjects.js?latest"></script>
+	<script src="assets/scripts/game/allLevels.js"></script>
+	<script src="assets/scripts/libs/phaser.min.js"></script>
+	<script src="assets/scripts/libs/pako.min.js"></script>
+	<script src="assets/scripts/utils/cache-manager.js"></script>
+	<script src="assets/scripts/api/GDapiWrapper.js"></script>
+	<script src="assets/scripts/utils/api-config.js"></script>
+	<script src="assets/scripts/api/account-api.js"></script>
+	<!-- worker -->
+	<script>window._gdProxyUrl = "https://gd-proxy.gmdc.workers.dev";</script>
+	<script defer src="assets/scripts/utils/config.js"></script>
+	<script defer src="assets/scripts/core/triggers.js"></script>
+	<script defer src="assets/scripts/core/level.js?latest"></script>
+	<script defer src="assets/scripts/core/player.js?latehkjthykhst"></script>
+	<script defer src="assets/scripts/core/audio.js"></script>
+	<script defer src="assets/scripts/core/loading-screen.js"></script>
+	<script defer src="assets/scripts/core/level-editor.js?latest"></script>
+	<script defer src="assets/scripts/core/game-scene.js?latest2"></script>
+	<script defer src="assets/scripts/core/main.js"></script>
+	<script>
+		new ResizeObserver(() => {
+			window.dispatchEvent(new Event('resize'));
+		}).observe(document.documentElement);
+    
+    document.oncontextmenu = (event) => {
+      event.preventDefault();
+    };
+	</script>
+</head>
+
+<body>
+</body>
+
+</html>
+
+</html>

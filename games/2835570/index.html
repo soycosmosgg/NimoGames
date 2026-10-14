@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<base href="https://rawcdn.githack.com/Stratus-Games/Buckshot-NEWEST-Port/V1.14/">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>Buckshot Roulette | Nimo Games</title>
+		<meta name="description" content="Test your nerve and strategy in Buckshot Roulette, a tense turn-based game playable in your browser on Nimo Games.">
+		<link rel="canonical" href="https://nimogames.qzz.io/games/2835570/index.html">
+		<link rel="preconnect" href="https://rawcdn.githack.com" crossorigin>
+		<link rel="preload" as="script" href="GlitchesBuckshot-W-MPsupport.js">
+		<style>
+html, body, #canvas {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+body {
+	color: white;
+	background-color: black;
+	overflow: hidden;
+	touch-action: none;
+}
+
+
+#canvas {
+	display: block;
+}
+
+#canvas:focus {
+	outline: none;
+}
+
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+
+
+#status {
+	background-color: #000000;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: visible; /* Forced visible immediately to host custom streaming stages */
+}
+
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+
+#status-splash.show-image--false {
+	display: none;
+}
+
+
+#status-splash.fullsize--true {
+	height: 100%;
+	width: 100%;
+	object-fit: contain;
+}
+
+#status-splash.use-filter--false {
+	image-rendering: pixelated;
+}
+
+#status-progress {
+	display: block;
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+
+#status-notice {
+	display: block;
+
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 1;
+}
+		</style>
+		<link id="-gd-engine-icon" rel="icon" type="image/png" href="GlitchesBuckshot-W-MPsupport.icon.png" />
+		<link rel="apple-touch-icon" href="GlitchesBuckshot-W-MPsupport.apple-touch-icon.png"/>
+		<script defer src="/assets/js/nimo-sdk.js" data-loading="true"></script>
+</head>
+	<body>
+		<canvas id="canvas">
+			Your browser does not support the canvas tag.
+		</canvas>
+
+		<noscript>
+
+			Your browser does not support JavaScript.
+		</noscript>
+
+		<div id="status">
+			<img id="status-splash" class="show-image--false fullsize--true use-filter--true" src="GlitchesBuckshot-W-MPsupport.png" alt="">
+			<progress id="status-progress" value="0" max="39"></progress>
+			<div id="status-notice">Preparing low-memory storage pipelines...</div>
+		</div>
+
+		<!-- Low-RAM Pipeline Architecture Layer -->
+		<script>
+			const WASM_FILE = 'GlitchesBuckshot-W-MPsupport.wasm';
+			const PCK_FILE = 'GlitchesBuckshot-W-MPsupport.pck';
+			const TOTAL_CHUNKS = 39; // 2 WASM segments + 37 PCK parts
+
+			// Setup an isolated IndexedDB architecture for individual atomic chunks
+			function openAssetDB() {
+				return new Promise((resolve, reject) => {
+					const request = indexedDB.open('GodotStreamingCacheDB', 1);
+
+					request.onupgradeneeded = (event) => {
+						const db = event.target.result;
+						if (!db.objectStoreNames.contains('chunks')) {
+							db.createObjectStore('chunks');
+						}
+					};
+					request.onsuccess = (event) => resolve(event.target.result);
+					request.onerror = (event) => reject(event.target.error);
+				});
+			}
+
+			function getChunk(db, key) {
+				return new Promise((resolve, reject) => {
+					const transaction = db.transaction('chunks', 'readonly');
+					const store = transaction.objectStore('chunks');
+					const request = store.get(key);
+					request.onsuccess = () => resolve(request.result || null);
+					request.onerror = (event) => reject(event.target.error);
+				});
+			}
+
+
+			function saveChunk(db, key, data) {
+				return new Promise((resolve, reject) => {
+					const transaction = db.transaction('chunks', 'readwrite');
+					const store = transaction.objectStore('chunks');
+					const request = store.put(data, key);
+					request.onsuccess = () => resolve();
+					request.onerror = (event) => reject(event.target.error);
+				});
+			}
+
+			function getCachedChunkKeys(db) {
+				return new Promise((resolve, reject) => {
+					const transaction = db.transaction('chunks', 'readonly');
+					const store = transaction.objectStore('chunks');
+					const request = store.getAllKeys();
+					request.onsuccess = () => resolve(request.result);
+					request.onerror = (event) => reject(event.target.error);
+				});
+			}
+
+
+			// Download with a bounded worker pool to reduce round trips without buffering every part.
+			async function downloadAndCacheAssets(db, progressBar, statusNotice) {
+				const cachedKeys = new Set(await getCachedChunkKeys(db));
+				let chunksProcessed = 0;
+				const parts = [
+					...Array.from({ length: 2 }, (_, index) => {
+						const part = index + 1;
+						return {
+							key: `wasm_part_${part}`,
+							url: `${WASM_FILE}.part${part}`,
+							label: `Downloading Core Binaries: Part ${part}/2...`
+						};
+					}),
+					...Array.from({ length: 37 }, (_, index) => {
+						const part = String(index + 1).padStart(2, '0');
+						return {
+							key: `pck_part_${part}`,
+							url: `${PCK_FILE}.part${part}`,
+							label: `Downloading Package Data: Chunk ${part}/37...`
+						};
+					})
+				];
+
+				async function processParts(partList, concurrency) {
+					let nextPart = 0;
+					const controller = new AbortController();
+
+					async function worker() {
+						while (nextPart < partList.length) {
+							const part = partList[nextPart++];
+							if (!cachedKeys.has(part.key)) {
+								statusNotice.textContent = part.label;
+								const response = await fetch(part.url, { signal: controller.signal });
+								if (!response.ok) {
+									throw new Error(`Network block failure fetching ${part.url}`);
+								}
+								await saveChunk(db, part.key, await response.arrayBuffer());
+							}
+							progressBar.value = ++chunksProcessed;
+						}
+					}
+
+					try {
+						await Promise.all(
+							Array.from(
+								{ length: Math.min(concurrency, partList.length) },
+								() => worker()
+							)
+						);
+					} catch (error) {
+						controller.abort();
+						throw error;
+					}
+				}
+
+				// Prioritize the executable before downloading the much larger package data.
+				await processParts(parts.slice(0, 2), 2);
+				statusNotice.textContent = 'Downloading Package Data...';
+				await processParts(parts.slice(2), 4);
+			}
+
+			// Backpressure-driven sequential readable stream constructor
+			function makeStreamingResponse(db, totalParts, prefix, contentType) {
+
+				let currentPart = 1;
+				
+				const stream = new ReadableStream({
+					async pull(controller) {
+						if (currentPart > totalParts) {
+							controller.close();
+							return;
+						}
+						try {
+							const suffix = prefix === 'pck_part_' ? String(currentPart).padStart(2, '0') : currentPart;
+							const key = `${prefix}${suffix}`;
+							const buffer = await getChunk(db, key);
+							
+							if (!buffer) {
+								throw new Error(`Data pipeline corruption: part ${key} not verified inside storage cache.`);
+							}
+
+							// Stream data block directly to runtime engine assembly context
+							controller.enqueue(new Uint8Array(buffer));
+							currentPart++;
+
+						} catch (err) {
+							controller.error(err);
+						}
+					}
+				});
+
+				return new Response(stream, {
+					status: 200,
+					statusText: 'OK',
+					headers: { 'Content-Type': contentType }
+				});
+			}
+
+			// Hook Network Controller directly to storage-level chunk streaming pipelines
+			function setupStreamingFetchInterceptor(db) {
+				const originalFetch = window.fetch;
+				window.fetch = async function (input, init) {
+					let url = typeof input === 'string' ? input : (input instanceof Request ? input.url : '');
+					
+
+					if (url) {
+						if (url.endsWith(WASM_FILE)) {
+							console.log('[Streaming Cache] Launching backpressure stream pipeline for WASM execution contexts.');
+							return makeStreamingResponse(db, 2, 'wasm_part_', 'application/wasm');
+						}
+						if (url.endsWith(PCK_FILE)) {
+							console.log('[Streaming Cache] Launching backpressure stream pipeline for virtual game filesystem.');
+							return makeStreamingResponse(db, 37, 'pck_part_', 'application/octet-stream');
+						}
+					}
+					return originalFetch(input, init);
+				};
+			}
+
+			// Script loading manager
+			function injectEngineRuntimeScript(url) {
+				return new Promise((resolve, reject) => {
+					const script = document.createElement('script');
+					script.src = url;
+
+					script.onload = () => resolve();
+					script.onerror = () => reject(new Error(`Failed to compile engine controller element: ${url}`));
+					document.body.appendChild(script);
+				});
+			}
+
+			// Primary Lifecycle Setup Coordinator
+			window.addEventListener('DOMContentLoaded', async () => {
+				const progressBar = document.getElementById('status-progress');
+				const statusNotice = document.getElementById('status-notice');
+
+				try {
+					statusNotice.textContent = 'Synchronizing low-overhead file system storage indices...';
+					const db = await openAssetDB();
+
+					// Execute the low-memory, chunk-by-chunk download coordinator loop
+					await downloadAndCacheAssets(db, progressBar, statusNotice);
+
+					statusNotice.textContent = 'Verification successful. Initializing real-time stream routing structures...';
+					
+
+					// Mount backpressure stream interceptors onto network sockets
+					setupStreamingFetchInterceptor(db);
+
+					// Load engine framework definitions now that the network sandbox is fully ready
+					await injectEngineRuntimeScript('GlitchesBuckshot-W-MPsupport.js');
+
+					// Pass program parameters over to original engine bootstrap context
+					launchGodotEngine();
+
+				} catch (err) {
+					console.error('[Bootstrapper Panic Engine Stopped]', err);
+					statusNotice.textContent = `Crash initializing chunked array resources:\n${err.message}`;
+				}
+			});
+
+			// Isolated loader implementation encapsulating original Godot execution structures
+			function launchGodotEngine() {
+				const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"GlitchesBuckshot-W-MPsupport","experimentalVK":false,"fileSizes":{"GlitchesBuckshot-W-MPsupport.pck":722243872,"GlitchesBuckshot-W-MPsupport.wasm":39513091},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+				const GODOT_THREADS_ENABLED = false;
+
+				const engine = new Engine(GODOT_CONFIG);
+
+				const statusOverlay = document.getElementById('status');
+				const statusProgress = document.getElementById('status-progress');
+				const statusNotice = document.getElementById('status-notice');
+
+				let initializing = true;
+				let statusMode = '';
+
+				function setStatusMode(mode) {
+					if (statusMode === mode || !initializing) {
+						return;
+					}
+					if (mode === 'hidden') {
+						statusOverlay.remove();
+						initializing = false;
+						return;
+					}
+					statusOverlay.style.visibility = 'visible';
+
+					statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+					statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+					statusMode = mode;
+				}
+
+				function setStatusNotice(text) {
+					while (statusNotice.lastChild) {
+						statusNotice.removeChild(statusNotice.lastChild);
+					}
+					const lines = text.split('\n');
+					lines.forEach((line) => {
+						statusNotice.appendChild(document.createTextNode(line));
+						statusNotice.appendChild(document.createElement('br'));
+					});
+				}
+
+				function displayFailureNotice(err) {
+					console.error(err);
+					if (err instanceof Error) {
+						setStatusNotice(err.message);
+
+					} else if (typeof err === 'string') {
+						setStatusNotice(err);
+					} else {
+						setStatusNotice('An unknown error occurred.');
+					}
+					setStatusMode('notice');
+					initializing = false;
+				}
+
+				const missing = Engine.getMissingFeatures({
+					threads: GODOT_THREADS_ENABLED,
+				});
+
+				if (missing.length !== 0) {
+					if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+						let serviceWorkerRegistrationPromise;
+						try {
+							serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
+						} catch (err) {
+
+							serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
+						}
+						Promise.race([
+							serviceWorkerRegistrationPromise.then((registration) => {
+								if (registration != null) {
+									return Promise.reject(new Error('Service worker already exists.'));
+								}
+								return registration;
+							}).then(() => engine.installServiceWorker()),
+							new Promise((resolve) => {
+								setTimeout(() => resolve(), 2000);
+							}),
+						]).then(() => {
+							window.location.reload();
+						}).catch((err) => {
+							console.error('Error while registering service worker:', err);
+						});
+					} else {
+						const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
+
+						displayFailureNotice(missingMsg + missing.join('\n'));
+					}
+				} else {
+					setStatusMode('progress');
+					engine.startGame({
+						'onProgress': function (current, total) {
+							if (current > 0 && total > 0) {
+								statusProgress.value = current;
+								statusProgress.max = total;
+							} else {
+								statusProgress.removeAttribute('value');
+								statusProgress.removeAttribute('max');
+							}
+						},
+					}).then(() => {
+						setStatusMode('hidden');
+					}, displayFailureNotice);
+				}
+			}
+		</script>
+	</body>
+</html>

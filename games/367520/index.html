@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+   <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Hollow Knight | Nimo Games</title>
+    <meta name="description" content="Explore Hallownest in Hollow Knight, an atmospheric action-adventure with challenging combat and hidden paths. Play on Nimo Games.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/367520/index.html">
+    <base href="https://rawcdn.githack.com/NOTAHACKER9999/Hollow-Knight-Port/main/">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #231F20;
+        }
+
+        #unity-container {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        #loading-text,
+        #unity-loading-bar {
+            display: none !important;
+        }
+        #nimo-hollow-loading {
+            position: fixed;
+            z-index: 2147483647;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: #000;
+            color: #fff;
+            transition: opacity 240ms ease;
+        }
+        #nimo-hollow-loading.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #nimo-hollow-loading .loading-content {
+            display: flex;
+            width: min(420px, 82vw);
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+        }
+        #nimo-hollow-loading img {
+            display: block;
+            width: min(200px, 46vw);
+            height: auto;
+            object-fit: contain;
+            image-rendering: auto;
+        }
+        #nimo-hollow-loading .loading-progress {
+            position: relative;
+            width: min(360px, 76vw);
+        }
+        #nimo-hollow-loading .loading-track {
+            height: 16px;
+            overflow: hidden;
+            border-radius: 4px;
+            background: #363636;
+        }
+        #nimo-hollow-loading .loading-fill {
+            width: 0;
+            height: 100%;
+            border-radius: inherit;
+            background: #fff;
+            transition: width 180ms ease-out;
+        }
+        #nimo-hollow-loading .loading-percent {
+            position: absolute;
+            top: 50%;
+            left: calc(100% + 16px);
+            min-width: 38px;
+            transform: translateY(-50%);
+            color: #fff;
+            font: 500 13px/1 system-ui, sans-serif;
+            font-variant-numeric: tabular-nums;
+            text-align: right;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #nimo-hollow-loading,
+            #nimo-hollow-loading .loading-fill {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="nimo-hollow-loading" role="status" aria-label="Cargando Hollow Knight">
+        <div class="loading-content">
+            <img src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+            <div class="loading-progress">
+                <div class="loading-track" role="progressbar" aria-label="Progreso de carga"
+                    aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div class="loading-fill"></div>
+                </div>
+                <span class="loading-percent">0%</span>
+            </div>
+        </div>
+    </div>
+    <div id="loading-text" style="color: white; font-size: 48px; font-family: cursive; text-align: center; margin-top: 20px;"> LOADING... </div>
+    <div hidden id="unity-container" class="unity-desktop">
+        <canvas id="unity-canvas"></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+        <div id="unity-mobile-warning"> WebGL builds are not supported on mobile devices. </div>
+    </div>
+ <script>
+(() => {
+  const FILES = [
+    "./StreamingAssets/Blacksmith.mp4",
+    "./StreamingAssets/CharmSlugKiss.mp4",
+    "./StreamingAssets/FinalA.mp4",
+    "./StreamingAssets/FinalB.mp4",
+    "./StreamingAssets/FinalC.mp4",
+    "./StreamingAssets/FinalD.mp4",
+    "./StreamingAssets/FinalE.mp4",
+    "./StreamingAssets/Fountain.mp4",
+    "./StreamingAssets/Intro.mp4",
+    "./StreamingAssets/MaskShatter.mp4",
+    "./StreamingAssets/MrMushroom.mp4",
+    "./StreamingAssets/Nailsmith.mp4",
+    "./StreamingAssets/NailsmithPaint.mp4",
+    "./StreamingAssets/Prologue.mp4",
+    "./StreamingAssets/StagTunnelRun.mp4",
+    "./StreamingAssets/Telescope.mp4"
+  ];
+
+  const DB_NAME = "asset-cache";
+  const STORE_NAME = "files";
+
+  // ─── Open DB ─────────────────────────────
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, 1);
+
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      };
+
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ─── Save ─────────────────────────────
+  function saveFile(db, key, blob) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      tx.objectStore(STORE_NAME).put(blob, key);
+      tx.oncomplete = resolve;
+      tx.onerror = reject;
+    });
+  }
+
+  // ─── Load ─────────────────────────────
+  function getFile(db, key) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const req = tx.objectStore(STORE_NAME).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = reject;
+    });
+  }
+
+  const dbPromise = openDB();
+  dbPromise.catch(error => console.error("Hollow Knight asset cache unavailable:", error));
+  const originalFetch = window.fetch.bind(window);
+
+  // Stream optional videos from the CDN on demand; cache them without delaying game startup.
+  window.fetch = async function(resource, options) {
+    const resourceUrl = typeof resource === "string" ? resource :
+      resource instanceof Request ? resource.url : null;
+    if (!resourceUrl) return originalFetch(resource, options);
+
+    let cacheKey;
+    try {
+      const pathname = new URL(resourceUrl, document.baseURI).pathname;
+      cacheKey = FILES.find(file =>
+        new URL(file, document.baseURI).pathname === pathname
+      );
+    } catch (error) {
+      console.error("Could not resolve Hollow Knight asset URL:", resourceUrl, error);
+      return originalFetch(resource, options);
+    }
+    if (!cacheKey) return originalFetch(resource, options);
+
+    let db;
+    try {
+      db = await dbPromise;
+      const cached = await getFile(db, cacheKey);
+      if (cached) return new Response(cached);
+    } catch (error) {
+      console.error("Hollow Knight asset cache unavailable; fetching from network:", error);
+      return originalFetch(resource, options);
+    }
+
+    const response = await originalFetch(resource, options);
+    if (response.ok) {
+      response.clone().blob()
+        .then(blob => saveFile(db, cacheKey, blob))
+        .catch(error => console.error("Failed to cache Hollow Knight asset:", cacheKey, error));
+    }
+    return response;
+  };
+
+})();
+</script>
+    <script>
+        const DB_NAME = "cachedb";
+        const STORE_NAME = "V1.10";
+
+        function openCacheDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, 1);
+
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME);
+                    }
+                };
+
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveToCache(key, blob) {
+            const db = await openCacheDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, "readwrite");
+                tx.objectStore(STORE_NAME).put(blob, key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+
+        async function loadFromCache(key) {
+            const db = await openCacheDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, "readonly");
+                const req = tx.objectStore(STORE_NAME).get(key);
+                req.onsuccess = () => resolve(req.result || null);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function deleteFromCache(key) {
+            const db = await openCacheDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, "readwrite");
+                tx.objectStore(STORE_NAME).delete(key);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
+    </script>
+    <script>
+        var loadingText = document.querySelector("#loading-text");
+        var nimoLoader = document.querySelector("#nimo-hollow-loading");
+        var nimoTrack = nimoLoader.querySelector(".loading-track");
+        var nimoFill = nimoLoader.querySelector(".loading-fill");
+        var nimoPercent = nimoLoader.querySelector(".loading-percent");
+        let totalBytes = 0;
+        let loadedBytes = 0;
+
+        function setNimoProgress(value) {
+            const percent = Math.max(0, Math.min(100, Math.floor(value)));
+            nimoFill.style.width = percent + "%";
+            nimoPercent.textContent = percent + "%";
+            nimoTrack.setAttribute("aria-valuenow", String(percent));
+        }
+
+        function hideNimoLoader() {
+            nimoLoader.classList.add("is-hidden");
+            setTimeout(() => nimoLoader.remove(), 260);
+        }
+
+        async function fetchWithProgress(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Failed to fetch ${url}: HTTP ${response.status}`);
+            const chunks = [];
+            if (!response.body) {
+                const blob = await response.blob();
+                loadedBytes += blob.size;
+                const mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+                loadingText.textContent = `LOADING... ${mbDone} MB / 886.65 MB`;
+                setNimoProgress((loadedBytes / (886.65 * 1024 * 1024)) * 85);
+                return blob;
+            }
+            const reader = response.body.getReader();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                loadedBytes += value.length;
+                chunks.push(value);
+                let mbDone = (loadedBytes / (1024 * 1024)).toFixed(2);
+                let mbTotal = '886.65';
+                loadingText.textContent = `LOADING... ${mbDone} MB / ${mbTotal} MB`;
+                setNimoProgress((loadedBytes / (886.65 * 1024 * 1024)) * 85);
+            }
+            return new Blob(chunks);
+        }
+        async function mergeFiles(fileParts, cacheKey) {
+            const cached = await loadFromCache(cacheKey);
+            if (cached) {
+                return URL.createObjectURL(cached);
+            }
+            const chunks = new Array(fileParts.length);
+            let nextPart = 0;
+            async function downloadWorker() {
+                while (nextPart < fileParts.length) {
+                    const index = nextPart++;
+                    chunks[index] = await fetchWithProgress(fileParts[index]);
+                }
+            }
+            await Promise.all(
+                Array.from(
+                    { length: Math.min(4, fileParts.length) },
+                    () => downloadWorker()
+                )
+            );
+            const mergedBlob = new Blob(chunks);
+            saveToCache(cacheKey, mergedBlob).catch(error => {
+                console.error("Failed to cache Hollow Knight build asset:", cacheKey, error);
+            });
+            return URL.createObjectURL(mergedBlob);
+        }
+
+        function getParts(file, start, end) {
+            let parts = [];
+            for (let i = start; i <= end; i++) {
+                parts.push(file + ".part" + i);
+            }
+            return parts;
+        }
+        (async () => {
+            const [dataUrl, wasmurl] = await Promise.all([
+                mergeFiles(getParts("Build/Glitches HK.data", 1, 44), "Glitches HK.data"),
+                mergeFiles(getParts("Build/Glitches HK.wasm", 1, 3), "Glitches HK.wasm"),
+            ]);
+            setNimoProgress(85);
+            var buildUrl = "Build";
+            var loaderUrl = buildUrl + "/Glitches HK.loader.js";
+            var config = {
+                dataUrl: dataUrl,
+                frameworkUrl: buildUrl + "/Glitches HK.framework.js",
+                codeUrl: wasmurl,
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "Stratus Dev Ports",
+                productName: "Hollow Knight",
+                productVersion: "Perfect Port",
+            };
+            var container = document.querySelector("#unity-container");
+            container.hidden = false;
+            var canvas = document.querySelector("#unity-canvas");
+            var loadingBar = document.querySelector("#unity-loading-bar");
+            var progressBarFull = document.querySelector("#unity-progress-bar-full");
+            var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+            var mobileWarning = document.querySelector("#unity-mobile-warning");
+            if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                container.className = "unity-mobile";
+                config.devicePixelRatio = 1;
+                mobileWarning.style.display = "block";
+                setTimeout(() => {
+                    mobileWarning.style.display = "none";
+                }, 5000);
+            } else {
+                if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+                    var meta = document.createElement('meta');
+                    meta.name = 'viewport';
+                    meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+                    document.getElementsByTagName('head')[0].appendChild(meta);
+                    container.className = "unity-mobile";
+                    canvas.className = "unity-mobile";
+                } else {
+                    function resizeCanvas() {
+                        canvas.width = window.innerWidth;
+                        canvas.height = window.innerHeight;
+                        canvas.style.width = window.innerWidth + "px";
+                        canvas.style.height = window.innerHeight + "px";
+                    }
+                    resizeCanvas();
+                    window.addEventListener('resize', resizeCanvas);
+                }
+            }
+            loadingBar.style.display = "block";
+            var script = document.createElement("script");
+            script.src = loaderUrl;
+            script.onload = () => {
+                createUnityInstance(canvas, config, (progress) => {
+                    progressBarFull.style.width = 100 * progress + "%";
+                    setNimoProgress(85 + progress * 15);
+                }).then((unityInstance) => {
+                    loadingText.remove();
+                    loadingBar.style.display = "none";
+                    canvas.style.display = "block";
+                    setNimoProgress(100);
+                    hideNimoLoader();
+                }).catch(async (message) => {
+                    await deleteFromCache("Glitches HK.wasm");
+                    alert(message);
+                });
+
+            };
+            document.body.appendChild(script);
+        })();
+    </script>
+
+</html>

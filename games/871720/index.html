@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <script src="/assets/js/nimo-sdk.js"
+          data-base="https://cdn.jsdelivr.net/gh/rockisdirt/ultimate-custom-night.github.io@main/"
+          data-probe="src/Runtime.js"
+          data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+          data-game-id="871720" data-loading="true"></script>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+
+<style type="text/css">
+  h1 {
+	  font-family: Arial, Helvetica, sans-serif;
+	  color: #F00;
+	  font-size: x-large;
+  }
+  p {
+	  font-family: Arial, Helvetica, sans-serif;
+	  color: #000;
+	  font-size: small;
+  }
+  body {
+	  background-color: #FFF;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+  }
+  #bloctxt {
+	  border-left-width: 5px;
+	  border-left-style: solid;
+	  border-left-color: #F00;
+	  padding-left: 10px;
+	  position: absolute;
+	  left: 50%%;
+	  width: 600px;
+	  margin-left: -260px
+  }
+</style>
+
+  <!-- Enables full-screen on iOS devices -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="HandheldFriendly" content="true" />
+
+  <title>Freddy Fazbear's Ultimate Custom Night | Nimo Games</title>
+  <meta name="description" content="Build your challenge from a roster of animatronics in Freddy Fazbear's Ultimate Custom Night. Play the survival game in your browser.">
+  <link rel="canonical" href="https://nimogames.qzz.io/games/871720/index.html">
+
+	<script>
+	   	// Detection of old browsers that do not support the canvas element
+		// Falls back to a default page
+	    if (!document.createElement("canvas").getContext)
+	    {
+			window.open("http://www.clickteam.com/html5-fallback", "_self");
+		}
+	</script>
+
+
+    <script>
+      window.nimoRuntimeReady = new Promise((resolve, reject) => {
+        const cdnBases = [
+          window.NIMO_CDN_BASE,
+          ...(window.NIMO_CDN_BASES || []).map(cdn => cdn.base)
+        ].filter((base, index, bases) => base && bases.indexOf(base) === index);
+
+        function loadRuntime(index) {
+          if (index >= cdnBases.length) {
+            reject(new Error("No se pudo cargar el runtime de UCN desde ninguna CDN."));
+            return;
+          }
+          const runtimeScript = document.createElement("script");
+          runtimeScript.src = new URL("src/Runtime.js", cdnBases[index]).href;
+          runtimeScript.fetchPriority = "high";
+          let settled = false;
+          const fallback = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timeout);
+            runtimeScript.remove();
+            loadRuntime(index + 1);
+          };
+          const timeout = setTimeout(fallback, 2000);
+          runtimeScript.onload = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timeout);
+            if (index > 0) {
+              const baseElement = document.querySelector("base");
+              if (baseElement) baseElement.href = cdnBases[index];
+              window.NIMO_CDN_BASE = cdnBases[index];
+              console.warn("[UCN] Runtime cargado desde una CDN alternativa.", runtimeScript.src);
+            }
+            resolve();
+          };
+          runtimeScript.onerror = fallback;
+          document.head.appendChild(runtimeScript);
+        }
+
+        loadRuntime(0);
+      });
+    </script>
+
+  <script>
+
+	// Detection of when the html file is ran locally.
+	// You can remove this code for the final version
+	if (window.location.protocol == "file:")
+	{
+		document.write('<div id="bloctxt">');
+		document.write('<h1>The application cannot be run...</h1>');
+		document.write('<p>HTML browsers do not allow you to launch data files directly from the file system.<br>');
+		document.write('A drag & drop of the html file on a web-browser window will not work, on any machine.<br>');
+		document.write('Please use the Build & Run option (it opens a local web server) to run your application,<br>')
+		document.write('or upload your application folder to a remote web-server, and start it from there...</p>');
+		document.write('</div>');
+		throw new Error("Cannot run application");
+	}
+  </script>
+</head>
+
+<body>
+
+<div style="display: inline-block; -webkit-user-select: none; text-align: left;">
+    <canvas id="MMFCanvas" width="1920" height="1080">
+    	Your browser does not support Canvas.
+    </canvas>
+</div>
+
+<script>
+    // RUNTIMESTART
+    // This is where the HTML5 runtime is actually started
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        await window.nimoRuntimeReady;
+        new Runtime("MMFCanvas", "resources/UCNHTML5.cch");
+      } catch (error) {
+        console.error("[UCN] No se pudo iniciar el juego.", error);
+        const message = document.createElement("p");
+        message.textContent = "No se pudo cargar Ultimate Custom Night. Recarga la página para intentarlo de nuevo.";
+        message.style.cssText = "position:fixed;inset:auto 16px 16px;padding:12px;background:#300;color:#fff;font:16px system-ui";
+        document.body.appendChild(message);
+      }
+    }, { once: true });
+    // RUNTIMESTARTEND
+</script>
+
+</body>
+</html>

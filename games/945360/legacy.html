@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Among Us</title>
+    <script src="../../assets/js/nimo-sdk.js" data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/amongus/" data-probe="Build/AmongUSWebPortByTSProllyFinalBuild9.data.unityweb" data-providers="rawcdn" data-game-id="945360" data-loading="true"></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <script src="TemplateData/UnityProgress.js"></script>
+    <script src="Build/UnityLoader.js"></script>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+      .webgl-content { width: 100%; height: 100%; margin: 0; position: absolute; top: 0; left: 0; transform: none; }
+      #gameContainer { width: 100% !important; height: 100% !important; position: absolute; top: 0; left: 0; }
+      #gameContainer canvas { width: 100vw !important; height: 100vh !important; display: block; object-fit: fill !important; }
+      .footer { display: none !important; }
+      .progress { position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%); }
+      #unityLogo { position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%); z-index: 5; pointer-events: none; }
+    </style>
+    <script>
+      var gameInstance = UnityLoader.instantiate("gameContainer", "Build/AmongUSWebPortByTSProllyFinalBuild9.json", {onProgress: function(g, p){ UnityProgress(g, p); if (p === 1) { var l = document.getElementById("unityLogo"); if (l) l.style.display = "none"; } }});
+      function forceFill() {
+        var c = document.querySelector("#gameContainer canvas");
+        if (!c) { console.log("[fill] no canvas yet"); return; }
+        var w = window.innerWidth, h = window.innerHeight;
+        c.width = w; c.height = h;
+        c.style.setProperty("width", "100vw", "important");
+        c.style.setProperty("height", "100vh", "important");
+        console.log("[fill] set", w, h, "-> now", c.width, c.height);
+      }
+      window.addEventListener("resize", forceFill);
+      setInterval(forceFill, 250);
+	  
+	  window.serverurl = "wss://nostaligafun.pages.dev";
+    </script>
+  </head>
+  <body>
+    <div class="webgl-content">
+      <div id="gameContainer"></div>
+    </div>
+  </body>
+</html>

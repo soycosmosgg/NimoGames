@@ -1,0 +1,295 @@
+<!doctypehtml>
+    <html lang=en-us>		
+        <script src="/js/all.min.js" async></script>
+        <meta charset=utf-8>
+        <meta content="text/html; charset=utf-8" http-equiv=Content-Type>
+        <title>Doki Doki Literature Club! | Nimo Games</title>
+        <meta name="description" content="Experience Doki Doki Literature Club!, a visual novel that blends school-life storytelling with psychological horror. Play in your browser.">
+        <link rel="canonical" href="https://nimogames.qzz.io/games/1388880/index.html">
+        <base href="https://selenite.cc/resources/semag/ddlc/">
+        <meta content="width=device-width,initial-scale=1" name=viewport>
+        <link href=manifest.json rel=manifest>
+        <link href=icons/web-icon.png rel=icon sizes=128x128 type=image/png>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+
+        <meta content=#000 name=theme-color>
+        <style>
+            html {
+                background: #111;
+                font-family: sans-serif
+            }
+
+            .filesystem-list-object {
+                cursor: pointer;
+                font-family: Montserrat, sans-serif;
+            }
+
+            #canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #000;
+                border: 0 none
+            }
+
+            .visible {
+                visibility: visible;
+                opacity: 1;
+                transition: opacity .1s linear
+            }
+
+            .hidden {
+                visibility: hidden;
+                opacity: 0;
+                transition: visibility 0s .25s, opacity .25s linear
+            }
+
+            #inputDiv,
+            #statusDiv {
+                background: rgba(0, 0, 0, .75);
+                width: 50%;
+                margin: auto;
+                min-width: 340px;
+                padding: 10px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                border-radius: 0 0 5px 5px
+            }
+
+            #statusTextDiv {
+                overflow: auto;
+                max-height: 40vh;
+                color: #ccc;
+                font-size: 14px
+            }
+
+            #statusProgress {
+                display: none;
+                width: 100%
+            }
+
+            #inputDiv {
+                width: 65%;
+                padding-left: 10px;
+                padding-right: 20px
+            }
+
+            #inputPrompt {
+                color: #eee;
+                font-size: 150%;
+                margin-bottom: 1em;
+                margin-top: 1em
+            }
+
+            #inputText {
+                width: 100%;
+                font-size: 175%;
+                padding: 5px;
+                background: inherit;
+                color: #eee
+            }
+
+            #inputText:focus {
+                color: #fff
+            }
+
+            #ContextContainer {
+                position: absolute;
+                left: 0;
+                top: 0;
+                color: #fff
+            }
+
+            #ContextContainer.shown {
+                background: rgba(0, 0, 0, .5);
+                border-radius: 0 0 5px 0
+            }
+
+            #ContextButton {
+                text-decoration: none;
+                color: #d3d3d3;
+                font-size: xx-large;
+                cursor: pointer;
+                user-select: none;
+                -moz-user-select: none;
+                padding: 10px 10px;
+                opacity: .75
+            }
+
+            #ContextButton:focus {
+                outline: 0;
+                color: #fff;
+                opacity: 1
+            }
+
+            #ContextMenu a {
+                text-decoration: none;
+                color: #d3d3d3;
+                background: #444;
+                height: 48px;
+                width: 250px;
+                border-radius: 5px;
+                border: 1px solid #d3d3d3;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 5px 5px;
+                opacity: 1;
+            }
+
+            #ContextMenu a:hover {
+                text-decoration: none;
+                background: #666;
+                color: #fff
+            }
+
+            #presplash {
+                position: absolute;
+                top: 0;
+                left: 0;
+                display: block;
+                margin: auto;
+                width: 100%;
+                height: 100%;
+                object-fit: contain
+            }
+
+            body {
+                margin: 0;
+                height: 100vh; /* Full viewport height */
+                display: flex;
+                justify-content: center; /* Center horizontally */
+                align-items: center; /* Center vertically */
+                font-family: Arial, sans-serif;
+                flex-direction: column; /* Stack elements vertically */
+            }
+
+            /* Style the large text */
+            .largest-text {
+                font-size: 6rem; /* Large text size */
+                margin: 10px;
+                color: white;
+                text-align: center;
+            }
+            .disclaimer {
+                font-size: .75rem; /* Large text size */
+                max-width: 50%;
+                color: white;
+                text-align: center;
+            }
+            .flex-centered {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .absolute-center {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            h1, h2, p {
+                color: white;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+            }
+            #fileList {
+                list-style: none;
+                padding: 0;
+            }
+            #fileList li {
+                margin: 5px 0;
+                cursor: pointer;
+                color: blue;
+                text-decoration: underline;
+            }
+            #fileContent {
+                margin-top: 20px;
+                white-space: pre-wrap;
+                border: 1px solid #ccc;
+                padding: 10px;
+            }
+            #filesystem {
+                z-index: 99;
+                background: #444;
+            }
+            #intro-text {
+                max-width: 90%;
+            }
+        </style>
+        <script defer src="/assets/js/nimo-sdk.js" data-loading="true"></script>
+    </head>
+
+    <body>
+        <canvas class=hidden id=canvas oncontextmenu=event.preventDefault() tabindex=-1></canvas>
+        <div id="filesystem" class="hidden absolute-center">
+            <div style="margin: 2%;">
+                <h1 style="text-align: center;">IDBFS Explorer</h1>
+                <div style="display: flex; flex-direction: row;">
+                    <button id="syncFrom">Refresh (Sync)</button>
+                    <button id="deleteModeButton">Toggle Delete Mode</button>
+                </div>
+                <ul id="fileList" style="max-width: 80vh; max-height: 50vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></ul>
+            </div>
+        </div>
+        <div class="flex-centered" id="intro-text">
+            <h1 class="largest-text">Click anywhere to initialize game.</h1>
+            <p class="disclaimer">DDLC is NOT our property in anyway and shall all the rights of the presented IP belong to Team Salvato. This content knowingly violates Team Salvato's official IP guidelines, though we do not condone any further violation of such guidelines. Sorry not sorry.</p>
+        </div>
+        <div id=ContextContainer><a id=ContextButton>≡</a><br>
+            <div id=ContextMenu style=display:none>
+                <input id=ID_SavegamesImport accept=application/zip onchange=onSavegamesImport(this) style=display:none type=file>
+                <a href="javascript:document.getElementById('ID_SavegamesImport').click();">Import Saves</a>
+                <a href=javascript:onSavegamesExport();>Export Saves</a>
+                <a href=javascript:showFileSystem();>Explore Filesystem</a>
+                <a href="javascript:FSDownload('/log.txt', 'text/plain');">Download Log</a>
+                <p style="text-align: center;">Powered by Ren'Py.</p>
+            </div>
+        </div>
+
+        <div id=statusDiv class=hidden>
+            <div id=statusTextDiv></div><progress id=statusProgress max=100 value=0></progress>
+        </div>
+        <div id=inputDiv class=hidden>
+            <form id=inputForm>
+                <div id=inputPrompt></div><input id=inputText>
+            </form>
+        </div>
+        <script>
+            navigator.serviceWorker && (navigator.serviceWorker.controller || navigator.serviceWorker.register(
+                "./service-worker.js", {
+                    updateViaCache: "all"
+                }))
+        </script>
+        <script>
+            var listener = function() {
+                var element = document.getElementById("canvas");
+                element.classList.remove("hidden");
+
+                var scriptPre = document.createElement("script");
+                scriptPre.src = "renpy-pre.js";
+
+                var scriptMain = document.createElement("script");
+                scriptMain.src = "renpy.js";
+                scriptMain.async = true;
+
+                document.body.appendChild(scriptPre);
+                document.body.appendChild(scriptMain);
+
+                document.removeEventListener("click", listener);
+            };
+            document.addEventListener("click", listener);
+        </script>
+    </body>
+
+    </html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/wasmdotrip/Peak-Port@main/"
+            data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+            data-probe="Build/WebGL.data.unityweb.part010"
+            data-game-id="3527290"></script>
+    <title>PEAK | Nimo Games</title>
+    <meta name="description" content="Take on a cooperative climbing adventure in PEAK. Explore dangerous terrain and try to reach the summit in this browser game.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/3527290/index.html">
+    <style>
+      /* black, not the Unity brown: whatever the canvas does not cover reads as a
+         letterbox bar rather than a strip of a different colour hanging off the bottom */
+      html, body { margin: 0; padding: 0; background: #000; height: 100%;
+                   overflow: hidden; }
+      #wrap { position: fixed; inset: 0; width: 100vw; height: 100vh;
+              background: #000; }
+      #unity-canvas { position: absolute; inset: 0; width: 100%; height: 100%;
+                      background: #000; outline: none; display: block; }
+      #bar { position: fixed; z-index: 2; top: calc(50% + 18px); left: 50%;
+             transform: translateX(-50%); width: min(320px, 80vw); height: 12px;
+             margin: 0; border: 1px solid #555;
+             display: none; }
+      #barfill { width: 0%; height: 100%; background: #7cc242; }
+      #msg { position: fixed; z-index: 2; top: calc(50% - 12px); left: 50%;
+             transform: translate(-50%, -50%); width: min(90vw, 500px);
+             color: #bbb; font: 13px/1.5 system-ui, sans-serif; text-align: center; }
+      #msg, #bar { visibility: hidden; }
+      #nimo-peak-loading {
+        position: fixed;
+        z-index: 2147483647;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #000;
+        color: #fff;
+        transition: opacity 240ms ease;
+      }
+      #nimo-peak-loading.is-hidden { opacity: 0; pointer-events: none; }
+      #nimo-peak-loading .loading-content {
+        display: flex;
+        width: min(420px, 82vw);
+        flex-direction: column;
+        align-items: center;
+        gap: 28px;
+      }
+      #nimo-peak-loading img {
+        display: block;
+        width: min(200px, 46vw);
+        height: auto;
+        object-fit: contain;
+        image-rendering: auto;
+      }
+      #nimo-peak-loading .loading-progress {
+        position: relative;
+        width: min(360px, 76vw);
+      }
+      #nimo-peak-loading .loading-track {
+        height: 16px;
+        overflow: hidden;
+        border-radius: 4px;
+        background: #363636;
+      }
+      #nimo-peak-loading .loading-fill {
+        width: 0;
+        height: 100%;
+        border-radius: inherit;
+        background: #fff;
+        transition: width 180ms ease-out;
+      }
+      #nimo-peak-loading .loading-percent {
+        position: absolute;
+        top: 50%;
+        left: calc(100% + 16px);
+        min-width: 38px;
+        transform: translateY(-50%);
+        color: #fff;
+        font: 500 13px/1 system-ui, sans-serif;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+      #nimo-peak-missing-assets {
+        display: none;
+        color: #aab4c0;
+        font: 500 12px/1.4 system-ui, sans-serif;
+        letter-spacing: .04em;
+      }
+      #nimo-peak-missing-assets.is-visible { display: block; }
+      #nimo-peak-status {
+        max-width: min(560px, 82vw);
+        color: #aab4c0;
+        font: 12px/1.5 system-ui, sans-serif;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+      #nimo-peak-status.is-error { color: #ff8b8b; }
+      @media (prefers-reduced-motion: reduce) {
+        #nimo-peak-loading, #nimo-peak-loading .loading-fill { transition: none; }
+      }
+      #credit { position: fixed; right: 10px; bottom: 8px; z-index: 10;
+                color: #8a8a8a; font: 12px/1.4 system-ui, sans-serif;
+                text-align: right; pointer-events: auto; }
+      #credit a { color: #7cc242; text-decoration: none; }
+      #credit a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div id="nimo-peak-loading" role="status" aria-label="Cargando PEAK">
+      <div class="loading-content">
+        <img src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+        <div class="loading-progress">
+          <div class="loading-track" role="progressbar" aria-label="Progreso de carga"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="loading-fill"></div>
+          </div>
+          <span class="loading-percent">0%</span>
+        </div>
+        <span id="nimo-peak-missing-assets" aria-live="polite">Loading Missing Assets...</span>
+        <span id="nimo-peak-status" aria-live="polite"></span>
+      </div>
+    </div>
+    <div id="wrap">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+      <div id="bar"><div id="barfill"></div></div>
+      <div id="msg">Loading…</div>
+    </div>
+    <script>
+      // Manifest written by make_cdn_bundle.py. Each entry is either a plain file or a
+      // list of parts that must be concatenated back together in order.
+      var MANIFEST = {
+  "data": {
+    "file": "WebGL.data.unityweb",
+    "parts": [
+      "WebGL.data.unityweb.part000",
+      "WebGL.data.unityweb.part001",
+      "WebGL.data.unityweb.part002",
+      "WebGL.data.unityweb.part003",
+      "WebGL.data.unityweb.part004",
+      "WebGL.data.unityweb.part005",
+      "WebGL.data.unityweb.part006",
+      "WebGL.data.unityweb.part007",
+      "WebGL.data.unityweb.part008",
+      "WebGL.data.unityweb.part009",
+      "WebGL.data.unityweb.part010",
+      "WebGL.data.unityweb.part011",
+      "WebGL.data.unityweb.part012"
+    ],
+    "bytes": 241608952
+  },
+  "code": {
+    "file": "WebGL.wasm.unityweb",
+    "bytes": 12657365
+  },
+  "framework": {
+    "file": "WebGL.framework.js.unityweb",
+    "bytes": 85982
+  },
+  "loader": {
+    "file": "WebGL.loader.js",
+    "bytes": 117365
+  }
+};
+      var BUILD = "Build";
+      // Empty for a same-origin build. When set, <base> already redirects the fetches on
+      // this page; this stamps the same root onto our own URL so the C# level streamer
+      // (which resolves bundle URLs against Application.absoluteURL, ignoring <base>)
+      // fetches LevelBundles from the CDN too instead of from wherever the page is hosted.
+      var CDN_BASE = (window.NIMO_CDN_BASE ||
+        "https://raw.githack.com/wasmdotrip/Peak-Port/main/").replace(/\/$/, "");
+      if (CDN_BASE) {
+        var u = new URL(window.location.href);
+        if (u.searchParams.get("cdn") !== CDN_BASE) {
+          u.searchParams.set("cdn", CDN_BASE);
+          history.replaceState(null, "", u.toString());
+        }
+      }
+
+      var canvas  = document.querySelector("#unity-canvas");
+      var bar     = document.querySelector("#bar");
+      var barfill = document.querySelector("#barfill");
+      var msg     = document.querySelector("#msg");
+      var nimoLoader = document.querySelector("#nimo-peak-loading");
+      var nimoProgress = nimoLoader.querySelector(".loading-track");
+      var nimoFill = nimoLoader.querySelector(".loading-fill");
+      var nimoPercent = nimoLoader.querySelector(".loading-percent");
+      var nimoMissingAssets = document.querySelector("#nimo-peak-missing-assets");
+      var nimoStatus = document.querySelector("#nimo-peak-status");
+      var assetUrls = [];
+      var cdnBases = window.NIMO_CDN_BASES || [{ base: CDN_BASE }];
+      var selectedCdnBase = window.NIMO_CDN_BASE || CDN_BASE;
+      cdnBases = cdnBases
+        .map(function (cdn) { return cdn.base; })
+        .filter(function (base, index, bases) { return bases.indexOf(base) === index; });
+      cdnBases = [selectedCdnBase].concat(cdnBases.filter(function (base) {
+        return base !== selectedCdnBase;
+      }));
+
+      function setLoadingProgress(value) {
+        var percent = Math.max(0, Math.min(100, Math.round(value)));
+        nimoFill.style.width = percent + "%";
+        nimoPercent.textContent = percent + "%";
+        nimoProgress.setAttribute("aria-valuenow", String(percent));
+        if (percent >= 90) nimoMissingAssets.classList.add("is-visible");
+      }
+      function setLoadingStatus(text, isError) {
+        nimoStatus.textContent = text;
+        nimoStatus.classList.toggle("is-error", Boolean(isError));
+      }
+      function releaseAssetUrls() {
+        assetUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+        assetUrls = [];
+      }
+      function setMsg(t) {
+        msg.textContent = t;
+      }
+      function mb(bytes) { return (bytes / 1048576).toFixed(1); }
+
+      async function fetchAsset(path, signal) {
+        var lastError;
+        var lastFailedUrl;
+        for (var i = 0; i < cdnBases.length; i++) {
+          var base = cdnBases[i].replace(/\/?$/, "/");
+          var url = new URL(BUILD + "/" + path, base).href;
+          try {
+            var response = await fetch(url, { signal: signal });
+            if (!response.ok) {
+              throw new Error("failed to fetch " + path + " from " + base +
+                " (" + response.status + ")");
+            }
+            if (i > 0) {
+              console.warn("[PEAK] CDN request failed; using fallback CDN.", {
+                failedUrl: lastFailedUrl,
+                fallbackUrl: url
+              });
+            }
+            return response;
+          } catch (error) {
+            if (signal.aborted) throw error;
+            lastError = error;
+            lastFailedUrl = url;
+          }
+        }
+        throw lastError || new Error("No CDN is available for " + path);
+      }
+
+      // Total download size, measured at package time — no HEAD requests needed, and it
+      // stays correct even if the CDN omits Content-Length on a streamed response.
+      var TOTAL = MANIFEST.data.bytes + MANIFEST.framework.bytes + MANIFEST.code.bytes;
+      var downloaded = 0;
+
+      function report(label) {
+        bar.style.display = "block";
+        var pct = TOTAL ? downloaded / TOTAL : 0;
+        barfill.style.width = (pct * 100).toFixed(1) + "%";
+        setLoadingProgress(pct * 90);
+        setMsg("Downloading " + label + "… " + mb(downloaded) + " / " + mb(TOTAL) +
+               " MB (" + Math.floor(pct * 100) + "%)");
+      }
+
+      // Bounded parallel fetches reduce round trips without overloading the browser.
+      async function assemble(entry, label) {
+        var urls = entry.parts || [entry.file];
+        var buffers = new Array(urls.length);
+        var nextPart = 0;
+        var controller = new AbortController();
+
+        async function fetchWorker() {
+          while (nextPart < urls.length) {
+            var index = nextPart++;
+            var response = await fetchAsset(urls[index], controller.signal);
+
+            var buffer = await response.arrayBuffer();
+            buffers[index] = buffer;
+            downloaded += buffer.byteLength;
+            report(label);
+          }
+        }
+
+        try {
+          await Promise.all(
+            Array.from({ length: Math.min(4, urls.length) }, () => fetchWorker())
+          );
+        } catch (error) {
+          controller.abort();
+          throw error;
+        }
+
+        var blob = new Blob(buffers);
+        buffers.fill(null);
+        var objectUrl = URL.createObjectURL(blob);
+        assetUrls.push(objectUrl);
+        return objectUrl;
+      }
+
+      function loadScript(url) {
+        return new Promise(function (resolve, reject) {
+          var script = document.createElement("script");
+          script.src = url;
+          script.onload = resolve;
+          script.onerror = function () {
+            reject(new Error("Failed to load " + url));
+          };
+          document.body.appendChild(script);
+        });
+      }
+
+      (async function () {
+        try {
+          var results = await Promise.all([
+            loadScript(BUILD + "/" + MANIFEST.loader.file),
+            Promise.all([
+              assemble(MANIFEST.data, "game data"),
+              assemble(MANIFEST.framework, "framework"),
+              assemble(MANIFEST.code, "code")
+            ])
+          ]);
+          var assets = results[1];
+          var dataUrl = assets[0];
+          var frameworkUrl = assets[1];
+          var codeUrl = assets[2];
+
+          setMsg("Starting…");
+          setLoadingProgress(90);
+          setLoadingStatus("Starting PEAK...");
+          createUnityInstance(canvas, {
+              dataUrl: dataUrl,
+              frameworkUrl: frameworkUrl,
+              codeUrl: codeUrl,
+              streamingAssetsUrl: "StreamingAssets",
+              companyName: "Aggro Crab & Landfall",
+              productName: "PEAK",
+              productVersion: "1.62.a",
+            }, function (p) {
+              bar.style.display = "block";
+              barfill.style.width = Math.round(p * 100) + "%";
+              setLoadingProgress(90 + p * 10);
+              setLoadingStatus("Loading PEAK...");
+              setMsg("Loading… " + Math.round(p * 100) + "%");
+            }).then(function (instance) {
+              window.unityInstance = instance;
+              setLoadingProgress(100);
+              releaseAssetUrls();
+              bar.style.display = "none";
+              setMsg("");
+              setLoadingStatus("");
+              nimoLoader.classList.add("is-hidden");
+              setTimeout(function () { nimoLoader.remove(); }, 260);
+              canvas.focus();
+            }).catch(function (e) {
+              console.error("[PEAK] Unity initialization failed.", e);
+              setLoadingStatus("Failed to start PEAK: " + (e && e.message ? e.message : String(e)), true);
+              releaseAssetUrls();
+            });
+        } catch (e) {
+          console.error("[PEAK] Failed to download or prepare game assets.", e);
+          setLoadingStatus("Failed to load PEAK: " + (e && e.message ? e.message : String(e)), true);
+          releaseAssetUrls();
+        }
+      })();
+    </script>
+  </body>
+</html>
