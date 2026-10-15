@@ -95,7 +95,7 @@ window.NIMO_GAMES = [
     playUrl: 'games/1388880/index.html',
     meta: 'JUGAR AHORA'
   },
-  {
+  /* {
     id: '319510',
     title: "Five Nights at Freddy's",
     hero: 'https://cdn-ngames.pages.dev/images/319510/hero.webp',
@@ -105,8 +105,7 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/1/',
     cdnProbe: 'favicon.ico',
     meta: 'JUGAR AHORA'
-  },
-  {
+  }, {
     id: '332800',
     title: 'Five Nights at Freddy’s 2',
     hero: 'https://cdn-ngames.pages.dev/images/332800/hero.webp',
@@ -118,8 +117,7 @@ window.NIMO_GAMES = [
     cdnProviders: ['rawcdn'],
     cdnProvidersExact: true,
     meta: 'JUGAR AHORA'
-  },
-  {
+  }, {
     id: '354140',
     title: 'Five Nights at Freddy’s 3',
     hero: 'https://cdn-ngames.pages.dev/images/354140/hero.webp',
@@ -129,8 +127,7 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/3/',
     cdnProbe: 'favicon.ico',
     meta: 'JUGAR AHORA'
-  },
-  {
+  }, {
     id: '388090',
     title: 'Five Nights at Freddy’s 4',
     hero: 'https://cdn-ngames.pages.dev/images/388090/hero.webp',
@@ -140,8 +137,7 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/4/',
     cdnProbe: 'favicon.ico',
     meta: 'JUGAR AHORA'
-  },
-  {
+  }, {
     id: '871720',
     title: "Freddy Fazbear's Ultimate Custom Night",
     hero: 'https://cdn-ngames.pages.dev/images/871720/hero.webp',
@@ -152,7 +148,7 @@ window.NIMO_GAMES = [
     cdnProbe: 'src/Runtime.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn'],
     meta: 'JUGAR AHORA'
-  },
+  }, */
   {
     id: '758260',
     title: "Jetpack Joyride",
@@ -184,7 +180,7 @@ window.NIMO_GAMES = [
     cdnProbe: 'simulation_worker.bundle.js',
     meta: 'JUGAR AHORA'
   },
-  {
+  /* {
     id: '493632',
     title: 'Skate 3',
     hero: 'https://cdn-ngames.pages.dev/images/493632/hero.webp',
@@ -195,7 +191,7 @@ window.NIMO_GAMES = [
     cdnProbe: 'main.js?v=b3e0ad12bba2',
     cdnProviders: ['jsdelivr-gcore', 'jsdelivr-fastly', 'jsdelivr', 'rawcdn'],
     meta: 'JUGAR AHORA'
-  },
+  }, */
   {
     id: '3314790',
     title: 'CloverPit',
