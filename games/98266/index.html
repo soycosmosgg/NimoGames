@@ -31,5 +31,22 @@
     title="Minecraft"
     allowfullscreen
   ></iframe>
+  <script>
+    const minecraftFrame = document.querySelector("iframe");
+    const retryKey = "minecraft-launcher-initial-retry";
+
+    if (!sessionStorage.getItem(retryKey)) {
+      sessionStorage.setItem(retryKey, "true");
+      minecraftFrame.addEventListener(
+        "load",
+        () => {
+          window.setTimeout(() => {
+            minecraftFrame.src = minecraftFrame.src;
+          }, 1000);
+        },
+        { once: true }
+      );
+    }
+  </script>
 </body>
 </html>
