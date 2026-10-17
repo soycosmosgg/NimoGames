@@ -1,5 +1,6 @@
 (() => {
   const games = window.NIMO_GAMES;
+  const visitorCountDisplay = document.getElementById('visitor-count');
   const ambientLayer = document.getElementById('ambient-layer');
   const recentRow = document.getElementById('recent-row');
   const clockDisplay = document.getElementById('clock-display');
@@ -26,7 +27,7 @@
   const avatarFileInput = document.getElementById('avatar-file-input');
   const libraryFilterButtons = document.querySelectorAll('.library-filter');
 
-  if (!Array.isArray(games) || !recentRow || !clockDisplay || !gamePlayer || !gameFrame || !closeGameButton ||
+  if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
       !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
       !libraryGameGrid || !avatarPicker || !avatarImage || !avatarFileInput) {
@@ -43,6 +44,7 @@
   );
   const recentGamesStorageKey = 'nimo-games-recently-played';
   const avatarStorageKey = 'nimo-games-profile-avatar';
+  const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
   let armedGameId = null;
   let recentGameIds = loadRecentGameIds();
   let homeGames = [];
@@ -194,6 +196,54 @@
     connectionStatusButton.classList.toggle('is-offline', !online);
     connectionStatusButton.setAttribute('aria-label', signalDescription);
     connectionStatusButton.title = signalDescription;
+  }
+
+  function getVisitorSessionId() {
+    try {
+      let sessionId = window.sessionStorage.getItem(visitorSessionStorageKey);
+      if (sessionId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId)) {
+        return sessionId;
+      }
+
+      sessionId = window.crypto.randomUUID();
+      window.sessionStorage.setItem(visitorSessionStorageKey, sessionId);
+      return sessionId;
+    } catch (error) {
+      console.error('No se pudo iniciar el contador de visitantes.', error);
+      visitorCountDisplay.textContent = '—';
+      return null;
+    }
+  }
+
+  async function updateVisitorCount(sessionId) {
+    try {
+      const response = await window.fetch('/api/visitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error(`El contador de visitantes respondió con HTTP ${response.status}.`);
+      }
+
+      const result = await response.json();
+      if (!Number.isSafeInteger(result.count) || result.count < 0) {
+        throw new TypeError('El contador de visitantes devolvió una respuesta no válida.');
+      }
+      visitorCountDisplay.textContent = new Intl.NumberFormat('es-ES').format(result.count);
+    } catch (error) {
+      console.error('No se pudo actualizar el contador de visitantes.', error);
+      visitorCountDisplay.textContent = '—';
+    }
+  }
+
+  function startVisitorCounter() {
+    const sessionId = getVisitorSessionId();
+    if (!sessionId) return;
+
+    updateVisitorCount(sessionId);
+    window.setInterval(() => updateVisitorCount(sessionId), 30000);
   }
 
   function updateClock() {
@@ -632,4 +682,5 @@
   homeGames = buildHomeGames();
   recentGamesCount.textContent = String(recentGameIds.length);
   renderCarousel();
+  startVisitorCounter();
 })();

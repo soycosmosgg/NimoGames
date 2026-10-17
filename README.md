@@ -17,6 +17,17 @@ Nimo Games is a browser-based game hub. Browse the game library, search by title
 
 Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers.
 
+## Configure the live visitor counter
+
+The header counter reports active browser sessions using a Cloudflare Pages Function and D1. It does not identify people: each browser tab gets a random session ID, and a session is considered active for 90 seconds after its last heartbeat.
+
+1. Create a D1 database in the same Cloudflare account as the Pages project.
+2. Run the SQL in `migrations/0001_create_active_visitors.sql` in the D1 Console.
+3. In the Pages project settings, add a D1 database binding under **Settings → Functions → D1 database bindings** with the variable name `VISITORS_DB`, selecting the database you created.
+4. Deploy the Pages project with Functions enabled. The endpoint is `/api/visitors`.
+
+Until the D1 binding and table are configured, the counter shows `—`; it does not display a fabricated number.
+
 ## Run locally
 
 The site is static HTML, CSS, and JavaScript; there is no build step or package installation required. Serve the repository root with any static web server, then open its local URL. For example, with Python installed:
@@ -35,6 +46,8 @@ assets/
   js/app.js          Library, player, recents, and interface behavior
   js/games.js        Game catalog and launch URLs
   js/nimo-sdk.js     CDN selection, fallbacks, and the shared game-loading screen
+functions/api/       Cloudflare Pages API endpoints
+migrations/          D1 database schema
 favicon/             Browser, Apple, and web-app icons
 games/
   <id>/              Game launch pages
