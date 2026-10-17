@@ -68,7 +68,7 @@
         displayStatus('Message sent, but the admin secret could not be remembered in this browser.', true);
         return;
       }
-      displayStatus('Message sent. It will show once per tab, expire after 30 seconds, and not appear on later visits.');
+      displayStatus('Message sent. It will show once per tab, expire after 10 seconds, and not appear on later visits.');
     } catch (error) {
       console.error('[messages-admin] Failed to send message.', error);
       displayStatus(error.message, true);

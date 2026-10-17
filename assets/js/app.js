@@ -6,6 +6,8 @@
   const clockDisplay = document.getElementById('clock-display');
   const gamePlayer = document.getElementById('game-player');
   const gameFrame = document.getElementById('game-frame');
+  const gameAdminMessage = document.getElementById('game-admin-message');
+  const gameAdminMessageText = document.getElementById('game-admin-message-text');
   const closeGameButton = document.getElementById('game-player-close');
   const gameVersionPicker = document.getElementById('game-version-picker');
   const gameVersionCancelButton = document.getElementById('game-version-cancel');
@@ -26,7 +28,8 @@
   const avatarMessageAnnouncement = document.getElementById('avatar-message-announcement');
   const libraryFilterButtons = document.querySelectorAll('.library-filter');
 
-  if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame || !closeGameButton ||
+  if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame ||
+      !gameAdminMessage || !gameAdminMessageText || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
       !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
       !libraryGameGrid || !avatarMessage || !avatarMessageAnnouncement) {
@@ -48,6 +51,7 @@
   let currentMessageUpdatedAt = null;
   let messageTypingTimer = null;
   let messageHideTimer = null;
+  let gameAdminMessageHideTimer = null;
   let messageRefreshInProgress = false;
   let messageLoadErrorReported = false;
   let armedGameId = null;
@@ -64,7 +68,8 @@
   let gameIsClosing = false;
   let pendingVersionSelection = null;
   const homeGameLimit = 5;
-  const messageVisibleDurationMs = 30000;
+  const greetingVisibleDurationMs = 30000;
+  const liveMessageVisibleDurationMs = 10000;
   const defaultGreetingMessages = {
     firstVisit: [
       'Hi! I hope you like the page!',
@@ -153,7 +158,21 @@
     messageHideTimer = null;
   }
 
-  function renderAvatarMessage(message) {
+  function hideGameAdminMessage() {
+    gameAdminMessage.classList.remove('is-visible');
+    gameAdminMessage.setAttribute('aria-hidden', 'true');
+    gameAdminMessageHideTimer = null;
+  }
+
+  function renderGameAdminMessage(message) {
+    window.clearTimeout(gameAdminMessageHideTimer);
+    gameAdminMessageText.textContent = message;
+    gameAdminMessage.setAttribute('aria-hidden', 'false');
+    gameAdminMessage.classList.add('is-visible');
+    gameAdminMessageHideTimer = window.setTimeout(hideGameAdminMessage, liveMessageVisibleDurationMs);
+  }
+
+  function renderAvatarMessage(message, visibleDurationMs = greetingVisibleDurationMs) {
     window.clearInterval(messageTypingTimer);
     window.clearTimeout(messageHideTimer);
     avatarMessageAnnouncement.textContent = message;
@@ -165,7 +184,7 @@
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         avatarMessage.textContent = message;
-        messageHideTimer = window.setTimeout(hideAvatarMessage, messageVisibleDurationMs);
+        messageHideTimer = window.setTimeout(hideAvatarMessage, visibleDurationMs);
         return;
       }
 
@@ -176,7 +195,7 @@
         if (characterIndex >= message.length) {
           window.clearInterval(messageTypingTimer);
           messageTypingTimer = null;
-          messageHideTimer = window.setTimeout(hideAvatarMessage, messageVisibleDurationMs);
+          messageHideTimer = window.setTimeout(hideAvatarMessage, visibleDurationMs);
         }
       }, 45);
     };
@@ -210,7 +229,11 @@
         currentMessageUpdatedAt = payload.updatedAt;
         if (payload.message && !hasSeenLiveMessage(payload.updatedAt)) {
           rememberLiveMessage(payload.updatedAt);
-          renderAvatarMessage(payload.message);
+          if (gamePlayer.classList.contains('is-open')) {
+            renderGameAdminMessage(payload.message);
+          } else {
+            renderAvatarMessage(payload.message, liveMessageVisibleDurationMs);
+          }
         }
       }
     } catch (error) {
@@ -421,6 +444,8 @@
   function closeGame() {
     if (!gamePlayer.classList.contains('is-open') || gameIsClosing) return;
     gameIsClosing = true;
+    window.clearTimeout(gameAdminMessageHideTimer);
+    hideGameAdminMessage();
     const transitionId = ++gameTransitionId;
     window.clearTimeout(gameTransitionTimer);
     gameTransitionTimer = null;

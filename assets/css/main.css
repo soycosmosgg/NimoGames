@@ -524,6 +524,73 @@ button {
   transition: opacity 300ms ease;
 }
 
+.game-admin-message {
+  position: absolute;
+  z-index: 2;
+  top: 20%;
+  left: 24px;
+  display: flex;
+  max-width: calc(100vw - 48px);
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.game-admin-message.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.game-admin-avatar {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border: 2px solid rgba(255, 255, 255, .9);
+  border-radius: 50%;
+  background: #18263c;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .4);
+  object-fit: cover;
+}
+
+.game-admin-message-text {
+  position: relative;
+  max-width: min(300px, calc(100vw - 72px));
+  margin: 10px 0 0 20px;
+  overflow-wrap: anywhere;
+  padding: 10px 14px;
+  border: 1px solid #a3a3a3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  color: #202124;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.game-admin-message-text::before,
+.game-admin-message-text::after {
+  position: absolute;
+  top: -9px;
+  left: 14px;
+  border-right: 7px solid transparent;
+  border-bottom: 10px solid #a3a3a3;
+  border-left: 7px solid transparent;
+  content: "";
+}
+
+.game-admin-message-text::after {
+  top: -8px;
+  left: 15px;
+  border-right-width: 6px;
+  border-bottom: 9px solid #fff;
+  border-left-width: 6px;
+}
+
 .game-player.is-playing iframe {
   opacity: 1;
 }
@@ -955,6 +1022,8 @@ button {
   .footer-right { gap: 6px; }
   .action-btn { gap: 5px; font-size: 9px; }
   .divider { height: 16px; }
+  .game-admin-message { left: 12px; max-width: calc(100vw - 24px); }
+  .game-admin-message-text { max-width: calc(100vw - 56px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
