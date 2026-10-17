@@ -10,8 +10,33 @@
     :root {
       color-scheme: dark;
       font-family: Inter, system-ui, sans-serif;
-      background: #10151d;
-      color: #f4f7fb;
+      background: #050608;
+      color: #f4f4f4;
+    }
+    html, body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(42, 82, 255, .15), transparent 22%),
+        radial-gradient(circle at 80% 10%, rgba(255, 72, 176, .12), transparent 18%),
+        linear-gradient(180deg, #07080d 0%, #050608 35%, #040507 70%, #050509 100%);
+    }
+    body {
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background:
+        radial-gradient(circle at 25% 18%, rgba(135, 172, 255, .14), transparent 18%),
+        radial-gradient(circle at 88% 12%, rgba(255, 125, 215, .08), transparent 19%),
+        radial-gradient(circle at 52% 82%, rgba(67, 255, 175, .06), transparent 16%),
+        radial-gradient(circle at 40% 70%, rgba(255, 255, 255, .02), transparent 20%);
+      filter: blur(44px);
+      opacity: .95;
+      content: "";
+      pointer-events: none;
     }
     body { margin: 0; padding: 32px 16px; }
     main { width: min(680px, 100%); margin: 0 auto; }
@@ -38,12 +63,12 @@
     #status { min-height: 1.5em; color: #b9d5ff; }
     #status[data-error="true"] { color: #ffaaaa; }
   </style>
-  <script src="/admin/messages.js" defer></script>
+  <script src="/admin/messages.js?v=remember-secret-1" defer></script>
 </head>
 <body>
   <main>
     <h1>Send a live message</h1>
-    <p>Your message appears in the avatar dialog on open pages within a few seconds, and remains the current message for people who visit later until you send another. The admin secret is only sent when publishing and is not stored by this page.</p>
+    <p>Your message appears in the avatar dialog on open pages within a few seconds. It is shown once per tab, expires after 30 seconds, and is not shown again on later visits. After a successful send, this browser remembers the admin secret for next time.</p>
     <form id="message-form">
       <label>
         Admin secret

@@ -19,14 +19,14 @@ Games and some artwork are provided by third-party sources. Availability, contro
 
 ## Send live messages
 
-The current avatar-dialog message is stored in Cloudflare D1. Pages check for updates every three seconds, and a sent message remains visible to people who visit later until another message is sent. Send messages from `/admin/greetings.html`.
+The first visit and returning-visitor avatar greetings are randomly selected on each page load. An administrator can also send a live message from `/admin/greetings.html`; open pages check every three seconds, show it once per tab, and keep it visible for at least 30 seconds. The message is deleted from D1 after 30 seconds and is not repeated on later visits.
 
 1. Bind the existing D1 database to the Pages project as `VISITORS_DB` under **Settings → Functions → D1 database bindings**.
 2. Run `migrations/0003_create_site_messages.sql` against that database. If you already ran migrations `0001` and `0002`, do not rerun them; `0003` adds the message table.
 3. Create a high-entropy secret (for example, with `python -c "import secrets; print(secrets.token_urlsafe(32))"`). In Pages project settings, add it as the encrypted secret `ADMIN_SECRET`. Do not put this value in the repository or share it with visitors.
 4. Deploy the site with Pages Functions enabled, then open `/admin/greetings.html`, enter the secret, write a message of up to 250 characters, and send it.
 
-The public endpoint only returns the current message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. The admin page does not store the secret; it clears the field after a successful send. Pages that are already open display the message within about three seconds.
+The public endpoint only returns an unexpired message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. The admin page remembers the secret in that browser after a successful send. Pages that are already open display the message within about three seconds.
 
 When running the site from a plain static server locally, live messages are unavailable because Pages Functions and D1 are not available.
 

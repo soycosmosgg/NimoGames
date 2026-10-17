@@ -1,5 +1,6 @@
 const MAX_REQUEST_LENGTH = 8192;
 const MAX_MESSAGE_LENGTH = 250;
+const MESSAGE_TTL_MS = 30000;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -37,11 +38,17 @@ export async function onRequestGet({ env }) {
     const row = await env.VISITORS_DB.prepare(
       'SELECT message, updated_at FROM site_messages WHERE id = 1'
     ).first();
-    if (!row || typeof row.message !== 'string') {
-      throw new Error('The message row has not been initialized.');
-    }
+    if (!row) return jsonResponse({ message: '', updatedAt: 0 });
+    if (typeof row.message !== 'string') throw new Error('The saved message has an invalid format.');
     if (row.message.length > MAX_MESSAGE_LENGTH || !Number.isSafeInteger(row.updated_at)) {
       throw new Error('The saved message has an invalid format.');
+    }
+
+    if (row.message && Date.now() - row.updated_at >= MESSAGE_TTL_MS) {
+      await env.VISITORS_DB.prepare(
+        'DELETE FROM site_messages WHERE id = 1 AND updated_at = ?'
+      ).bind(row.updated_at).run();
+      return jsonResponse({ message: '', updatedAt: 0 });
     }
 
     return jsonResponse({ message: row.message, updatedAt: row.updated_at });

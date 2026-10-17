@@ -42,6 +42,8 @@
     libraryGames.map((game, index) => [game.id, libraryGames.length - index])
   );
   const recentGamesStorageKey = 'nimo-games-recently-played';
+  const avatarGreetingStorageKey = 'nimo-games-visited';
+  const seenLiveMessageStorageKey = 'nimo-games-seen-live-message';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
   let currentMessageUpdatedAt = null;
   let messageTypingTimer = null;
@@ -63,6 +65,22 @@
   let pendingVersionSelection = null;
   const homeGameLimit = 5;
   const messageVisibleDurationMs = 30000;
+  const defaultGreetingMessages = {
+    firstVisit: [
+      'Hi! I hope you like the page!',
+      'Welcome! Enjoy exploring!',
+      'Hey there! Have fun!',
+      "Hello! Glad you're here!",
+      'Welcome to the page!'
+    ],
+    returning: [
+      'Hello again!!!',
+      'Welcome back!',
+      'Nice to see you again!',
+      "You're back! Enjoy your visit!",
+      'Hey again!'
+    ]
+  };
   const networkConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
   function loadRecentGameIds() {
@@ -111,6 +129,22 @@
     const playedIds = new Set(playedGames.map(game => game.id));
     const randomGames = shuffleGames(catalogGames.filter(game => !playedIds.has(game.id)));
     return [...playedGames, ...randomGames].slice(0, homeGameLimit);
+  }
+
+  function showEntryGreeting() {
+    let isReturningVisitor = false;
+    try {
+      isReturningVisitor = window.localStorage.getItem(avatarGreetingStorageKey) === 'true';
+      window.localStorage.setItem(avatarGreetingStorageKey, 'true');
+    } catch (error) {
+      console.error('Could not save the visit state for avatar greetings.', error);
+    }
+
+    const greetings = isReturningVisitor
+      ? defaultGreetingMessages.returning
+      : defaultGreetingMessages.firstVisit;
+    const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+    renderAvatarMessage(greeting);
   }
 
   function hideAvatarMessage() {
@@ -174,7 +208,10 @@
       messageLoadErrorReported = false;
       if (payload.updatedAt !== currentMessageUpdatedAt) {
         currentMessageUpdatedAt = payload.updatedAt;
-        if (payload.message) renderAvatarMessage(payload.message);
+        if (payload.message && !hasSeenLiveMessage(payload.updatedAt)) {
+          rememberLiveMessage(payload.updatedAt);
+          renderAvatarMessage(payload.message);
+        }
       }
     } catch (error) {
       if (!messageLoadErrorReported) {
@@ -186,7 +223,25 @@
     }
   }
 
+  function hasSeenLiveMessage(updatedAt) {
+    try {
+      return window.sessionStorage.getItem(seenLiveMessageStorageKey) === String(updatedAt);
+    } catch (error) {
+      console.error('Could not check whether this tab has shown the live message.', error);
+      return false;
+    }
+  }
+
+  function rememberLiveMessage(updatedAt) {
+    try {
+      window.sessionStorage.setItem(seenLiveMessageStorageKey, String(updatedAt));
+    } catch (error) {
+      console.error('Could not remember that this tab showed the live message.', error);
+    }
+  }
+
   function initializeAvatarMessages() {
+    showEntryGreeting();
     refreshAvatarMessage();
     window.setInterval(refreshAvatarMessage, 3000);
   }
