@@ -213,7 +213,7 @@ button {
 .avatar-message {
   position: absolute;
   z-index: 20;
-  top: calc(100% + 12px);
+  top: calc(100% + 6px);
   right: 0;
   width: max-content;
   max-width: min(270px, calc(100vw - 32px));
@@ -239,15 +239,19 @@ button {
 
 .avatar-message::before {
   position: absolute;
-  top: -6px;
-  right: 11px;
-  width: 10px;
-  height: 10px;
+  top: -7px;
+  right: 10px;
+  width: 12px;
+  height: 12px;
   border-top: 1px solid #a3a3a3;
   border-left: 1px solid #a3a3a3;
   background: #fff;
   content: "";
   transform: rotate(45deg);
+}
+
+.avatar-message.is-visible::before {
+  top: -6px;
 }
 
 .avatar-message.is-visible {
