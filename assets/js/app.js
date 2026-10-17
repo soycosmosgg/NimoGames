@@ -22,15 +22,14 @@
   const librarySectionTitle = document.getElementById('library-section-title');
   const allGamesCount = document.getElementById('all-games-count');
   const recentGamesCount = document.getElementById('recent-games-count');
-  const avatarPicker = document.getElementById('avatar-picker');
-  const avatarImage = document.getElementById('avatar-image');
-  const avatarFileInput = document.getElementById('avatar-file-input');
+  const avatarGreeting = document.getElementById('avatar-greeting');
+  const avatarGreetingAnnouncement = document.getElementById('avatar-greeting-announcement');
   const libraryFilterButtons = document.querySelectorAll('.library-filter');
 
   if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
       !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
-      !libraryGameGrid || !avatarPicker || !avatarImage || !avatarFileInput) {
+      !libraryGameGrid || !avatarGreeting || !avatarGreetingAnnouncement) {
     console.error('No se pudo inicializar Nimo Games: faltan datos o elementos requeridos.');
     return;
   }
@@ -43,8 +42,30 @@
     libraryGames.map((game, index) => [game.id, libraryGames.length - index])
   );
   const recentGamesStorageKey = 'nimo-games-recently-played';
-  const avatarStorageKey = 'nimo-games-profile-avatar';
+  const avatarGreetingStorageKey = 'nimo-games-visited';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
+  const defaultGreetingMessages = {
+    firstVisit: [
+      'Hi! I hope you like the page!',
+      'Welcome! Enjoy exploring!',
+      'Hey there! Have fun!',
+      "Hello! Glad you're here!",
+      'Welcome to the page!'
+    ],
+    returning: [
+      'Hello again!!!',
+      'Welcome back!',
+      'Nice to see you again!',
+      "You're back! Enjoy your visit!",
+      'Hey again!'
+    ]
+  };
+  let greetingMessages = defaultGreetingMessages;
+  let activeGreetingGroup = null;
+  let greetingTypingTimer = null;
+  let greetingHideTimer = null;
+  let greetingRefreshInProgress = false;
+  let greetingLoadErrorReported = false;
   let armedGameId = null;
   let recentGameIds = loadRecentGameIds();
   let homeGames = [];
@@ -109,62 +130,119 @@
     return [...playedGames, ...randomGames].slice(0, homeGameLimit);
   }
 
-  function loadProfileAvatar() {
+  function showAvatarGreeting() {
+    let isReturningVisitor = false;
     try {
-      const savedAvatar = window.localStorage.getItem(avatarStorageKey);
-      if (savedAvatar) {
-        avatarImage.src = savedAvatar;
-        avatarImage.hidden = false;
-        avatarPicker.setAttribute('aria-label', 'Cambiar imagen de perfil');
-        avatarPicker.title = 'Cambiar imagen de perfil';
-      }
+      isReturningVisitor = window.localStorage.getItem(avatarGreetingStorageKey) === 'true';
+      window.localStorage.setItem(avatarGreetingStorageKey, 'true');
     } catch (error) {
-      console.error('No se pudo cargar la imagen de perfil guardada.', error);
+      console.error('No se pudo guardar el estado de visita.', error);
     }
+
+    activeGreetingGroup = isReturningVisitor ? 'returning' : 'firstVisit';
+    renderAvatarGreeting(pickRandomGreeting(activeGreetingGroup));
   }
 
-  function saveProfileAvatar(file) {
-    if (!file.type.startsWith('image/')) {
-      console.error('No se pudo guardar la imagen de perfil: el archivo no es una imagen.');
-      avatarFileInput.value = '';
+  function hideAvatarGreeting() {
+    avatarGreeting.classList.remove('is-visible');
+    avatarGreeting.setAttribute('aria-hidden', 'true');
+    greetingHideTimer = null;
+  }
+
+  function renderAvatarGreeting(greeting) {
+    window.clearInterval(greetingTypingTimer);
+    window.clearTimeout(greetingHideTimer);
+    avatarGreetingAnnouncement.textContent = greeting;
+    avatarGreeting.textContent = '';
+
+    const startGreeting = () => {
+      avatarGreeting.classList.add('is-visible');
+      avatarGreeting.setAttribute('aria-hidden', 'false');
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        avatarGreeting.textContent = greeting;
+        greetingHideTimer = window.setTimeout(hideAvatarGreeting, 3500);
+        return;
+      }
+
+      let characterIndex = 0;
+      greetingTypingTimer = window.setInterval(() => {
+        avatarGreeting.textContent += greeting[characterIndex];
+        characterIndex += 1;
+        if (characterIndex >= greeting.length) {
+          window.clearInterval(greetingTypingTimer);
+          greetingTypingTimer = null;
+          greetingHideTimer = window.setTimeout(hideAvatarGreeting, 3500);
+        }
+      }, 45);
+    };
+
+    if (avatarGreeting.classList.contains('is-visible')) {
+      startGreeting();
       return;
     }
 
-    const imageUrl = URL.createObjectURL(file);
-    const image = new Image();
-    image.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        const size = 128;
-        const cropSize = Math.min(image.naturalWidth, image.naturalHeight);
-        const cropX = (image.naturalWidth - cropSize) / 2;
-        const cropY = (image.naturalHeight - cropSize) / 2;
-        canvas.width = size;
-        canvas.height = size;
-        const context = canvas.getContext('2d');
-        if (!context) throw new Error('No se pudo preparar la imagen de perfil.');
-        context.drawImage(image, cropX, cropY, cropSize, cropSize, 0, 0, size, size);
-        const savedAvatar = canvas.toDataURL('image/jpeg', .82);
-        window.localStorage.setItem(avatarStorageKey, savedAvatar);
-        avatarImage.src = savedAvatar;
-        avatarImage.hidden = false;
-        avatarPicker.setAttribute('aria-label', 'Cambiar imagen de perfil');
-        avatarPicker.title = 'Cambiar imagen de perfil';
-      } catch (error) {
-        console.error('No se pudo guardar la imagen de perfil.', error);
-        avatarPicker.title = 'No se pudo guardar la imagen de perfil';
-      } finally {
-        URL.revokeObjectURL(imageUrl);
-        avatarFileInput.value = '';
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(startGreeting);
+    });
+  }
+
+  function pickRandomGreeting(group) {
+    const messages = greetingMessages[group];
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
+
+  function parseGreetingMessages(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    const firstVisit = parseGreetingList(payload.firstVisit);
+    const returning = parseGreetingList(payload.returning);
+    if (!firstVisit || !returning) return null;
+    return { firstVisit, returning };
+  }
+
+  function parseGreetingList(messages) {
+    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 10) return null;
+    const trimmedMessages = messages.map(message =>
+      typeof message === 'string' ? message.trim() : ''
+    );
+    if (trimmedMessages.some(message => message.length === 0 || message.length > 120)) return null;
+    return trimmedMessages;
+  }
+
+  async function refreshGreetingMessages() {
+    if (greetingRefreshInProgress) return;
+    greetingRefreshInProgress = true;
+    try {
+      const response = await fetch('/api/greetings', { cache: 'no-store' });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || `Request failed with status ${response.status}.`);
       }
-    };
-    image.onerror = () => {
-      console.error('No se pudo leer la imagen de perfil seleccionada.');
-      avatarPicker.title = 'No se pudo leer la imagen seleccionada';
-      URL.revokeObjectURL(imageUrl);
-      avatarFileInput.value = '';
-    };
-    image.src = imageUrl;
+
+      const updatedMessages = parseGreetingMessages(payload);
+      if (!updatedMessages) throw new Error('The greeting response has an invalid format.');
+      greetingLoadErrorReported = false;
+
+      if (JSON.stringify(updatedMessages) !== JSON.stringify(greetingMessages)) {
+        greetingMessages = updatedMessages;
+        if (activeGreetingGroup) {
+          renderAvatarGreeting(pickRandomGreeting(activeGreetingGroup));
+        }
+      }
+    } catch (error) {
+      if (!greetingLoadErrorReported) {
+        console.error('[Nimo Games] Could not load live greetings; using the built-in messages.', error);
+        greetingLoadErrorReported = true;
+      }
+    } finally {
+      greetingRefreshInProgress = false;
+    }
+  }
+
+  async function initializeAvatarGreeting() {
+    await refreshGreetingMessages();
+    showAvatarGreeting();
+    window.setInterval(refreshGreetingMessages, 3000);
   }
 
   function updateConnectionStatus() {
@@ -608,11 +686,6 @@
   }
 
   closeGameButton.addEventListener('click', closeGame);
-  avatarPicker.addEventListener('click', () => avatarFileInput.click());
-  avatarFileInput.addEventListener('change', () => {
-    const [file] = avatarFileInput.files;
-    if (file) saveProfileAvatar(file);
-  });
   window.addEventListener('online', updateConnectionStatus);
   window.addEventListener('offline', updateConnectionStatus);
   if (networkConnection && typeof networkConnection.addEventListener === 'function') {
@@ -676,8 +749,8 @@
 
   updateClock();
   updateConnectionStatus();
+  initializeAvatarGreeting();
   window.setInterval(updateClock, 30000);
-  loadProfileAvatar();
   renderFeaturedGames();
   homeGames = buildHomeGames();
   recentGamesCount.textContent = String(recentGameIds.length);

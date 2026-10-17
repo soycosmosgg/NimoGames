@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#10151d">
+  <title>Edit avatar greetings | Nimo Games</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, sans-serif;
+      background: #10151d;
+      color: #f4f7fb;
+    }
+    body { margin: 0; padding: 32px 16px; }
+    main { width: min(680px, 100%); margin: 0 auto; }
+    h1 { margin-top: 0; font-size: 26px; }
+    p { color: #aeb9c8; line-height: 1.5; }
+    form, fieldset {
+      display: grid;
+      gap: 16px;
+    }
+    fieldset {
+      padding: 18px;
+      border: 1px solid #394454;
+      border-radius: 12px;
+    }
+    legend { padding: 0 8px; font-weight: 700; }
+    label { display: grid; gap: 8px; font-weight: 600; }
+    input, textarea, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #4a5667;
+      border-radius: 8px;
+      background: #1b2430;
+      color: #f4f7fb;
+      font: inherit;
+    }
+    textarea { min-height: 150px; resize: vertical; line-height: 1.5; }
+    button { width: auto; padding-inline: 20px; background: #2966c2; cursor: pointer; }
+    button:disabled { cursor: wait; opacity: .65; }
+    #status { min-height: 1.5em; color: #b9d5ff; }
+    #status[data-error="true"] { color: #ffaaaa; }
+  </style>
+  <script src="/admin/greetings.js" defer></script>
+</head>
+<body>
+  <main>
+    <h1>Avatar greetings</h1>
+    <p>Enter one greeting per line. Changes appear on open pages within a few seconds. The admin secret is sent only when saving and is not stored by this page.</p>
+    <form id="greetings-form">
+      <label>
+        Admin secret
+        <input id="admin-secret" type="password" autocomplete="off" required>
+      </label>
+      <fieldset>
+        <legend>First-time visitors</legend>
+        <label for="first-visit-greetings">One message per line</label>
+        <textarea id="first-visit-greetings" maxlength="1209" required></textarea>
+      </fieldset>
+      <fieldset>
+        <legend>Returning visitors</legend>
+        <label for="returning-greetings">One message per line</label>
+        <textarea id="returning-greetings" maxlength="1209" required></textarea>
+      </fieldset>
+      <button id="save-greetings" type="submit">Save greetings</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+</body>
+</html>

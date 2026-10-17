@@ -193,24 +193,77 @@ button {
 
 .avatar {
   position: relative;
+  display: inline-block;
   width: 32px;
   height: 32px;
   flex: 0 0 auto;
   overflow: hidden;
-  border: 2px solid rgba(140, 180, 255, .85);
-  border-radius: 8px;
+  border: 0;
+  border-radius: 50%;
   background: linear-gradient(135deg, #18263c, #3d6296);
-  box-shadow: 0 0 8px rgba(90, 160, 255, .25);
   cursor: pointer;
-  transition: border-color .15s, box-shadow .15s, transform .15s;
 }
 
-.avatar:hover,
+.avatar-greeting-wrap {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.avatar-greeting {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 12px);
+  right: 0;
+  width: max-content;
+  max-width: min(270px, calc(100vw - 32px));
+  padding: 10px 14px;
+  border: 1px solid #a3a3a3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .2);
+  color: #202124;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transform-origin: top right;
+  transition: opacity .8s ease, transform .8s ease;
+}
+
+.avatar-greeting::before {
+  position: absolute;
+  top: -6px;
+  right: 11px;
+  width: 10px;
+  height: 10px;
+  border-top: 1px solid #a3a3a3;
+  border-left: 1px solid #a3a3a3;
+  background: #fff;
+  content: "";
+  transform: rotate(45deg);
+}
+
+.avatar-greeting.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.avatar-greeting-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .avatar:focus-visible {
-  border-color: #c4e0ff;
-  box-shadow: 0 0 12px rgba(90, 160, 255, .45);
   outline: 0;
-  transform: scale(1.06);
+  box-shadow: 0 0 0 2px #c4e0ff;
 }
 
 .avatar img {
@@ -227,10 +280,6 @@ button {
   content: "";
   background: linear-gradient(135deg, rgba(255, 255, 255, .3), transparent 60%);
   pointer-events: none;
-}
-
-.avatar-file-input {
-  display: none;
 }
 
 .content {
