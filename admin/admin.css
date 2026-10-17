@@ -268,24 +268,6 @@ button, input, textarea { font: inherit; }
 }
 
 .admin-nav-link svg { width: 16px; height: 16px; flex: 0 0 auto; }
-.admin-sidebar-spacer { flex: 1; }
-
-.admin-sidebar-footer {
-  padding: 12px 10px 4px;
-  border-top: 1px solid var(--admin-border);
-  color: #6b7280;
-  font-size: 10px;
-  line-height: 1.55;
-}
-
-.admin-sidebar-footer strong {
-  display: block;
-  margin-bottom: 3px;
-  color: #374151;
-  font-size: 11px;
-  font-weight: 600;
-}
-
 .admin-workspace { min-height: 100vh; margin-left: 248px; }
 
 .admin-topbar {
@@ -564,7 +546,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   }
 
   .admin-brand { padding: 0 2px 11px; }
-  .admin-nav-label, .admin-sidebar-spacer, .admin-sidebar-footer { display: none; }
+  .admin-nav-label { display: none; }
   .admin-nav { display: flex; }
   .admin-nav-link { min-height: 35px; padding-inline: 9px; }
   .admin-workspace { margin-left: 0; }
