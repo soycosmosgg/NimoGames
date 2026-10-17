@@ -62,6 +62,7 @@
   let gameIsClosing = false;
   let pendingVersionSelection = null;
   const homeGameLimit = 5;
+  const messageVisibleDurationMs = 30000;
   const networkConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
 
   function loadRecentGameIds() {
@@ -130,7 +131,7 @@
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         avatarMessage.textContent = message;
-        messageHideTimer = window.setTimeout(hideAvatarMessage, 3500);
+        messageHideTimer = window.setTimeout(hideAvatarMessage, messageVisibleDurationMs);
         return;
       }
 
@@ -141,7 +142,7 @@
         if (characterIndex >= message.length) {
           window.clearInterval(messageTypingTimer);
           messageTypingTimer = null;
-          messageHideTimer = window.setTimeout(hideAvatarMessage, 3500);
+          messageHideTimer = window.setTimeout(hideAvatarMessage, messageVisibleDurationMs);
         }
       }, 45);
     };
