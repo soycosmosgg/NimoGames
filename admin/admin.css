@@ -488,12 +488,7 @@ button, input, textarea { font: inherit; }
   line-height: 1.5;
 }
 
-.admin-compose-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(220px, .85fr);
-  align-items: start;
-  gap: 14px;
-}
+.admin-compose-grid { width: min(100%, 760px); }
 
 .admin-form { display: grid; gap: 18px; padding: 18px; }
 .admin-field { display: grid; gap: 7px; }
@@ -541,62 +536,6 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 #status { min-height: 1.5em; margin: 0; color: #1d4ed8; font-size: 11px; line-height: 1.5; }
 #status[data-error="true"] { color: #b42318; }
 
-.admin-preview-card { padding: 16px; }
-
-.admin-preview-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin: 0 0 13px;
-  color: #374151;
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.admin-preview-live { display: inline-flex; align-items: center; gap: 6px; color: #15803d; font-size: 10px; font-weight: 600; }
-.admin-preview-live::before { width: 6px; height: 6px; border-radius: 50%; background: #16a34a; content: ""; }
-
-.admin-preview-stage {
-  display: flex;
-  min-height: 180px;
-  align-items: flex-end;
-  justify-content: center;
-  overflow: hidden;
-  padding: 14px;
-  border: 1px solid var(--admin-border);
-  border-radius: 4px;
-  background: #f7f8fa;
-}
-
-.admin-preview-dialog {
-  position: relative;
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background: #fff;
-  color: #374151;
-  font-size: 11px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-
-.admin-preview-dialog::after {
-  position: absolute;
-  right: 20px;
-  bottom: -6px;
-  width: 10px;
-  height: 10px;
-  transform: rotate(45deg);
-  border-right: 1px solid #d1d5db;
-  border-bottom: 1px solid #d1d5db;
-  background: #fff;
-  content: "";
-}
-
-.admin-preview-caption { margin: 10px 0 0; color: #6b7280; font-size: 10px; line-height: 1.5; }
-
 .admin-note {
   display: flex;
   align-items: flex-start;
@@ -612,9 +551,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 @media (max-width: 900px) {
   .admin-sidebar { width: 220px; }
   .admin-workspace { margin-left: 220px; }
-  .admin-compose-grid { grid-template-columns: minmax(0, 1fr); }
   .admin-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .admin-preview-stage { min-height: 135px; }
 }
 
 @media (max-width: 680px) {

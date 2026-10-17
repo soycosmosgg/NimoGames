@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#07111a">
   <title>Mensajes en vivo | Administración de Nimo Games</title>
   <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-7">
-  <script src="/admin/messages.js?v=admin-dashboard-2" defer></script>
+  <script src="/admin/messages.js?v=admin-dashboard-8" defer></script>
 </head>
 <body>
   <div class="admin-shell">
@@ -58,21 +58,15 @@
             <h1 id="page-title">Mensajes en vivo</h1>
             <p class="admin-description">Redacta un aviso y envíalo a los visitantes que tienen Nimo Games abierto.</p>
           </div>
-          <span class="admin-pill"><span class="admin-pill-dot" aria-hidden="true"></span>Temporal · 10 s</span>
         </section>
 
         <div class="admin-compose-grid">
           <section class="admin-card" aria-labelledby="form-title">
             <header class="admin-card-header">
               <h2 id="form-title">Redactar mensaje</h2>
-              <p>El aviso se muestra una vez por pestaña y no vuelve a aparecer en visitas posteriores.</p>
+              <p>Se mostrará una vez por pestaña y caducará automáticamente a los 10 segundos.</p>
             </header>
             <form class="admin-form" id="message-form">
-              <div class="admin-field">
-                <label class="admin-label" for="admin-secret">Clave de administrador</label>
-                <input class="admin-input" id="admin-secret" type="password" autocomplete="current-password" required>
-                <p class="admin-help">Se recordará en este navegador después de un envío correcto.</p>
-              </div>
               <div class="admin-field">
                 <label class="admin-label" for="message">Texto del mensaje</label>
                 <textarea class="admin-input" id="message" maxlength="250" placeholder="Escribe el aviso para los visitantes…" required></textarea>
@@ -89,21 +83,10 @@
                   </svg>
                   Enviar mensaje
                 </button>
-                <p id="status" role="status" aria-live="polite"></p>
+                <p id="status" role="status" aria-live="polite">                </p>
               </div>
             </form>
           </section>
-
-          <aside class="admin-card admin-preview-card" aria-labelledby="preview-title">
-            <h2 class="admin-preview-title" id="preview-title">
-              Vista previa
-              <span class="admin-preview-live">En vivo</span>
-            </h2>
-            <div class="admin-preview-stage">
-              <div class="admin-preview-dialog" id="message-preview">Tu mensaje aparecerá aquí.</div>
-            </div>
-            <p class="admin-preview-caption">Así verán el aviso los visitantes en el sitio.</p>
-          </aside>
         </div>
 
         <aside class="admin-note">

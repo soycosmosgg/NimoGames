@@ -1,21 +1,18 @@
 (() => {
   const form = document.getElementById('message-form');
-  const adminSecret = document.getElementById('admin-secret');
   const messageInput = document.getElementById('message');
   const messageCount = document.getElementById('message-count');
-  const messagePreview = document.getElementById('message-preview');
   const sendButton = document.getElementById('send-message');
   const status = document.getElementById('status');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
+  let adminSecret = '';
 
   function displayStatus(message, isError = false) {
     status.textContent = message;
     status.dataset.error = String(isError);
   }
 
-  function updateMessagePreview() {
-    const message = messageInput.value.trim();
-    messagePreview.textContent = message || 'Tu mensaje aparecerá aquí.';
+  function updateMessageCount() {
     messageCount.textContent = `${messageInput.value.length} / 250`;
   }
 
@@ -54,14 +51,17 @@
     return result;
   }
 
-  messageInput.addEventListener('input', updateMessagePreview);
-  updateMessagePreview();
+  messageInput.addEventListener('input', updateMessageCount);
+  updateMessageCount();
 
   try {
-    adminSecret.value = window.localStorage.getItem(adminSecretStorageKey) || '';
+    adminSecret = window.localStorage.getItem(adminSecretStorageKey) || '';
+    if (!adminSecret) {
+      displayStatus('La sesión de administrador no está disponible. Vuelve al panel e introduce la clave.', true);
+    }
   } catch (error) {
     console.error('[messages-admin] Could not load the saved admin secret.', error);
-    displayStatus('No se pudo acceder a la clave guardada en este navegador.', true);
+    displayStatus('No se pudo acceder a la sesión de administrador. Vuelve al panel e introduce la clave.', true);
   }
 
   async function loadCurrentMessage() {
@@ -69,7 +69,7 @@
       const response = await fetch('/api/messages', { cache: 'no-store' });
       const result = await readApiResponse(response);
       messageInput.value = result.message;
-      updateMessagePreview();
+      updateMessageCount();
       displayStatus(result.message ? 'Mensaje actual cargado.' : 'Todavía no se ha enviado ningún mensaje.');
     } catch (error) {
       console.error('[messages-admin] Failed to load current message.', error);
@@ -86,25 +86,19 @@
       const response = await fetch('/api/messages', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${adminSecret.value}`,
+          'Authorization': `Bearer ${adminSecret}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ message: messageInput.value })
       });
-      const result = await readApiResponse(response);
+      await readApiResponse(response);
 
       messageInput.value = '';
-      updateMessagePreview();
-      try {
-        window.localStorage.setItem(adminSecretStorageKey, adminSecret.value);
-      } catch (error) {
-        console.error('[messages-admin] Could not save the admin secret in this browser.', error);
-        displayStatus('Mensaje enviado, pero no se pudo guardar la clave en este navegador.', true);
-        return;
-      }
+      updateMessageCount();
       displayStatus('Mensaje enviado. Se mostrará una vez por pestaña y caducará a los 10 segundos.');
     } catch (error) {
       if (error instanceof Error && error.name === 'UnauthorizedError') {
+        adminSecret = '';
         try {
           window.localStorage.removeItem(adminSecretStorageKey);
         } catch (storageError) {
