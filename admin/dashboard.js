@@ -1,6 +1,8 @@
 (() => {
   const loginForm = document.getElementById('admin-login-form');
+  const languageSelect = document.getElementById('admin-language');
   const secretInput = document.getElementById('admin-secret');
+  const secretToggle = document.getElementById('admin-secret-toggle');
   const unlockButton = document.getElementById('admin-unlock');
   const loginStatus = document.getElementById('admin-login-status');
   const gate = document.getElementById('admin-gate');
@@ -13,14 +15,105 @@
   const chart = document.getElementById('views-chart');
   const statsStatus = document.getElementById('stats-status');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
+  const adminLanguageStorageKey = 'nimo-games-admin-language';
   const numberFormat = new Intl.NumberFormat('es-ES');
   const dayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'short', timeZone: 'UTC' });
+  const translations = {
+    es: {
+      gateLabel: 'Acceso al panel de administración',
+      homeLabel: 'Nimo Games, página principal',
+      brandLabel: 'Nimo Games',
+      eyebrow: 'Administración',
+      title: 'Iniciar sesión',
+      description: 'Introduce tu clave para continuar.',
+      secretLabel: 'Clave de administrador',
+      showSecret: 'Mostrar clave',
+      hideSecret: 'Ocultar clave',
+      submit: 'Acceder al panel',
+      asideKicker: 'NIMO GAMES · ADMIN',
+      asideTitle: 'Todo el control.<br>En un solo lugar.',
+      asideDescription: 'Gestiona la actividad y las herramientas de tu sitio.',
+      languageLabel: 'Seleccionar idioma',
+      checking: 'Verificando clave…',
+      invalidSecret: 'La clave de administrador no es válida.',
+      unavailable: 'Las estadísticas aún no están disponibles en este servidor. Despliégalo con Pages Functions habilitado.',
+      invalidResponse: 'El servidor devolvió una respuesta no válida',
+      serviceUnavailable: 'El servicio de administración no está configurado. Revisa la base de datos y ADMIN_SECRET en Pages.',
+      statsUnavailable: 'No se pudieron cargar las estadísticas',
+      invalidStats: 'El servidor devolvió estadísticas con un formato no válido.',
+      expiredSecret: 'La clave dejó de ser válida. Desbloquea el panel de nuevo.',
+      verifyFailed: 'No se pudo verificar la clave.'
+    },
+    en: {
+      gateLabel: 'Admin panel sign in',
+      homeLabel: 'Nimo Games, home page',
+      brandLabel: 'Nimo Games',
+      eyebrow: 'Administration',
+      title: 'Sign in',
+      description: 'Enter your key to continue.',
+      secretLabel: 'Admin key',
+      showSecret: 'Show key',
+      hideSecret: 'Hide key',
+      submit: 'Access the panel',
+      asideKicker: 'NIMO GAMES · ADMIN',
+      asideTitle: 'Everything in control.<br>All in one place.',
+      asideDescription: 'Manage your site activity and tools.',
+      languageLabel: 'Select language',
+      checking: 'Verifying key…',
+      invalidSecret: 'The admin key is invalid.',
+      unavailable: 'Statistics are not available on this server yet. Deploy with Pages Functions enabled.',
+      invalidResponse: 'The server returned an invalid response',
+      serviceUnavailable: 'The admin service is not configured. Check the database and ADMIN_SECRET in Pages.',
+      statsUnavailable: 'Could not load statistics',
+      invalidStats: 'The server returned statistics in an invalid format.',
+      expiredSecret: 'The key is no longer valid. Sign in again.',
+      verifyFailed: 'Could not verify the key.'
+    }
+  };
+  let currentLanguage = 'es';
+  let lastLoginMessage = '';
   let refreshTimer = null;
   let activeSecret = '';
   let refreshInProgress = false;
 
   function setLoginStatus(message) {
-    loginStatus.textContent = message;
+    lastLoginMessage = message;
+    const text = translations[currentLanguage];
+    let translatedMessage = message;
+    if (currentLanguage === 'en') {
+      const exactMessages = {
+        'Verificando clave…': text.checking,
+        'La clave de administrador no es válida.': text.invalidSecret,
+        'Las estadísticas aún no están disponibles en este servidor. Despliégalo con Pages Functions habilitado.': text.unavailable,
+        'El servidor devolvió estadísticas con un formato no válido.': text.invalidStats,
+        'El servicio de administración no está configurado. Revisa la base de datos y ADMIN_SECRET en Pages.': text.serviceUnavailable,
+        'No se pudo verificar la clave.': text.verifyFailed,
+        'La clave dejó de ser válida. Desbloquea el panel de nuevo.': text.expiredSecret
+      };
+      translatedMessage = exactMessages[message] || message
+        .replace(/^El servidor devolvió una respuesta no válida/, text.invalidResponse)
+        .replace(/^No se pudieron cargar las estadísticas/, text.statsUnavailable);
+    }
+    loginStatus.textContent = translatedMessage;
+  }
+
+  function setLanguage(language) {
+    currentLanguage = translations[language] ? language : 'es';
+    const text = translations[currentLanguage];
+    document.documentElement.lang = currentLanguage;
+    document.title = currentLanguage === 'en' ? 'Admin panel | Nimo Games' : 'Panel de administración | Nimo Games';
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+      element.textContent = text[element.dataset.i18n];
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach(element => {
+      element.setAttribute('aria-label', text[element.dataset.i18nAriaLabel]);
+    });
+    document.getElementById('unlock-title').textContent = text.title;
+    document.getElementById('admin-aside-title').innerHTML = text.asideTitle;
+    document.querySelector('.admin-gate-language').setAttribute('aria-label', text.languageLabel);
+    languageSelect.setAttribute('aria-label', text.languageLabel);
+    secretToggle.setAttribute('aria-label', secretInput.type === 'password' ? text.showSecret : text.hideSecret);
+    setLoginStatus(lastLoginMessage);
   }
 
   function showStatsStatus(message, isError = false) {
@@ -211,6 +304,24 @@
     unlock(secretInput.value);
   });
 
+  secretToggle.addEventListener('click', () => {
+    const isVisible = secretInput.type === 'text';
+    secretInput.type = isVisible ? 'password' : 'text';
+    secretToggle.setAttribute('aria-pressed', String(!isVisible));
+    const text = translations[currentLanguage];
+    secretToggle.setAttribute('aria-label', isVisible ? text.showSecret : text.hideSecret);
+    secretInput.focus();
+  });
+
+  languageSelect.addEventListener('change', () => {
+    setLanguage(languageSelect.value);
+    try {
+      window.localStorage.setItem(adminLanguageStorageKey, currentLanguage);
+    } catch (error) {
+      console.error('[admin-dashboard] Could not save the language preference.', error);
+    }
+  });
+
   logoutButton.addEventListener('click', () => {
     lockPanel();
   });
@@ -221,4 +332,11 @@
     console.error('[admin-dashboard] Could not load the saved admin secret.', error);
     setLoginStatus('No se pudo acceder a la clave guardada. Introdúcela para desbloquear el panel.');
   }
+  try {
+    const savedLanguage = window.localStorage.getItem(adminLanguageStorageKey);
+    if (savedLanguage && translations[savedLanguage]) languageSelect.value = savedLanguage;
+  } catch (error) {
+    console.error('[admin-dashboard] Could not load the saved language preference.', error);
+  }
+  setLanguage(languageSelect.value);
 })();

@@ -4,33 +4,74 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#07111a">
+  <meta name="theme-color" content="#282a30">
   <title>Panel de administración | Nimo Games</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-8">
-  <script src="/admin/dashboard.js?v=admin-dashboard-4" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-18">
+  <script src="/admin/dashboard.js?v=admin-dashboard-6" defer></script>
 </head>
 <body>
   <main class="admin-gate" id="admin-gate">
-    <section class="admin-gate-card" aria-labelledby="unlock-title">
-      <div class="admin-brand admin-gate-brand">
+    <section class="admin-gate-main" aria-label="Acceso al panel de administración" data-i18n-aria-label="gateLabel">
+      <a class="admin-gate-brand" href="/" aria-label="Nimo Games, página principal" data-i18n-aria-label="homeLabel">
         <img class="admin-logo" src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+      </a>
+      <label class="admin-gate-language" aria-label="Seleccionar idioma">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+        </svg>
+        <select id="admin-language" aria-label="Seleccionar idioma">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+        <svg class="admin-gate-language-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m7 10 5 5 5-5" />
+        </svg>
+      </label>
+      <div class="admin-gate-card">
+        <div class="admin-gate-heading">
+          <p class="admin-eyebrow" data-i18n="eyebrow">Administración</p>
+          <h1 id="unlock-title">Iniciar sesión</h1>
+          <p class="admin-gate-description" data-i18n="description">Introduce tu clave para continuar.</p>
+        </div>
+        <form class="admin-gate-form" id="admin-login-form" aria-labelledby="unlock-title">
+          <div class="admin-field">
+            <label class="admin-label" for="admin-secret" data-i18n="secretLabel">Clave de administrador</label>
+            <div class="admin-gate-password">
+              <input class="admin-input" id="admin-secret" type="password" autocomplete="current-password" required autofocus>
+              <button class="admin-gate-password-toggle" id="admin-secret-toggle" type="button" aria-label="Mostrar clave" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="admin-button admin-gate-submit" id="admin-unlock" type="submit">
+            <span data-i18n="submit">Acceder al panel</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+          <p class="admin-gate-error" id="admin-login-status" role="status" aria-live="polite"></p>
+        </form>
       </div>
-      <p class="admin-eyebrow">Acceso privado</p>
-      <h1 id="unlock-title">Desbloquear panel</h1>
-      <p class="admin-gate-description">Introduce la clave de administrador para acceder a las estadísticas y herramientas del sitio.</p>
-      <form class="admin-gate-form" id="admin-login-form">
-        <label class="admin-label" for="admin-secret">Clave de administrador</label>
-        <input class="admin-input" id="admin-secret" type="password" autocomplete="current-password" required autofocus>
-        <button class="admin-button" id="admin-unlock" type="submit">
-          Desbloquear
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <rect x="4" y="10" width="16" height="11" rx="2" />
-            <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
-          </svg>
-        </button>
-        <p class="admin-gate-error" id="admin-login-status" role="status" aria-live="polite"></p>
-      </form>
     </section>
+    <aside class="admin-gate-aside" aria-label="Nimo Games" data-i18n-aria-label="brandLabel">
+      <div class="admin-gate-games" aria-hidden="true">
+        <img src="https://cdn-ngames.pages.dev/images/945360/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/285900/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/3527290/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/367520/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/98266/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/302895/hero.webp" alt="">
+      </div>
+      <div class="admin-gate-aside-copy">
+        <p class="admin-gate-aside-kicker" data-i18n="asideKicker">NIMO GAMES · ADMIN</p>
+        <h2 id="admin-aside-title">Todo el control.<br>En un solo lugar.</h2>
+        <p data-i18n="asideDescription">Gestiona la actividad y las herramientas de tu sitio.</p>
+      </div>
+    </aside>
   </main>
 
   <div class="admin-shell" id="admin-dashboard" hidden>

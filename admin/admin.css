@@ -33,50 +33,210 @@ button, input, textarea { font: inherit; }
 
 .admin-gate {
   display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
   min-height: 100vh;
-  place-items: center;
-  padding: 24px;
-  background: #f7f8fa;
+  background: #282a30;
 }
 
-.admin-gate-card {
-  width: min(100%, 410px);
-  padding: 30px;
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
-  background: #fff;
+.admin-gate-main {
+  position: relative;
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 88px 48px 48px;
+  background: #282a30;
 }
 
 .admin-gate-brand {
-  justify-content: center;
-  margin-bottom: 44px;
+  position: absolute;
+  top: 30px;
+  left: 32px;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
 }
+
+.admin-gate-brand .admin-logo { filter: brightness(0) invert(1) opacity(.88); }
+
+.admin-gate-language {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 5;
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid #45474e;
+  border-radius: 5px;
+  background: rgba(43, 45, 51, .94);
+  color: #e5e7eb;
+}
+
+.admin-gate-language > svg:first-child { width: 15px; height: 15px; }
+
+.admin-gate-language select {
+  max-width: 100px;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.admin-gate-language select:focus-visible { outline: 2px solid #60a5fa; outline-offset: 3px; }
+.admin-gate-language select option { background: #2b2d33; color: #f9fafb; }
+.admin-gate-language-chevron { width: 12px; height: 12px; }
+
+.admin-gate-card {
+  width: min(100%, 360px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.admin-gate-heading { margin-bottom: 25px; }
+
+.admin-gate-heading .admin-eyebrow { margin-bottom: 10px; }
 
 .admin-gate-card h1 {
   margin: 0;
-  color: #20252b;
-  font-size: 23px;
+  color: #f3f4f6;
+  font-size: 25px;
   font-weight: 650;
   letter-spacing: -.035em;
 }
 
 .admin-gate-description {
-  margin: 9px 0 24px;
-  color: var(--admin-muted);
+  margin: 8px 0 0;
+  color: #b6bac2;
   font-size: 13px;
-  line-height: 1.65;
+  line-height: 1.55;
 }
 
-.admin-gate-form { display: grid; gap: 14px; }
-.admin-gate-form .admin-button { width: 100%; margin-top: 4px; cursor: pointer; }
+.admin-gate-form { display: grid; gap: 17px; }
+.admin-gate-form .admin-field { gap: 8px; }
+.admin-gate-form .admin-label { color: #e1e3e8; font-size: 12px; }
+.admin-gate-form .admin-input {
+  min-height: 44px;
+  padding: 9px 42px 9px 12px;
+  border-color: #50535b;
+  background: #1e2025;
+  color: #f3f4f6;
+  font-size: 13px;
+}
+.admin-gate-form .admin-input:focus { border-color: #2563eb; }
+.admin-gate-form .admin-input::placeholder { color: #9297a1; }
+
+.admin-gate-password { position: relative; }
+
+.admin-gate-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #b6bac2;
+  cursor: pointer;
+}
+
+.admin-gate-password-toggle:hover { background: #383b42; color: #fff; }
+.admin-gate-password-toggle:focus-visible { outline: 2px solid #2563eb; outline-offset: 1px; }
+.admin-gate-password-toggle svg { width: 17px; height: 17px; }
+
+.admin-gate-form .admin-gate-submit {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 2px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
 .admin-gate-form .admin-button:disabled { cursor: wait; opacity: .65; }
 
 .admin-gate-error {
   min-height: 1.4em;
-  margin: 0;
+  margin: -8px 0 0;
   color: #b42318;
   font-size: 12px;
   line-height: 1.5;
+}
+
+.admin-gate-aside {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+  gap: 34px;
+  padding: 10vh clamp(36px, 5vw, 76px) 8%;
+  background: #282a30;
+  color: #f3f4f6;
+}
+
+.admin-gate-games {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 50vh;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.admin-gate-games img {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .16);
+}
+
+.admin-gate-aside-copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin: 0;
+}
+
+.admin-gate-aside-kicker {
+  margin: 0 0 12px;
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .09em;
+}
+
+.admin-gate-aside-copy h2 {
+  margin: 0;
+  color: #f9fafb;
+  font-size: clamp(27px, 3vw, 38px);
+  font-weight: 650;
+  letter-spacing: -.04em;
+  line-height: 1.15;
+}
+
+.admin-gate-aside-copy > p:last-child {
+  max-width: 360px;
+  margin: 13px 0 0;
+  color: #d1d5db;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .admin-topbar-actions { display: flex; align-items: center; gap: 18px; }
@@ -537,6 +697,17 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 }
 
 @media (max-width: 680px) {
+  .admin-gate { grid-template-columns: 1fr; }
+  .admin-gate-main { min-height: 54svh; padding: 78px 24px 36px; }
+  .admin-gate-brand { top: 23px; left: 24px; }
+  .admin-gate-language { top: 16px; right: 16px; min-height: 34px; }
+  .admin-gate-aside { min-height: 36svh; gap: 14px; padding: 22px 28px 24px; }
+  .admin-gate-games { width: 100%; height: 16svh; gap: 8px; }
+  .admin-gate-games img { border-radius: 6px; }
+  .admin-gate-aside-copy { margin: 0; padding-top: 0; }
+  .admin-gate-aside-copy h2 { font-size: 24px; }
+  .admin-gate-aside-copy > p:last-child { margin-top: 7px; font-size: 12px; }
+
   .admin-sidebar {
     position: static;
     width: auto;
@@ -567,8 +738,10 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 }
 
 @media (max-width: 420px) {
-  .admin-gate { padding: 16px; }
-  .admin-gate-card { padding: 22px; }
+  .admin-gate-main { min-height: 54svh; padding-inline: 22px; }
+  .admin-gate-brand { left: 22px; }
+  .admin-gate-card h1 { font-size: 23px; }
+  .admin-gate-aside { min-height: 36svh; padding-inline: 22px; }
   .admin-overview { grid-template-columns: 1fr; }
   .admin-topbar { padding-inline: 15px; }
   .admin-content { padding-inline: 15px; }
