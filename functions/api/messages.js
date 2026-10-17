@@ -1,3 +1,5 @@
+import { matchesAdminSecret } from '../_utils/admin-auth.js';
+
 const MAX_REQUEST_LENGTH = 8192;
 const MAX_MESSAGE_LENGTH = 250;
 const MESSAGE_TTL_MS = 10000;
@@ -10,23 +12,6 @@ function jsonResponse(body, status = 200) {
       'Cache-Control': 'no-store'
     }
   });
-}
-
-async function matchesAdminSecret(suppliedSecret, configuredSecret) {
-  const encoder = new TextEncoder();
-  const [suppliedDigest, configuredDigest] = await Promise.all([
-    crypto.subtle.digest('SHA-256', encoder.encode(suppliedSecret)),
-    crypto.subtle.digest('SHA-256', encoder.encode(configuredSecret))
-  ]);
-  const suppliedBytes = new Uint8Array(suppliedDigest);
-  const configuredBytes = new Uint8Array(configuredDigest);
-  let difference = 0;
-
-  for (let index = 0; index < configuredBytes.length; index += 1) {
-    difference |= suppliedBytes[index] ^ configuredBytes[index];
-  }
-
-  return difference === 0;
 }
 
 export async function onRequestGet({ env }) {

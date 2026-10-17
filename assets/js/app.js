@@ -317,12 +317,12 @@
     }
   }
 
-  async function updateVisitorCount(sessionId) {
+  async function updateVisitorCount(sessionId, pageView = false) {
     try {
       const response = await window.fetch('/api/visitors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ sessionId, pageView }),
         cache: 'no-store'
       });
       if (!response.ok) {
@@ -344,7 +344,7 @@
     const sessionId = getVisitorSessionId();
     if (!sessionId) return;
 
-    updateVisitorCount(sessionId);
+    updateVisitorCount(sessionId, true);
     window.setInterval(() => updateVisitorCount(sessionId), 30000);
   }
 

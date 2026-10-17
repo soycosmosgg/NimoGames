@@ -43,6 +43,7 @@ export async function onRequestPost({ request, env }) {
 
   const now = Math.floor(Date.now() / 1000);
   const cutoff = now - ACTIVE_VISITOR_TTL_SECONDS;
+  const today = new Date(now * 1000).toISOString().slice(0, 10);
 
   try {
     await env.VISITORS_DB.prepare(
@@ -62,6 +63,14 @@ export async function onRequestPost({ request, env }) {
     if (!result || !Number.isSafeInteger(result.count) || result.count < 0) {
       throw new Error('D1 returned an invalid active visitor count.');
     }
+
+    await env.VISITORS_DB.prepare(`
+      INSERT INTO site_analytics_daily (day, page_views, peak_visitors)
+      VALUES (?, ?, ?)
+      ON CONFLICT (day) DO UPDATE SET
+        page_views = page_views + excluded.page_views,
+        peak_visitors = MAX(peak_visitors, excluded.peak_visitors)
+    `).bind(today, payload.pageView === true ? 1 : 0, result.count).run();
 
     return jsonResponse({ count: result.count });
   } catch (error) {

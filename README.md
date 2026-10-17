@@ -19,23 +19,23 @@ Games and some artwork are provided by third-party sources. Availability, contro
 
 ## Send live messages
 
-The first visit and returning-visitor avatar greetings are randomly selected on each page load. An administrator can also send a live message from `/admin/greetings.html`; open pages check every three seconds, show it once per tab, and keep it visible for at least 30 seconds. The message is deleted from D1 after 30 seconds and is not repeated on later visits.
+The first visit and returning-visitor avatar greetings are randomly selected on each page load. The admin panel is available at `/admin/`; its current tool sends a live message. Open pages check every three seconds, show it once per tab for 10 seconds, and do not repeat it on later visits. The message is deleted from D1 after 10 seconds.
 
 1. Bind the existing D1 database to the Pages project as `VISITORS_DB` under **Settings → Functions → D1 database bindings**.
-2. Run `migrations/0003_create_site_messages.sql` against that database. If you already ran migrations `0001` and `0002`, do not rerun them; `0003` adds the message table.
+2. Run `migrations/0003_create_site_messages.sql` and `migrations/0004_create_site_analytics.sql` against that database. If you already ran migrations `0001` and `0002`, do not rerun them; `0003` adds the message table and `0004` adds daily dashboard analytics.
 3. Create a high-entropy secret (for example, with `python -c "import secrets; print(secrets.token_urlsafe(32))"`). In Pages project settings, add it as the encrypted secret `ADMIN_SECRET`. Do not put this value in the repository or share it with visitors.
-4. Deploy the site with Pages Functions enabled, then open `/admin/greetings.html`, enter the secret, write a message of up to 250 characters, and send it.
+4. Deploy the site with Pages Functions enabled, then open `/admin/` and unlock the dashboard with the secret. Use **Mensajes** in the sidebar to send a message of up to 250 characters.
 
-The public endpoint only returns an unexpired message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. The admin page remembers the secret in that browser after a successful send. Pages that are already open display the message within about three seconds.
+The public endpoint only returns an unexpired message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. The dashboard remembers the secret in that browser after a successful unlock or send. Pages that are already open display the message within about three seconds.
 
 When running the site from a plain static server locally, live messages are unavailable because Pages Functions and D1 are not available.
 
 ## Configure the live visitor counter
 
-The header counter reports active browser sessions using a Cloudflare Pages Function and D1. It does not identify people: each browser tab gets a random session ID, and a session is considered active for 90 seconds after its last heartbeat.
+The header counter reports active browser sessions using a Cloudflare Pages Function and D1. It does not identify people: each browser tab gets a random session ID, and a session is considered active for 90 seconds after its last heartbeat. The admin dashboard shows active sessions, the day's peak, and page loads reported by the home page after migration `0004`; it does not backfill historical analytics.
 
 1. Create a D1 database in the same Cloudflare account as the Pages project.
-2. Run the SQL in `migrations/0001_create_active_visitors.sql` in the D1 Console.
+2. Run the SQL in `migrations/0001_create_active_visitors.sql` and `migrations/0004_create_site_analytics.sql` in the D1 Console.
 3. In the Pages project settings, add a D1 database binding under **Settings → Functions → D1 database bindings** with the variable name `VISITORS_DB`, selecting the database you created.
 4. Deploy the Pages project with Functions enabled. The endpoint is `/api/visitors`.
 
@@ -59,9 +59,9 @@ assets/
   js/app.js          Library, player, recents, and interface behavior
   js/games.js        Game catalog and launch URLs
   js/nimo-sdk.js     CDN selection, fallbacks, and the shared game-loading screen
-admin/               Admin page for sending live avatar-dialog messages
+admin/               Password-protected dashboard and live message tool
 functions/api/       Cloudflare Pages API endpoints
-migrations/          D1 database schema
+migrations/          D1 database and analytics schema
 favicon/             Browser, Apple, and web-app icons
 games/
   <id>/              Game launch pages
