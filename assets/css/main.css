@@ -536,7 +536,7 @@ button {
   opacity: 0;
   pointer-events: none;
   transform: translateX(-10px);
-  transition: opacity 200ms ease, transform 200ms ease;
+  transition: opacity 500ms ease, transform 500ms ease;
 }
 
 .game-admin-message.is-visible {
@@ -557,8 +557,11 @@ button {
 
 .game-admin-message-text {
   position: relative;
-  max-width: min(300px, calc(100vw - 72px));
-  margin: 10px 0 0 20px;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: min(300px, calc(100vw - 64px));
+  align-self: flex-start;
+  margin: 10px 0 0 18px;
   overflow-wrap: anywhere;
   padding: 10px 14px;
   border: 1px solid #a3a3a3;
@@ -1023,7 +1026,7 @@ button {
   .action-btn { gap: 5px; font-size: 9px; }
   .divider { height: 16px; }
   .game-admin-message { left: 12px; max-width: calc(100vw - 24px); }
-  .game-admin-message-text { max-width: calc(100vw - 56px); }
+  .game-admin-message-text { max-width: calc(100vw - 52px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
