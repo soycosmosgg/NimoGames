@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#06111a">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Descubre juegos online gratis en Nimo Games: explora una biblioteca de juegos para navegador, encuentra tus favoritos y juégalos al instante, sin descargas.">
-  <meta name="robots" content="index, follow">
+  <meta name="description" content="Juega gratis a juegos online desde el navegador. Explora el catálogo de Nimo Games, descubre títulos populares y empieza a jugar sin descargas ni registro.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
   <meta name="google-site-verification" content="m_5M4Q0fcVPrkhUvlccRe_FK4MNACpGDzCMqEqelc9I" />
   <link rel="alternate" hreflang="es" href="https://nimogames.qzz.io/">
   <link rel="alternate" hreflang="x-default" href="https://nimogames.qzz.io/">
@@ -14,17 +14,21 @@
   <meta property="og:locale" content="es_ES">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://nimogames.qzz.io/">
-  <meta property="og:title" content="Nimo Games | Juegos online gratis sin descargas">
-  <meta property="og:description" content="Descubre juegos online gratis en Nimo Games: explora una biblioteca de juegos para navegador, encuentra tus favoritos y juégalos al instante, sin descargas.">
+  <meta property="og:title" content="Juegos online gratis para navegador | Nimo Games">
+  <meta property="og:description" content="Juega gratis a juegos online desde el navegador. Explora el catálogo de Nimo Games, descubre títulos populares y empieza a jugar sin descargas ni registro.">
   <meta property="og:site_name" content="Nimo Games">
   <meta property="og:image" content="https://nimogames.qzz.io/favicon/web-app-manifest-512x512.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="Nimo Games">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://nimogames.qzz.io/">
-  <meta name="twitter:title" content="Nimo Games | Juegos online gratis sin descargas">
-  <meta name="twitter:description" content="Descubre juegos online gratis en Nimo Games: explora una biblioteca de juegos para navegador, encuentra tus favoritos y juégalos al instante, sin descargas.">
+  <meta name="twitter:title" content="Juegos online gratis para navegador | Nimo Games">
+  <meta name="twitter:description" content="Juega gratis a juegos online desde el navegador. Explora el catálogo de Nimo Games, descubre títulos populares y empieza a jugar sin descargas ni registro.">
   <meta name="twitter:image" content="https://nimogames.qzz.io/favicon/web-app-manifest-512x512.png">
-  <title>Nimo Games | Juegos online gratis sin descargas</title>
+  <meta name="twitter:image:alt" content="Nimo Games">
+  <title>Juegos online gratis para navegador | Nimo Games</title>
   <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
   <link rel="icon" type="image/png" href="favicon/favicon-96x96.png" sizes="96x96">
   <link rel="shortcut icon" href="favicon/favicon.ico">
@@ -45,20 +49,37 @@
         "@id": "https://nimogames.qzz.io/#website",
         "url": "https://nimogames.qzz.io/",
         "name": "Nimo Games",
-        "description": "Descubre juegos online gratis en Nimo Games: explora una biblioteca de juegos para navegador, encuentra tus favoritos y juégalos al instante, sin descargas.",
+        "description": "Juega gratis a juegos online desde el navegador. Explora el catálogo de Nimo Games, descubre títulos populares y empieza a jugar sin descargas ni registro.",
         "inLanguage": "es"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://nimogames.qzz.io/#webpage",
+        "url": "https://nimogames.qzz.io/",
+        "name": "Juegos online gratis para navegador | Nimo Games",
+        "description": "Juega gratis a juegos online desde el navegador. Explora el catálogo de Nimo Games, descubre títulos populares y empieza a jugar sin descargas ni registro.",
+        "inLanguage": "es",
+        "isPartOf": {"@id": "https://nimogames.qzz.io/#website"},
+        "about": {"@id": "https://nimogames.qzz.io/#organization"},
+        "mainEntity": {"@id": "https://nimogames.qzz.io/#games"}
       },
       {
         "@type": "Organization",
         "@id": "https://nimogames.qzz.io/#organization",
         "name": "Nimo Games",
         "url": "https://nimogames.qzz.io/",
-        "logo": "https://nimogames.qzz.io/favicon/web-app-manifest-512x512.png"
+        "logo": "https://nimogames.qzz.io/favicon/web-app-manifest-512x512.png",
+        "sameAs": [
+          "https://github.com/soycosmosgg/NimoGames",
+          "https://dsc.gg/Nimo"
+        ]
       },
       {
         "@type": "ItemList",
         "@id": "https://nimogames.qzz.io/#games",
         "name": "Juegos online disponibles en Nimo Games",
+        "itemListOrder": "https://schema.org/ItemListUnordered",
+        "numberOfItems": 13,
         "itemListElement": [
           {"@type": "ListItem", "position": 1, "name": "Among Us", "url": "https://nimogames.qzz.io/games/945360/index.html"},
           {"@type": "ListItem", "position": 2, "name": "Gang Beasts", "url": "https://nimogames.qzz.io/games/285900/index.html"},
