@@ -22,14 +22,14 @@
   const librarySectionTitle = document.getElementById('library-section-title');
   const allGamesCount = document.getElementById('all-games-count');
   const recentGamesCount = document.getElementById('recent-games-count');
-  const avatarGreeting = document.getElementById('avatar-greeting');
-  const avatarGreetingAnnouncement = document.getElementById('avatar-greeting-announcement');
+  const avatarMessage = document.getElementById('avatar-message');
+  const avatarMessageAnnouncement = document.getElementById('avatar-message-announcement');
   const libraryFilterButtons = document.querySelectorAll('.library-filter');
 
   if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
       !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
-      !libraryGameGrid || !avatarGreeting || !avatarGreetingAnnouncement) {
+      !libraryGameGrid || !avatarMessage || !avatarMessageAnnouncement) {
     console.error('No se pudo inicializar Nimo Games: faltan datos o elementos requeridos.');
     return;
   }
@@ -42,30 +42,12 @@
     libraryGames.map((game, index) => [game.id, libraryGames.length - index])
   );
   const recentGamesStorageKey = 'nimo-games-recently-played';
-  const avatarGreetingStorageKey = 'nimo-games-visited';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
-  const defaultGreetingMessages = {
-    firstVisit: [
-      'Hi! I hope you like the page!',
-      'Welcome! Enjoy exploring!',
-      'Hey there! Have fun!',
-      "Hello! Glad you're here!",
-      'Welcome to the page!'
-    ],
-    returning: [
-      'Hello again!!!',
-      'Welcome back!',
-      'Nice to see you again!',
-      "You're back! Enjoy your visit!",
-      'Hey again!'
-    ]
-  };
-  let greetingMessages = defaultGreetingMessages;
-  let activeGreetingGroup = null;
-  let greetingTypingTimer = null;
-  let greetingHideTimer = null;
-  let greetingRefreshInProgress = false;
-  let greetingLoadErrorReported = false;
+  let currentMessageUpdatedAt = null;
+  let messageTypingTimer = null;
+  let messageHideTimer = null;
+  let messageRefreshInProgress = false;
+  let messageLoadErrorReported = false;
   let armedGameId = null;
   let recentGameIds = loadRecentGameIds();
   let homeGames = [];
@@ -130,119 +112,82 @@
     return [...playedGames, ...randomGames].slice(0, homeGameLimit);
   }
 
-  function showAvatarGreeting() {
-    let isReturningVisitor = false;
-    try {
-      isReturningVisitor = window.localStorage.getItem(avatarGreetingStorageKey) === 'true';
-      window.localStorage.setItem(avatarGreetingStorageKey, 'true');
-    } catch (error) {
-      console.error('No se pudo guardar el estado de visita.', error);
-    }
-
-    activeGreetingGroup = isReturningVisitor ? 'returning' : 'firstVisit';
-    renderAvatarGreeting(pickRandomGreeting(activeGreetingGroup));
+  function hideAvatarMessage() {
+    avatarMessage.classList.remove('is-visible');
+    avatarMessage.setAttribute('aria-hidden', 'true');
+    messageHideTimer = null;
   }
 
-  function hideAvatarGreeting() {
-    avatarGreeting.classList.remove('is-visible');
-    avatarGreeting.setAttribute('aria-hidden', 'true');
-    greetingHideTimer = null;
-  }
+  function renderAvatarMessage(message) {
+    window.clearInterval(messageTypingTimer);
+    window.clearTimeout(messageHideTimer);
+    avatarMessageAnnouncement.textContent = message;
+    avatarMessage.textContent = '';
 
-  function renderAvatarGreeting(greeting) {
-    window.clearInterval(greetingTypingTimer);
-    window.clearTimeout(greetingHideTimer);
-    avatarGreetingAnnouncement.textContent = greeting;
-    avatarGreeting.textContent = '';
-
-    const startGreeting = () => {
-      avatarGreeting.classList.add('is-visible');
-      avatarGreeting.setAttribute('aria-hidden', 'false');
+    const startMessage = () => {
+      avatarMessage.classList.add('is-visible');
+      avatarMessage.setAttribute('aria-hidden', 'false');
 
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        avatarGreeting.textContent = greeting;
-        greetingHideTimer = window.setTimeout(hideAvatarGreeting, 3500);
+        avatarMessage.textContent = message;
+        messageHideTimer = window.setTimeout(hideAvatarMessage, 3500);
         return;
       }
 
       let characterIndex = 0;
-      greetingTypingTimer = window.setInterval(() => {
-        avatarGreeting.textContent += greeting[characterIndex];
+      messageTypingTimer = window.setInterval(() => {
+        avatarMessage.textContent += message[characterIndex];
         characterIndex += 1;
-        if (characterIndex >= greeting.length) {
-          window.clearInterval(greetingTypingTimer);
-          greetingTypingTimer = null;
-          greetingHideTimer = window.setTimeout(hideAvatarGreeting, 3500);
+        if (characterIndex >= message.length) {
+          window.clearInterval(messageTypingTimer);
+          messageTypingTimer = null;
+          messageHideTimer = window.setTimeout(hideAvatarMessage, 3500);
         }
       }, 45);
     };
 
-    if (avatarGreeting.classList.contains('is-visible')) {
-      startGreeting();
+    if (avatarMessage.classList.contains('is-visible')) {
+      startMessage();
       return;
     }
 
     window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(startGreeting);
+      window.requestAnimationFrame(startMessage);
     });
   }
 
-  function pickRandomGreeting(group) {
-    const messages = greetingMessages[group];
-    return messages[Math.floor(Math.random() * messages.length)];
-  }
-
-  function parseGreetingMessages(payload) {
-    if (!payload || typeof payload !== 'object') return null;
-    const firstVisit = parseGreetingList(payload.firstVisit);
-    const returning = parseGreetingList(payload.returning);
-    if (!firstVisit || !returning) return null;
-    return { firstVisit, returning };
-  }
-
-  function parseGreetingList(messages) {
-    if (!Array.isArray(messages) || messages.length === 0 || messages.length > 10) return null;
-    const trimmedMessages = messages.map(message =>
-      typeof message === 'string' ? message.trim() : ''
-    );
-    if (trimmedMessages.some(message => message.length === 0 || message.length > 120)) return null;
-    return trimmedMessages;
-  }
-
-  async function refreshGreetingMessages() {
-    if (greetingRefreshInProgress) return;
-    greetingRefreshInProgress = true;
+  async function refreshAvatarMessage() {
+    if (messageRefreshInProgress) return;
+    messageRefreshInProgress = true;
     try {
-      const response = await fetch('/api/greetings', { cache: 'no-store' });
+      const response = await fetch('/api/messages', { cache: 'no-store' });
       const payload = await response.json();
       if (!response.ok) {
         throw new Error(payload.error || `Request failed with status ${response.status}.`);
       }
+      if (typeof payload.message !== 'string' || payload.message.length > 250 ||
+          !Number.isSafeInteger(payload.updatedAt) || payload.updatedAt < 0) {
+        throw new Error('The live message response has an invalid format.');
+      }
 
-      const updatedMessages = parseGreetingMessages(payload);
-      if (!updatedMessages) throw new Error('The greeting response has an invalid format.');
-      greetingLoadErrorReported = false;
-
-      if (JSON.stringify(updatedMessages) !== JSON.stringify(greetingMessages)) {
-        greetingMessages = updatedMessages;
-        if (activeGreetingGroup) {
-          renderAvatarGreeting(pickRandomGreeting(activeGreetingGroup));
-        }
+      messageLoadErrorReported = false;
+      if (payload.updatedAt !== currentMessageUpdatedAt) {
+        currentMessageUpdatedAt = payload.updatedAt;
+        if (payload.message) renderAvatarMessage(payload.message);
       }
     } catch (error) {
-      if (!greetingLoadErrorReported) {
-        console.error('[Nimo Games] Could not load live greetings; using the built-in messages.', error);
-        greetingLoadErrorReported = true;
+      if (!messageLoadErrorReported) {
+        console.error('[Nimo Games] Could not load the current live message.', error);
+        messageLoadErrorReported = true;
       }
     } finally {
-      greetingRefreshInProgress = false;
+      messageRefreshInProgress = false;
     }
   }
 
-  async function initializeAvatarGreeting() {
-    await refreshGreetingMessages();
-    showAvatarGreeting();
-    window.setInterval(refreshGreetingMessages, 3000);
+  function initializeAvatarMessages() {
+    refreshAvatarMessage();
+    window.setInterval(refreshAvatarMessage, 3000);
   }
 
   function updateConnectionStatus() {
@@ -749,7 +694,7 @@
 
   updateClock();
   updateConnectionStatus();
-  initializeAvatarGreeting();
+  initializeAvatarMessages();
   window.setInterval(updateClock, 30000);
   renderFeaturedGames();
   homeGames = buildHomeGames();

@@ -1,6 +1,5 @@
 const MAX_REQUEST_LENGTH = 8192;
-const MAX_GREETING_COUNT = 10;
-const MAX_GREETING_LENGTH = 120;
+const MAX_MESSAGE_LENGTH = 250;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -10,29 +9,6 @@ function jsonResponse(body, status = 200) {
       'Cache-Control': 'no-store'
     }
   });
-}
-
-function validateGreetings(value) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-
-  const firstVisit = validateGreetingList(value.firstVisit);
-  const returning = validateGreetingList(value.returning);
-  if (!firstVisit || !returning) return null;
-
-  return { firstVisit, returning };
-}
-
-function validateGreetingList(value) {
-  if (!Array.isArray(value) || value.length === 0 || value.length > MAX_GREETING_COUNT) return null;
-
-  const greetings = value.map(greeting =>
-    typeof greeting === 'string' ? greeting.trim() : ''
-  );
-  if (greetings.some(greeting =>
-    greeting.length === 0 || greeting.length > MAX_GREETING_LENGTH
-  )) return null;
-
-  return greetings;
 }
 
 async function matchesAdminSecret(suppliedSecret, configuredSecret) {
@@ -54,35 +30,33 @@ async function matchesAdminSecret(suppliedSecret, configuredSecret) {
 
 export async function onRequestGet({ env }) {
   if (!env.VISITORS_DB) {
-    return jsonResponse({ error: 'The greetings database is not configured.' }, 503);
+    return jsonResponse({ error: 'The messages database is not configured.' }, 503);
   }
 
   try {
     const row = await env.VISITORS_DB.prepare(
-      'SELECT greetings_json, updated_at FROM site_greetings WHERE id = 1'
+      'SELECT message, updated_at FROM site_messages WHERE id = 1'
     ).first();
-    if (!row || typeof row.greetings_json !== 'string') {
-      throw new Error('The greetings row has not been initialized.');
+    if (!row || typeof row.message !== 'string') {
+      throw new Error('The message row has not been initialized.');
+    }
+    if (row.message.length > MAX_MESSAGE_LENGTH || !Number.isSafeInteger(row.updated_at)) {
+      throw new Error('The saved message has an invalid format.');
     }
 
-    const greetings = validateGreetings(JSON.parse(row.greetings_json));
-    if (!greetings || !Number.isSafeInteger(row.updated_at)) {
-      throw new Error('The saved greetings have an invalid format.');
-    }
-
-    return jsonResponse({ ...greetings, updatedAt: row.updated_at });
+    return jsonResponse({ message: row.message, updatedAt: row.updated_at });
   } catch (error) {
-    console.error('[greetings] Failed to read saved greetings.', error);
-    return jsonResponse({ error: 'Unable to read the saved greetings.' }, 500);
+    console.error('[messages] Failed to read the current message.', error);
+    return jsonResponse({ error: 'Unable to read the current message.' }, 500);
   }
 }
 
 export async function onRequestPost({ request, env }) {
   if (!env.VISITORS_DB) {
-    return jsonResponse({ error: 'The greetings database is not configured.' }, 503);
+    return jsonResponse({ error: 'The messages database is not configured.' }, 503);
   }
   if (!env.ADMIN_SECRET) {
-    return jsonResponse({ error: 'The greetings admin secret is not configured.' }, 503);
+    return jsonResponse({ error: 'The messages admin secret is not configured.' }, 503);
   }
   if (request.headers.get('origin') !== new URL(request.url).origin) {
     return jsonResponse({ error: 'Requests must come from this site.' }, 403);
@@ -122,26 +96,29 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ error: 'Invalid JSON request body.' }, 400);
   }
 
-  const greetings = validateGreetings(payload);
-  if (!greetings) {
+  if (!payload || typeof payload.message !== 'string') {
+    return jsonResponse({ error: 'A message is required.' }, 400);
+  }
+  const message = payload.message.trim();
+  if (message.length === 0 || message.length > MAX_MESSAGE_LENGTH) {
     return jsonResponse({
-      error: `Provide 1-${MAX_GREETING_COUNT} non-empty greetings per visit type; each must be at most ${MAX_GREETING_LENGTH} characters.`
+      error: `The message must contain 1-${MAX_MESSAGE_LENGTH} characters.`
     }, 400);
   }
 
   const updatedAt = Date.now();
   try {
     await env.VISITORS_DB.prepare(`
-      INSERT INTO site_greetings (id, greetings_json, updated_at)
+      INSERT INTO site_messages (id, message, updated_at)
       VALUES (1, ?, ?)
       ON CONFLICT (id) DO UPDATE SET
-        greetings_json = excluded.greetings_json,
+        message = excluded.message,
         updated_at = excluded.updated_at
-    `).bind(JSON.stringify(greetings), updatedAt).run();
+    `).bind(message, updatedAt).run();
 
-    return jsonResponse({ ...greetings, updatedAt });
+    return jsonResponse({ message, updatedAt });
   } catch (error) {
-    console.error('[greetings] Failed to save greetings.', error);
-    return jsonResponse({ error: 'Unable to save the greetings.' }, 500);
+    console.error('[messages] Failed to save the current message.', error);
+    return jsonResponse({ error: 'Unable to save the current message.' }, 500);
   }
 }

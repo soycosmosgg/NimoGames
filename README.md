@@ -17,18 +17,18 @@ Nimo Games is a browser-based game hub. Browse the game library, search by title
 
 Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers.
 
-## Configure live greetings
+## Send live messages
 
-Avatar greetings are stored in Cloudflare D1 and checked by open pages every three seconds. The first-visit and returning-visitor greeting lists are editable at `/admin/greetings.html`.
+The current avatar-dialog message is stored in Cloudflare D1. Pages check for updates every three seconds, and a sent message remains visible to people who visit later until another message is sent. Send messages from `/admin/greetings.html`.
 
 1. Bind the existing D1 database to the Pages project as `VISITORS_DB` under **Settings → Functions → D1 database bindings**.
-2. Run `migrations/0002_create_site_greetings.sql` against that database after `0001_create_active_visitors.sql`.
+2. Run `migrations/0003_create_site_messages.sql` against that database. If you already ran migrations `0001` and `0002`, do not rerun them; `0003` adds the message table.
 3. Create a high-entropy secret (for example, with `python -c "import secrets; print(secrets.token_urlsafe(32))"`). In Pages project settings, add it as the encrypted secret `ADMIN_SECRET`. Do not put this value in the repository or share it with visitors.
-4. Deploy the site with Pages Functions enabled, then open `/admin/greetings.html`, enter the secret, and edit the messages. Use one message per line; each list must contain 1–10 messages of up to 120 characters.
+4. Deploy the site with Pages Functions enabled, then open `/admin/greetings.html`, enter the secret, write a message of up to 250 characters, and send it.
 
-The public endpoint only returns greeting text. Saving requires the `ADMIN_SECRET` in an authorization header and a same-origin request. The admin page does not store the secret; it clears the field after a successful save. Pages that are already open pick up changes within about three seconds.
+The public endpoint only returns the current message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. The admin page does not store the secret; it clears the field after a successful send. Pages that are already open display the message within about three seconds.
 
-When running the site from a plain static server locally, the bundled greeting lists are used because Pages Functions and D1 are not available.
+When running the site from a plain static server locally, live messages are unavailable because Pages Functions and D1 are not available.
 
 ## Configure the live visitor counter
 
@@ -59,7 +59,7 @@ assets/
   js/app.js          Library, player, recents, and interface behavior
   js/games.js        Game catalog and launch URLs
   js/nimo-sdk.js     CDN selection, fallbacks, and the shared game-loading screen
-admin/               Admin page for editing live avatar greetings
+admin/               Admin page for sending live avatar-dialog messages
 functions/api/       Cloudflare Pages API endpoints
 migrations/          D1 database schema
 favicon/             Browser, Apple, and web-app icons

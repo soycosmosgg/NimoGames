@@ -204,19 +204,22 @@ button {
   cursor: pointer;
 }
 
-.avatar-greeting-wrap {
+.avatar-message-wrap {
   position: relative;
   display: flex;
   flex: 0 0 auto;
 }
 
-.avatar-greeting {
+.avatar-message {
   position: absolute;
   z-index: 20;
   top: calc(100% + 12px);
   right: 0;
   width: max-content;
   max-width: min(270px, calc(100vw - 32px));
+  max-height: 45vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 10px 14px;
   border: 1px solid #a3a3a3;
   border-radius: 12px;
@@ -226,6 +229,7 @@ button {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
+  white-space: pre-wrap;
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px);
@@ -233,7 +237,7 @@ button {
   transition: opacity .8s ease, transform .8s ease;
 }
 
-.avatar-greeting::before {
+.avatar-message::before {
   position: absolute;
   top: -6px;
   right: 11px;
@@ -246,12 +250,12 @@ button {
   transform: rotate(45deg);
 }
 
-.avatar-greeting.is-visible {
+.avatar-message.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-.avatar-greeting-announcement {
+.avatar-message-announcement {
   position: absolute;
   width: 1px;
   height: 1px;
