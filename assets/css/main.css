@@ -116,30 +116,6 @@ button {
   color: #fff;
 }
 
-.visitor-counter .tooltip {
-  position: absolute;
-  z-index: 30;
-  top: calc(100% + 9px);
-  left: 50%;
-  width: max-content;
-  padding: 6px 9px;
-  border: 1px solid rgba(255, 255, 255, .12);
-  border-radius: 6px;
-  background: rgba(9, 15, 24, .94);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 500;
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -3px);
-  transition: opacity .15s ease, transform .15s ease;
-}
-
-.visitor-counter:hover .tooltip {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
 .icon-btn {
   display: inline-flex;
   width: 24px;
