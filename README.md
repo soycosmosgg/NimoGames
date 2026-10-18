@@ -73,7 +73,7 @@ sitemap.xml          Public pages for search engines
 
 ## Update the game catalog
 
-Edit `window.NIMO_GAMES` in `assets/js/games.js`. Each entry defines a numeric `id`, title, artwork URLs, a `playUrl`, and optional metadata. Game pages can use `data-loading="true"` on the Nimo SDK script to enable its shared loading screen; CDN-backed games can also configure their base and probe attributes. Make sure the launch URL points to an existing game page and update `sitemap.xml` when adding or removing indexable pages.
+Edit `window.NIMO_GAMES` in `assets/js/games.js`. Each entry needs an `id` and title; artwork URLs and `playUrl` are generated from the ID. Keep optional game-specific settings such as CDN configuration or custom metadata when needed. Game pages can use `data-loading="true"` on the Nimo SDK script to enable its shared loading screen. Make sure the game ID points to an existing game page and update `sitemap.xml` when adding or removing indexable pages.
 
 ## Links
 
