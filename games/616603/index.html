@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <base href="https://cdn.jsdelivr.net/gh/1e295a49108e716ce8ab7eba0c8dca7d/9326265e4f1b14345a3bdab6f8ffad0e2e7ab3fda920c5f0f095f77359af00aeae22591c5bc4914c84c13d99eb62091d7ce7@main/utyweb/">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/1e295a49108e716ce8ab7eba0c8dca7d/9326265e4f1b14345a3bdab6f8ffad0e2e7ab3fda920c5f0f095f77359af00aeae22591c5bc4914c84c13d99eb62091d7ce7@main/utyweb/"
+            data-probe="runner.js"
+            data-providers="jsdelivr,jsdelivr-gcore,rawcdn"
+            data-game-id="616603"
+            data-loading="true"></script>
+    <body oncontextmenu="return false;">
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" type="x-icon" href="https://cdn.jsdelivr.net/gh/1e295a49108e716ce8ab7eba0c8dca7d/9326265e4f1b14345a3bdab6f8ffad0e2e7ab3fda920c5f0f095f77359af00aeae22591c5bc4914c84c13d99eb62091d7ce7@main/utyweb/fav.ico">
+    <title>UNDERTALE Yellow | Nimo Games</title>
+    <link rel="stylesheet" href="uty.css">
+    <script src="jszip.min.js"></script>
+  </head>
+
+  <body>
+    <div id="game-container">
+      <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+      <div class="loading">
+        <div class="spinner" id="spinner"></div>
+        <noscript class="nsmessage">This requires JavaScript and WebAssembly to be enabled in your browser.</noscript>
+        <div class="emscripten" id="status">Loading...</div>
+        <progress value="0" max="100" id="progress" hidden="1"></progress>
+      </div>
+      <div class="output-container" id="output-container">
+      <button class="output-button" onclick="toggleConsole()" title="Lists emscripten/GM console output and loading progress">Toggle Console!</button>
+      <button class="output-button" id="stats-button" onclick="toggleFPS()" title="Toggles the external FPS Counter">Toggle FPS Counter!</button>
+      <button class="output-button" onclick="window.SAVEManager.openSAVEManager()" title="Manage your UNDERTALE SAVE files">SAVE Manager!</button>
+      <button class="output-button" onclick="toggleWASD(this)" title="Toggles Mirroring Arrow Keys to WASD for easier control">Mirror WASD to Arrows!</button>
+      <input id="colorpicker" type="color" onchange="changecolor(this)" title="Changes color of the canvas' surrounding areas">
+      <textarea id="output"></textarea>
+    </div>
+    <button id="closeUIButton" onclick="hideUI()">&times;</button>
+    <div id="message-container">
+      <div id="messages"></div>
+    </div>
+  </div>
+  <div id="customMessageBox" class="custom-message-box">
+    <div class="custom-message-box-content">
+      <p id="messageBoxText"></p>
+      <button id="messageBoxConfirmBtn">OK</button>
+    </div>
+  </div>
+  <div id="saveManagerModal" class="save-manager-modal">
+    <div class="save-manager-content">
+      <span class="close-button" onclick="window.SAVEManager.closeSAVEManager()">&times;</span>
+      <div class="save-manager-content2">
+        <span class="minimize-button" onclick="window.SAVEManager.closeSMnoreload()">&dash;</span>
+        <h2>SAVE File Manager!</h2>
+        <button class="output-button" onclick="toggleclear_site_cache()">Wipe all of your SAVEs?</button>
+        <button id="exportAllBtn" class="output-button" onclick="SAVEManager.exportAllToZip()">Export all SAVEs to ZIP?</button>
+        <h3>Current SAVE Files:</h3>
+        <div id="saveFileList" class="save-file-list">
+          <p style="text-align: center; color: #888;">No saves found. Try importing one or saving in-game first.</p>
+        </div>
+        <div class="file-upload-section">
+          <h3>Import Save Files?</h3>
+          <input type="file" id="uploadFileInput" accept="*" multiple>
+          <input type="text" id="uploadFileNameInput" placeholder="Enter the corresponding filename (e.g., filech1_0, dr.ini / for single file only)">
+          <button onclick="SAVEManager.handleUpload()">Select File(s)!</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      window.addEventListener('load', () => {
+        const mobileButtons = document.getElementById('mobile-buttons');
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+          mobileButtons.style.display = 'block';
+        }
+      });
+    </script>
+    <script>
+      window.SAVEManager = (function() {
+        function showMessageBox(message, onConfirm = null) {
+          const messageBox = document.getElementById('customMessageBox');
+          const messageBoxText = document.getElementById('messageBoxText');
+          const messageBoxConfirmBtn = document.getElementById('messageBoxConfirmBtn');
+          const messageBoxCancelBtn = document.getElementById('messageBoxCancelBtn');
+          messageBoxText.textContent = message;
+          messageBoxConfirmBtn.textContent = 'Alright!';
+          if (messageBoxCancelBtn) {
+            messageBoxCancelBtn.style.display = 'none';
+          }
+          messageBox.style.display = 'flex';
+          messageBoxConfirmBtn.onclick = () => {
+            messageBox.style.display = 'none';
+            if (onConfirm) onConfirm();
+          };
+        }
+
+        function confirmBox(message) {
+          return new Promise((resolve) => {
+            const messageBox = document.getElementById('customMessageBox');
+            const messageBoxText = document.getElementById('messageBoxText');
+            const messageBoxConfirmBtn = document.getElementById('messageBoxConfirmBtn');
+            let messageBoxCancelBtn = document.getElementById('messageBoxCancelBtn');
+            if (!messageBoxCancelBtn) {
+              messageBoxCancelBtn = document.createElement('button');
+              messageBoxCancelBtn.id = 'messageBoxCancelBtn';
+              messageBoxCancelBtn.style.backgroundColor = '#6c757d';
+              messageBoxCancelBtn.style.marginLeft = '10px';
+              messageBoxConfirmBtn.parentNode.appendChild(messageBoxCancelBtn);
+            }
+            messageBoxText.textContent = message;
+            messageBoxConfirmBtn.textContent = 'Sure!';
+            messageBoxCancelBtn.textContent = 'Nah.';
+            messageBoxCancelBtn.style.display = 'inline-block';
+            messageBox.style.display = 'flex';
+            messageBoxConfirmBtn.onclick = () => {
+              messageBox.style.display = 'none';
+              resolve(true);
+            };
+            messageBoxCancelBtn.onclick = () => {
+              messageBox.style.display = 'none';
+              resolve(false);
+            };
+          });
+        }
+        const DB_NAME = '/_savedata';
+        const STORE_NAME = 'FILE_DATA';
+        const DB_VERSION = 21;
+        let db;
+        async function openIndexedDB() {
+          if (db) return db;
+          if (!window.indexedDB) {
+            showMessageBox("Your browser doesn't support IndexedDB. The SAVE Manager will not work.");
+            throw new Error("IndexedDB not supported 😂 no saves for you gng");
+          }
+          const databases = await window.indexedDB.databases();
+          const dbExists = databases.some(dbInfo => dbInfo.name === DB_NAME);
+          if (!dbExists) {
+            const errorMessage = `Database '${DB_NAME}' not found. Please SAVE in-game first!`;
+            console.log(errorMessage);
+            throw new Error(errorMessage);
+          }
+          return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            request.onerror = (event) => {
+              console.error("IndexedDB error:", event.target.error);
+              showMessageBox("Error opening IndexedDB: " + (event.target.error ? event.target.error.message : "Unknown error??"));
+              reject("Error opening IndexedDB!");
+            };
+            request.onsuccess = (event) => {
+              db = event.target.result;
+              console.log("IndexedDB opened successfully.");
+              resolve(db);
+            };
+            request.onupgradeneeded = (event) => {
+              db = event.target.result;
+              if (!db.objectStoreNames.contains(STORE_NAME)) {
+                console.log(`Object store '${STORE_NAME}' not found. Waiting for the game to create it... smh`);
+              }
+            };
+          });
+        }
+        async function getSaveFiles() {
+          try {
+            await openIndexedDB();
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.getAll();
+            return new Promise((resolve, reject) => {
+              request.onsuccess = (event) => {
+                const files = event.target.result;
+                const fileNamesRequest = objectStore.getAllKeys();
+                fileNamesRequest.onsuccess = (eventKeys) => {
+                  const fileNames = eventKeys.target.result;
+                  const result = files.map((file, index) => ({
+                    name: fileNames[index],
+                    data: file
+                  }));
+                  resolve(result);
+                };
+                fileNamesRequest.onerror = (eventKeys) => {
+                  console.error("Error getting file names:", eventKeys.target.error);
+                  reject("Error getting file names: " + (eventKeys.target.error ? eventKeys.target.error.message : "Unknown error"));
+                };
+              };
+              request.onerror = (event) => {
+                console.error("Error getting save files from object store:", event.target.error);
+                reject("Error getting save files: " + (event.target.error ? event.target.error.message : "Unknown error"));
+              };
+            });
+          } catch (error) {
+            console.error("Error in getSaveFiles:", error);
+            showMessageBox("Failed to retrieve save files: " + error.message);
+            return [];
+          }
+        }
+        async function displaySaveFiles() {
+          const saveFileListDiv = document.getElementById('saveFileList');
+          saveFileListDiv.innerHTML = '';
+          try {
+            const files = await getSaveFiles();
+            if (files.length === 0) {
+              saveFileListDiv.innerHTML = 'No saves found. Try importing one or saving in-game first.';
+              return;
+            }
+            files.forEach(fileEntry => {
+              const fileName = fileEntry.name;
+              const fileData = fileEntry.data;
+              const itemDiv = document.createElement('div');
+              itemDiv.classList.add('save-file-item');
+              const infoDiv = document.createElement('div');
+              infoDiv.classList.add('save-file-info');
+              const timestamp = fileData.timestamp ? new Date(fileData.timestamp).toLocaleString() : 'N/A';
+              const size = fileData.contents ? fileData.contents.byteLength : 0;
+              infoDiv.innerHTML = `
+                  
+                      
+                      
+                                  
+                                                <span>
+                                                    <strong>File:</strong> ${fileName.replace('/_savedata/', '')}
+                      
+                      
+                                  
+                                                </span>
+                                                <span>
+                                                    <strong>Last Modified:</strong> ${timestamp}
+                      
+                      
+                                  
+                                                </span>
+                                                <span>
+                                                    <strong>Size:</strong> ${size} bytes
+                      
+                      
+                                  
+                                                </span>
+                `;
+              const actionsDiv = document.createElement('div');
+              actionsDiv.classList.add('save-file-actions');
+              const downloadBtn = document.createElement('button');
+              downloadBtn.textContent = 'Download';
+              downloadBtn.onclick = () => downloadSaveFile(fileName, fileData.contents);
+              actionsDiv.appendChild(downloadBtn);
+              const deleteBtn = document.createElement('button');
+              deleteBtn.textContent = 'Delete';
+              deleteBtn.classList.add('delete-btn');
+              deleteBtn.onclick = async () => {
+                const confirmed = await confirmBox(`Are you sure you want to delete "${fileName}"?`);
+                if (confirmed) {
+                  await deleteSaveFile(fileName);
+                }
+              };
+              actionsDiv.appendChild(deleteBtn);
+              itemDiv.appendChild(infoDiv);
+              itemDiv.appendChild(actionsDiv);
+              saveFileListDiv.appendChild(itemDiv);
+            });
+          } catch (error) {
+            console.error("Error displaying save files:", error);
+            saveFileListDiv.innerHTML = `
+                                  
+                                  
+                                  
+                                                <p style="text-align: center; color: #FA1E4E;">Error loading files: ${error.message}</p>`;
+          }
+        }
+
+        function downloadSaveFile(fileName, contents) {
+          if (!contents) {
+            showMessageBox("No content to download for this file!");
+            return;
+          }
+          const blob = new Blob([contents], {
+            type: 'application/octet-stream'
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showMessageBox(`File "${fileName}" downloaded.`);
+        }
+        async function deleteSaveFile(fileName) {
+          try {
+            await openIndexedDB();
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.delete(fileName);
+            return new Promise((resolve, reject) => {
+              request.onsuccess = () => {
+                showMessageBox(`File "${fileName}" deleted successfully.`);
+                displaySaveFiles();
+                resolve();
+              };
+              request.onerror = (event) => {
+                console.error("Error deleting file:", event.target.error);
+                showMessageBox(`Error deleting file "${fileName}": ` + (event.target.error ? event.target.error.message : "Unknown error"));
+                reject("Error deleting file.");
+              };
+            });
+          } catch (error) {
+            console.error("Error in deleteSaveFile:", error);
+            showMessageBox("Failed to delete save file: " + error.message);
+          }
+        }
+        async function handleUpload() {
+          const uploadFileInput = document.getElementById('uploadFileInput');
+          const uploadFileNameInput = document.getElementById('uploadFileNameInput');
+          const files = uploadFileInput.files;
+          if (files.length === 0) {
+            showMessageBox("Please select at least one file to upload.");
+            return;
+          }
+          try {
+            const uploadPromises = [];
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              let fileName = (files.length === 1 && uploadFileNameInput.value.trim()) ? uploadFileNameInput.value.trim() : file.name;
+              fileName = fileName.replace(/^_savedata\//, '');
+              fileName = fileName.replace(/^\//, '');
+              if (!fileName) {
+                showMessageBox(`Invalid file name for "${file.name}" after processing. Skipping.`);
+                continue;
+              }
+              const arrayBuffer = await file.arrayBuffer();
+              const uint8ArrayContents = new Uint8Array(arrayBuffer);
+              const saveObject = {
+                timestamp: new Date(),
+                mode: 33206,
+                contents: uint8ArrayContents
+              };
+              const finalFileName = `/_savedata/${fileName}`;
+              uploadPromises.push(saveSaveFile(finalFileName, saveObject));
+            }
+            await Promise.all(uploadPromises);
+            showMessageBox(`${files.length} file(s) uploaded and saved successfully.`);
+            uploadFileInput.value = '';
+            uploadFileNameInput.value = '';
+            displaySaveFiles();
+          } catch (error) {
+            console.error("Error uploading file(s):", error);
+            showMessageBox("Failed to upload one or more files: " + error.message);
+          }
+        }
+        async function exportAllToZip() {
+          try {
+            const files = await getSaveFiles();
+            if (files.length === 0) {
+              showMessageBox("No save files to export.");
+              return;
+            }
+            const zip = new JSZip();
+            files.forEach(fileEntry => {
+              const fileName = fileEntry.name.replace(/^\/_savedata\//, '');
+              const contents = fileEntry.data.contents;
+              if (contents) {
+                const zipContents = (contents instanceof Int8Array) ? new Uint8Array(contents.buffer) : contents;
+                zip.file(fileName, zipContents);
+              }
+            });
+            const zipBlob = await zip.generateAsync({
+              type: 'blob'
+            });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'UNDERTALEWeb_SAVEs.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showMessageBox("All save files exported to UNDERTALEWeb_SAVEs.zip.");
+          } catch (error) {
+            console.error("Error exporting to ZIP:", error);
+            showMessageBox("Failed to export to ZIP: " + error.message);
+          }
+        }
+        async function saveSaveFile(fileName, data) {
+          try {
+            await openIndexedDB();
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const objectStore = transaction.objectStore(STORE_NAME);
+            const request = objectStore.put(data, fileName);
+            return new Promise((resolve, reject) => {
+              request.onsuccess = () => {
+                resolve();
+              };
+              request.onerror = (event) => {
+                console.error("Error saving file:", event.target.error);
+                showMessageBox("Error saving file: " + (event.target.error ? event.target.error.message : "Unknown error"));
+                reject("Error saving file.");
+              };
+            });
+          } catch (error) {
+            console.error("Error in saveSaveFile:", error);
+            showMessageBox("Failed to save file: " + error.message);
+          }
+        }
+        async function openSAVEManager() {
+          const saveManagerModal = document.getElementById('saveManagerModal');
+          saveManagerModal.style.display = 'flex';
+          await displaySaveFiles();
+          GM_pause();
+        }
+
+        function closeSAVEManager() {
+          window.location.reload();
+          const saveManagerModal = document.getElementById('saveManagerModal');
+          saveManagerModal.style.display = 'none';
+        }
+
+        function closeSMnoreload() {
+          const saveManagerModal = document.getElementById('saveManagerModal');
+          saveManagerModal.style.display = 'none';
+          GM_unpause();
+        }
+        let uploadFileNameInput = null;
+
+        function protectInputFromGame(e) {
+          if (uploadFileNameInput && document.activeElement === uploadFileNameInput) {
+            e.stopImmediatePropagation();
+          }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+          uploadFileNameInput = document.getElementById('uploadFileNameInput');
+          const uploadFileInput = document.getElementById('uploadFileInput');
+          if (uploadFileInput && uploadFileNameInput) {
+            if (uploadFileInput && uploadFileNameInput) {
+              uploadFileInput.addEventListener('change', () => {
+                if (uploadFileInput.files.length === 1) {
+                  uploadFileNameInput.disabled = false;
+                  uploadFileNameInput.value = uploadFileInput.files[0].name;
+                  uploadFileNameInput.placeholder = 'Enter the corresponding filename (e.g., filech1_0, dr.ini / for single file only)';
+                } else {
+                  uploadFileNameInput.disabled = true;
+                  uploadFileNameInput.value = '';
+                  uploadFileNameInput.placeholder = 'Custom filenames do not work when selecting multiple files!';
+                }
+              });
+            }
+          }
+          if (uploadFileNameInput) {
+            window.addEventListener('keydown', protectInputFromGame, true);
+            window.addEventListener('keyup', protectInputFromGame, true);
+            window.addEventListener('keypress', protectInputFromGame, true);
+          }
+        });
+        return {
+          openSAVEManager: openSAVEManager,
+          closeSAVEManager: closeSAVEManager,
+          closeSMnoreload: closeSMnoreload,
+          handleUpload: handleUpload,
+          showMessageBox: showMessageBox,
+          confirmBox: confirmBox,
+          openIndexedDB: openIndexedDB,
+          exportAllToZip: exportAllToZip
+        };
+      })();
+      window.addEventListener('load', async () => {
+        try {
+          await window.SAVEManager.openIndexedDB();
+        } catch (error) {
+          console.error("Failed to initialize IndexedDB on load:", error);
+        }
+      });
+      (function() {
+        const originalLog = console.log;
+        console.log = function(...args) {
+          originalLog.apply(console, args);
+          if (args.includes("Heading back to homepage...")) {
+            window.location.href = '/';
+          }
+        };
+      })();
+      (function() {
+        const originalLog = console.log;
+        console.log = function(...args) {
+          originalLog.apply(console, args);
+          if (args.includes("ERROR in")) {
+            if (confirm("Heya! Seems like UNDERTALE Yellow has crashed! Would you like to reload the page?")) {
+              location.reload();
+            }
+          }
+        };
+      })();
+    </script>
+    <script>
+      function showToggleMessage(button, message) {
+        const oldMessage = document.querySelector('.toggle-feedback');
+        if (oldMessage) oldMessage.remove();
+        const rect = button.getBoundingClientRect();
+        const popup = document.createElement('div');
+        popup.textContent = message;
+        Object.assign(popup.style, {
+          position: 'absolute',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          color: '#1a1a1a',
+          padding: '6px 12px',
+          borderRadius: '15px',
+          fontFamily: 'sans-serif',
+          fontSize: '13px',
+          fontWeight: 'bold',
+          zIndex: '9999',
+          pointerEvents: 'none',
+          left: `${rect.left + rect.width / 2}px`,
+          top: `${rect.top}px`,
+          transform: 'translate(-50%, -110%)',
+          opacity: '1',
+          transition: 'opacity 0.4s ease-out, transform 0.4s ease-out'
+        });
+        document.body.appendChild(popup);
+        setTimeout(() => {
+          popup.style.opacity = '0';
+          popup.style.transform = 'translate(-50%, -160%)';
+        }, 800);
+        setTimeout(() => popup.remove(), 1200);
+      }
+
+      function simulateKeyEvent(eventType, key, keyCode) {
+        const event = new KeyboardEvent(eventType, {
+          key: key,
+          keyCode: keyCode,
+          which: keyCode,
+          bubbles: true,
+          cancelable: true,
+        });
+        document.dispatchEvent(event);
+      }
+      (function(window) {
+        const WASD_CONTROLLER = {
+          isEnabled: false,
+          boundHandler: null,
+          eventTarget: document.body,
+          keyMap: {
+            'w': {
+              key: 'ArrowUp',
+              code: 'ArrowUp',
+              keyCode: 38
+            },
+            'a': {
+              key: 'ArrowLeft',
+              code: 'ArrowLeft',
+              keyCode: 37
+            },
+            's': {
+              key: 'ArrowDown',
+              code: 'ArrowDown',
+              keyCode: 40
+            },
+            'd': {
+              key: 'ArrowRight',
+              code: 'ArrowRight',
+              keyCode: 39
+            },
+            'W': {
+              key: 'ArrowUp',
+              code: 'ArrowUp',
+              keyCode: 38
+            },
+            'A': {
+              key: 'ArrowLeft',
+              code: 'ArrowLeft',
+              keyCode: 37
+            },
+            'S': {
+              key: 'ArrowDown',
+              code: 'ArrowDown',
+              keyCode: 40
+            },
+            'D': {
+              key: 'ArrowRight',
+              code: 'ArrowRight',
+              keyCode: 39
+            }
+          },
+          handleKeyEvent: function(event) {
+            if (!this.isEnabled) return;
+            const targetNode = event.target.nodeName.toLowerCase();
+            if (targetNode === 'input' || targetNode === 'textarea' || event.target.isContentEditable) {
+              return;
+            }
+            const keyData = this.keyMap[event.key];
+            if (keyData) {
+              event.preventDefault();
+              event.stopPropagation();
+              const arrowKeyEvent = new KeyboardEvent(event.type, {
+                key: keyData.key,
+                code: keyData.code,
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+              });
+              Object.defineProperty(arrowKeyEvent, 'keyCode', {
+                value: keyData.keyCode,
+                writable: false
+              });
+              Object.defineProperty(arrowKeyEvent, 'which', {
+                value: keyData.keyCode,
+                writable: false
+              });
+              this.eventTarget.dispatchEvent(arrowKeyEvent);
+            }
+          },
+          enable: function() {
+            if (this.isEnabled) return;
+            this.boundHandler = this.boundHandler || this.handleKeyEvent.bind(this);
+            document.addEventListener('keydown', this.boundHandler, true);
+            document.addEventListener('keyup', this.boundHandler, true);
+            this.isEnabled = true;
+            console.log('WASD -> arrow key control has been ENABLED! Target:', this.eventTarget);
+          },
+          disable: function() {
+            if (!this.isEnabled || !this.boundHandler) return;
+            document.removeEventListener('keydown', this.boundHandler, true);
+            document.removeEventListener('keyup', this.boundHandler, true);
+            this.isEnabled = false;
+            console.log('WASD -> arrow key control has been DISABLED!');
+          },
+          toggle: function(button) {
+            if (this.isEnabled) {
+              this.disable();
+              showToggleMessage(button, 'Toggled off!');
+            } else {
+              this.enable();
+              showToggleMessage(button, 'Toggled on!');
+            }
+          }
+        };
+        window.toggleWASD = function(button) {
+          WASD_CONTROLLER.toggle(button);
+        };
+      })(window);
+    </script>
+    <script>
+      alert("Loading, this may take a while...");
+      alert("Make sure to click inside the tab when the game finishes loading for audio!");
+      const konamiCode = ['p', 'i', 'e'];
+      let konamiIndex = 0;
+
+      function hideUI() {
+        document.getElementById('output-container').classList.remove('visible');
+        document.getElementById('message-container').classList.add('hidden-ui');
+        document.getElementById('closeUIButton').style.display = 'none';
+      }
+
+      function showUI() {
+        document.getElementById('output-container').classList.add('visible');
+        document.getElementById('message-container').classList.remove('hidden-ui');
+        document.getElementById('closeUIButton').style.display = 'block';
+        ensureAspectRatio();
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+          konamiIndex++;
+          if (konamiIndex === konamiCode.length) {
+            showUI();
+            konamiIndex = 0;
+          }
+        } else {
+          konamiIndex = 0;
+        }
+      });
+      window.addEventListener('load', () => {
+        document.getElementById('output-container').classList.remove('visible');
+        document.querySelector('.loading').classList.add('hidden-ui');
+        document.getElementById('message-container').classList.add('hidden-ui');
+        document.getElementById('closeUIButton').style.display = 'none';
+      });
+    </script>
+    <script id="tick-worker" type="javascript/worker">
+      let running = false;
+      let stop_called = false;
+
+      let intervalMs = 16;
+
+      onmessage = (e) => {
+        if (e.data.run) {
+          intervalMs = Math.floor(1000 / e.data.fps);
+
+          if (!running) {
+            running = true;
+            setTimeout(tick, intervalMs);
+          }
+        } else {
+          stop_called = true;
+        }
+      }
+
+      const tick = () => {
+        if (stop_called) {
+          stop_called = false;
+          running = false;
+
+          return;
+        }
+
+        const start = new Date().getTime();
+        postMessage('');
+        const end = new Date().getTime();
+
+        let next_update = start + intervalMs - end;
+        next_update = Math.max(next_update, 0);
+        setTimeout(tick, next_update);
+      }
+    </script>
+
+    <script type="text/javascript">
+      const blob = new Blob([document.querySelector('#tick-worker').textContent]);
+      const worker = new Worker(window.URL.createObjectURL(blob));
+
+      worker.onmessage = function () {
+        GM_tick(performance.now());
+      }
+      
+      if ("getGamepads" in navigator) {
+        const sendGamepadInfo = (id) => {
+          const firefoxRegex = /^([0-9a-fA-F]{4})-([0-9a-fA-F]{4})-(.*)$/;
+          const chromeRegex = /^(.*) ?\(.*[vV][eE][nN][dD][oO][rR]: ?([0-9a-fA-F]{4}).*[pP][rR][oO][dD][uU][cC][tT]: ?([0-9a-fA-F]{4})\)$/;
+          
+          let name = undefined;
+          let vendor = undefined;
+          let product = undefined;
+          const firefoxMatch = id.match(firefoxRegex);
+          if (firefoxMatch) {
+            name = firefoxMatch[3];
+            vendor = firefoxMatch[1];
+            product = firefoxMatch[2];
+          } else {
+            const chromeMatch = id.match(chromeRegex);
+            if (chromeMatch) {
+              name = chromeMatch[1];
+              vendor = chromeMatch[2];
+              product = chromeMatch[3];
+            }
+          }
+          
+          if (!name) {
+            name = "";
+          }
+          if (!vendor) {
+            vendor = "";
+          }
+          if (!product) {
+            product = "";
+          }
+          name = name.toLowerCase();
+          vendor = vendor.toLowerCase();
+          product = product.toLowerCase();
+          
+          let ps = false;
+          let dualsense = false;
+          if (name.includes("dualsense") || name.includes("ps5")) {
+            ps = true;
+            dualsense = true;
+          } else if (vendor == "054c" ||
+                     name.includes("playstation") || name.includes("dualshock") ||
+                     name.includes("ps1") || name.includes("ps2") ||
+                     name.includes("ps3") || name.includes("ps4")) {
+            ps = true;
+          }
+          const dataToSend = { gamepadIsPlaystation: ps, gamepadIsDualsense: dualsense };
+          window.postMessage(dataToSend);
+        };
+      
+        window.addEventListener("gamepadconnected", (event) => {
+          const id = event.gamepad.id;
+          console.log("Gamepad connected with ID: " + id);
+          sendGamepadInfo(id);
+        });
+        
+        setInterval(() => {
+          const gamepads = navigator.getGamepads();
+          let activityDetectedIndex = -1;
+          for (const gp of gamepads) {
+            if (!gp) {
+              continue;
+            }
+            let activityDetected = false;
+            if (gp.mapping !== "standard" || gp.axes.length < 2) {
+              for (let i = 0; i < gp.axes.length; i++) {
+                activityDetected |= Math.abs(gp.axes[i]) >= 0.4;
+              }
+              for (let i = 0; i < gp.buttons.length; i++) {
+                activityDetected |= gp.buttons[i].pressed;
+              }
+            } else {
+              activityDetected |= Math.abs(gp.axes[0]) >= 0.4 || Math.abs(gp.axes[1]) >= 0.4;
+              for (let i = 0; i < gp.buttons.length; i++) {
+                activityDetected |= gp.buttons[i].pressed;
+              }
+            }
+            if (activityDetected) {
+              sendGamepadInfo(gp.id);
+              break;
+            }
+          }
+        }, 16);
+      }
+    </script>
+
+    <script type="text/javascript">
+      // Combined and de-duplicated variable declarations
+      const CHANGE_ASPECT_RATIO = true;
+      var bodyElement = document.getElementsByTagName("body")[0];
+      var statusElement = document.getElementById("status");
+      var progressElement = document.getElementById("progress");
+      var spinnerElement = document.getElementById("spinner");
+      var canvasElement = document.getElementById("canvas");
+      var outputElement = document.getElementById("output");
+      var outputContainerElement = document.getElementById("output-container");
+      const messageContainerElement = document.getElementById("message-container");
+      const messagesElement = document.getElementById("messages");
+      
+      // Event listener for canvas focus
+      canvasElement.addEventListener("click", function() { canvasElement.focus(); });
+
+      // Prevent GameMaker from changing window title erroneously.
+      var actualDocumentTitle = document.title;
+      Object.defineProperty(document, "title", {
+        set: function(val) {},
+        get: function() { return actualDocumentTitle; }
+      });
+
+      // Rollback message handling from the second script
+      let rollbackMessages = [];
+      const CONSOLE_layer_set_visible = "layer_set_visible() - could not find specified layer in current room";
+      const CONSOLE_layer_tilemap_get_id = "layer_tilemap_get_id() - specified tilemap not found";
+      const CONSOLE_layer_depth = "layer_depth() - can't find specified layer";
+      const CONSOLE_draw_tilemap = "draw_tilemap() - couldn't find specified tilemap";
+      const CONSOLE_layer_get_all_elements = "layer_get_all_elements() - can't find specified layer";
+      let clearRollbackMessagesTimeoutId = -1;
+      
+      const showRollbackMessage = function(message) {
+        let messages = "";
+        rollbackMessages.push(message);
+        rollbackMessages.forEach(m => messages += " < p > " + m + " < /p>");
+        messagesElement.innerHTML = messages;
+        messageContainerElement.style.display = 'block';
+        if (clearRollbackMessagesTimeoutId !== -1) {
+          clearTimeout(clearRollbackMessagesTimeoutId);
+        }
+        clearRollbackMessagesTimeoutId = setTimeout(clearRollbackMessages, 5000);
+      };
+
+      const clearRollbackMessages = function() {
+        clearRollbackMessagesTimeoutId = -1;
+        rollbackMessages = [];
+        messageContainerElement.style.display = 'none';
+      };
+
+      // Utility and game state variables
+      var loadprogress = 0;
+      var startingHeight, startingWidth;
+      var startingAspect;
+      
+      // More comprehensive Module object from the second script
+      var Module = {
+        preRun: [],
+        postRun: [],
+        print: (function() {
+          var element = document.getElementById("output");
+          if (element) element.value = "";
+          return function(text) {
+            if (text === "Starting WAD") {
+              loadprogress += 1;
+            }
+            if (loadprogress === 1) {
+              Module.setStatus(text);
+            } else if (loadprogress >= 2) {
+              Module.setStatus("");
+            }
+            if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(" ");
+            if (text != CONSOLE_layer_set_visible && text != CONSOLE_layer_tilemap_get_id && text != CONSOLE_layer_depth && text != CONSOLE_draw_tilemap && text != CONSOLE_layer_get_all_elements) {
+              console.log(text);
+            }
+            if (text === "Entering main loop.") {
+              ensureAspectRatio();
+              loadprogress += 1;
+            }
+            if (element) {
+              if (text != CONSOLE_layer_set_visible && text != CONSOLE_layer_tilemap_get_id && text != CONSOLE_layer_depth && text != CONSOLE_draw_tilemap && text != CONSOLE_layer_get_all_elements) {
+                element.value += text + "\n";
+              }
+              element.scrollTop = element.scrollHeight;
+            }
+          };
+        })(),
+        printErr: function(text) {
+          if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(" ");
+          console.error(text);
+        },
+        canvas: (function() {
+          return document.getElementById("canvas");
+        })(),
+        setStatus: function(text) {
+          if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: "" };
+          if (text === Module.setStatus.last.text) return;
+          var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+          var now = Date.now();
+          if (m && now - Module.setStatus.last.time < 30) return;
+          if (text.includes("Downloading data...")) text = "Downloading data...";
+          Module.setStatus.last.time = now;
+          Module.setStatus.last.text = text;
+          if (m) {
+            text = m[1];
+            progressElement.value = parseInt(m[2]) * 100;
+            progressElement.max = parseInt(m[4]) * 100;
+            progressElement.hidden = false;
+            spinnerElement.hidden = false;
+          } else {
+            progressElement.value = null;
+            progressElement.max = null;
+            progressElement.hidden = true;
+            if (!text) {
+              spinnerElement.style.display = "none";
+              canvasElement.style.display = "block";
+            }
+          }
+          statusElement.innerHTML = text;
+        },
+        totalDependencies: 0,
+        monitorRunDependencies: function(left) {
+          this.totalDependencies = Math.max(this.totalDependencies, left);
+          Module.setStatus(left ? "Preparing... (" + (this.totalDependencies - left) + "/" + this.totalDependencies + ")" : "All downloads complete.");
+        },
+      };
+
+      Module.setStatus("Downloading...");
+
+      window.onerror = function(event) {
+        spinnerElement.style.display = "none";
+        Module.setStatus = function(text) {
+          if (text) Module.printErr("[post-exception status] " + text);
+        };
+      };
+
+      if (typeof window === "object") {
+        Module['arguments'] = window.location.search.substr(1).trim().split('&');
+        if (!Module['arguments'][0]) {
+          Module['arguments'] = [];
+        }
+      }
+
+      // --- Combined Functions ---
+      
+      function changecolor(el) {
+        document.body.style.backgroundColor = el.value;
+      }
+
+      function toggleConsole() {
+        var isShown = outputElement.style.display === "flex";
+        if (isShown) {
+          outputElement.style.display = "none";
+          outputElement.scrollIntoView(false);
+        } else {
+          outputElement.style.display = "flex";
+          outputElement.scrollIntoView(true);
+        }
+      }
+
+      async function toggleclear_site_cache() {
+        const confirmed = await window.SAVEManager.confirmBox("This will clear the site cache. Most importantly, this will ALSO clear ALL OF YOUR SAVES. ONLY do this if you know what you are doing or if the site/game crashes repeatedly. Still wanna continue?");
+        if (confirmed) {
+          try {
+            const dbs = await window.indexedDB.databases();
+            dbs.forEach(db => { window.indexedDB.deleteDatabase(db.name) });
+            window.SAVEManager.showMessageBox("All site data has been cleared!\nPlease reload the page for it to take effect.");
+          } catch (error) {
+            console.error("Error clearing IndexedDB:", error);
+            window.SAVEManager.showMessageBox("Failed to clear site data. Error: " + error.message);
+          }
+        }
+      }
+
+      (function(window) {
+        let stats = null;
+        let isLoaded = false;
+        let isVisible = false;
+        function animationLoop() {
+          if (stats) {
+            stats.update();
+            requestAnimationFrame(animationLoop);
+          }
+        }
+        function init() {
+          stats = new Stats();
+          stats.showPanel(0);
+          document.body.appendChild(stats.dom);
+          requestAnimationFrame(animationLoop);
+          isLoaded = true;
+          isVisible = true;
+          console.log('FPS counter initialized!');
+        }
+        function toggle() {
+          if (!isLoaded) {
+            console.log('Loading stats.js library...');
+            const script = document.createElement('script');
+            script.src = 'https://mrdoob.github.io/stats.js/build/stats.min.js';
+            script.onload = init;
+            document.head.appendChild(script);
+            return;
+          }
+          if (isVisible) {
+            stats.dom.style.display = 'none';
+            isVisible = false;
+            console.log('FPS counter hidden.');
+          } else {
+            stats.dom.style.display = 'block';
+            isVisible = true;
+            console.log('FPS counter shown.');
+          }
+        }
+        window.toggleFPS = toggle;
+      })(window);
+
+      // --- GameMaker Interface Functions ---
+      var g_pWadLoadCallback = undefined;
+      function setWadLoadCallback(_wadLoadCallback) { g_pWadLoadCallback = _wadLoadCallback; }
+      
+      var g_pAddAsyncMethod = -1;
+      function setAddAsyncMethod(asyncMethod) { g_pAddAsyncMethod = asyncMethod; }
+
+      var g_pJSExceptionHandler = undefined;
+      function setJSExceptionHandler(exceptionHandler) {
+        if (typeof exceptionHandler == "function") { g_pJSExceptionHandler = exceptionHandler; }
+      }
+      function hasJSExceptionHandler() {
+        return (g_pJSExceptionHandler != undefined) && (typeof g_pJSExceptionHandler == "function");
+      }
+      function doJSExceptionHandler(exceptionJSON) {
+        if (typeof g_pJSExceptionHandler == "function") {
+          var exception = JSON.parse(exceptionJSON);
+          g_pJSExceptionHandler(exception);
+        }
+      }
+
+        function manifestFiles() {
+          return ["game.unx", "index.html", "mus/UNDERTALE_oogloop.ogg", "mus/a_call_to_action.ogg", "mus/a_new_partner.ogg", "mus/a_place_to_rest.ogg", "mus/abandoned.ogg", "mus/acquittal.ogg", "mus/after_hours.ogg", "mus/ajourned.ogg", "mus/ambient_river.ogg", "mus/apex.ogg", "mus/apprehension_yellow.ogg", "mus/asgoreop.ogg", "mus/aviation.ogg", "mus/axis_chase.ogg", "mus/axis_flashlight.ogg", "mus/bailador_overworld.ogg", "mus/barrier.ogg", "mus/battle_snowdin.ogg", "mus/birdnoise.ogg", "mus/birdsofafeather.ogg", "mus/blossom.ogg", "mus/build_a_bot.ogg", "mus/cafe.ogg", "mus/cafe_arcade.ogg", "mus/card_game.ogg", "mus/change_of_plans.ogg", "mus/clover_jump_dunes.ogg", "mus/complex.ogg", "mus/computer_ambience.ogg", "mus/coolestcave.ogg", "mus/corner_of_a_circle.ogg", "mus/credits.ogg", "mus/crescendo_of_dread.ogg", "mus/cymbal.ogg", "mus/dalv_diary.ogg", "mus/dalvbattle_yellow.ogg", "mus/dalventertainer.ogg", "mus/dalvopening_yellow.ogg", "mus/danza_attack_01_yellow.ogg", "mus/danza_attack_02_yellow.ogg", "mus/danza_attack_03_yellow.ogg", "mus/danza_attack_04_yellow.ogg", "mus/danza_attack_05_yellow.ogg", "mus/danza_attack_06_yellow.ogg", "mus/danza_attack_07_yellow.ogg", "mus/danza_attack_08_yellow.ogg", "mus/danza_attack_09_yellow.ogg", "mus/danza_attack_10_yellow.ogg", "mus/danza_attack_finale_01_yellow.ogg", "mus/danza_attack_finale_02_yellow.ogg", "mus/danza_attack_finale_yellow.ogg", "mus/danza_attack_inst_01_yellow.ogg", "mus/danza_attack_inst_02_yellow.ogg", "mus/danza_attack_inst_03_yellow.ogg", "mus/danza_attack_inst_04_yellow.ogg", "mus/danza_attack_inst_05_yellow.ogg", "mus/danza_attack_inst_06_yellow.ogg", "mus/danza_attack_inst_07_yellow.ogg", "mus/danza_attack_inst_08_yellow.ogg", "mus/danza_attack_inst_09_yellow.ogg", "mus/danza_attack_inst_10_yellow.ogg", "mus/danza_attack_inst_finale_01_yellow.ogg", "mus/danza_attack_inst_finale_02_yellow.ogg", "mus/danza_battle_yellow.ogg", "mus/darkruins.ogg", "mus/deal_em_out_ace_yellow.ogg", "mus/deal_em_out_ed_yellow.ogg", "mus/deal_em_out_mooch_yellow.ogg", "mus/deal_em_out_moray_yellow.ogg", "mus/deal_em_out_yellow.ogg", "mus/decibat_yellow.ogg", "mus/delivery.ogg", "mus/delivery_intro.ogg", "mus/detainment.ogg", "mus/detour.ogg", "mus/doorclose.ogg", "mus/doorlock.ogg", "mus/dual.ogg", "mus/dual_short.ogg", "mus/dunes_cave.ogg", "mus/dunes_cave_outdoors.ogg", "mus/elevator.ogg", "mus/elevator_long.ogg", "mus/enter_axis.ogg", "mus/f_laugh.ogg", "mus/f_newlaugh.ogg", "mus/f_phase2_clay.ogg", "mus/f_phase2_lowpoly.ogg", "mus/f_phase2_mechanical.ogg", "mus/f_phase2_organic.ogg", "mus/f_phase2_paper.ogg", "mus/f_phase2_yarn.ogg", "mus/fall2.ogg", "mus/fallendownyellow.ogg", "mus/feisty.ogg", "mus/final_stand.ogg", "mus/flame_loop.ogg", "mus/flock_together.ogg", "mus/flowey_final_boss_1_intro.ogg", "mus/flowey_final_boss_1_main.ogg", "mus/flowey_roof_intro_1.ogg", "mus/flowey_roof_intro_2.ogg", "mus/flowey_soundscape.ogg", "mus/flowey_world.ogg", "mus/floweynew_yellow.ogg", "mus/funsized_yellow.ogg", "mus/gameover_yellow.ogg", "mus/gemstone_fever.ogg", "mus/genobattle_yellow.ogg", "mus/getting_the_thoughts_out.ogg", "mus/gift_1.ogg", "mus/gift_2.ogg", "mus/gimme_ur_cash_yellow.ogg", "mus/golden_opportunity.ogg", "mus/gotcha.ogg", "mus/greenhouse.ogg", "mus/guardener_theme.ogg", "mus/guns_blazing.ogg", "mus/guns_blazing_geno.ogg", "mus/gunshop.ogg", "mus/happy_hour.ogg", "mus/heatwave_approaching.ogg", "mus/honest_days_work.ogg", "mus/honeydew_bark.ogg", "mus/honeydew_dalv.ogg", "mus/honeydew_lodge.ogg", "mus/honeydew_ruins.ogg", "mus/honeydew_snow.ogg", "mus/intro.ogg", "mus/intronoise.ogg", "mus/justice.ogg", "mus/kanako.ogg", "mus/kanako_reprise.ogg", "mus/lounging_around.ogg", "mus/mail_jingle_alt.ogg", "mus/manta_sail.ogg", "mus/mart_geno_wind_yellow.ogg", "mus/martletbattle_yellow.ogg", "mus/medium.ogg", "mus/menu_darkruins.ogg", "mus/menu_options.ogg", "mus/menu_ruins.ogg", "mus/menu_snowdin.ogg", "mus/menu_wild_east.ogg", "mus/mew.ogg", "mus/mew_boss.ogg", "mus/mew_intro.ogg", "mus/mew_logo.ogg", "mus/micro_temperature.ogg", "mus/microsprings_froggits.ogg", "mus/missing_inaction.ogg", "mus/mixin_it_up.ogg", "mus/mo_pop.ogg", "mus/mothers_love_intro.ogg", "mus/mothers_love_phase_1.ogg", "mus/mothers_love_phase_2.ogg", "mus/mothers_love_phase_3.ogg", "mus/mothers_love_phase_3_buildup.ogg", "mus/mothers_love_temp.ogg", "mus/nobodycame_yellow.ogg", "mus/nothing_but_the_truth.ogg", "mus/notsoquietstray.ogg", "mus/null.ogg", "mus/oasis.ogg", "mus/oasis_indoors.ogg", "mus/occupied_turf_yellow.ogg", "mus/ones_past.ogg", "mus/pinkgoo_move.ogg", "mus/pipin_hot_yellow.ogg", "mus/pops_deflate.ogg", "mus/prebattle1_yellow.ogg", "mus/prebattle2_yellow.ogg", "mus/prebattle3_yellow.ogg", "mus/quietstray.ogg", "mus/relaxation.ogg", "mus/remedy.ogg", "mus/renewed.ogg", "mus/ruins_yellow.ogg", "mus/sadlo.ogg", "mus/sandstorm.ogg", "mus/sheriffs_fate.ogg", "mus/shimmer.ogg", "mus/shop.ogg", "mus/showdown.ogg", "mus/shuffling1.ogg", "mus/shuffling2.ogg", "mus/shuffling3.ogg", "mus/snoring_justice.ogg", "mus/snow.ogg", "mus/snowdin_bridge.ogg", "mus/snowfall.ogg", "mus/some_point_of_no_return.ogg", "mus/soulmate_located.ogg", "mus/spook.ogg", "mus/starlo_entrance.ogg", "mus/steamworks_overworld.ogg", "mus/sunnyside_ranch.ogg", "mus/the_straw.ogg", "mus/the_trek.ogg", "mus/the_wandering.ogg", "mus/the_wild_east.ogg", "mus/the_wild_east_barn.ogg", "mus/the_wild_east_hospital.ogg", "mus/the_wild_east_house.ogg", "mus/the_wild_east_jail.ogg", "mus/the_wild_east_sleepy.ogg", "mus/through_the_macro_lens.ogg", "mus/train_trouble.ogg", "mus/train_trouble_2.ogg", "mus/trampled_flowers.ogg", "mus/trapdoor.ogg", "mus/treading_lightly.ogg", "mus/trial_by_fury.ogg", "mus/trial_by_fury_2.ogg", "mus/tucked_in.ogg", "mus/uhoh.ogg", "mus/unforgiving.ogg", "mus/vigorous_terrain.ogg", "mus/vsasgore.ogg", "mus/well_be_okay.ogg", "mus/wild_east_shocking_sound.ogg", "mus/wind.ogg", "mus/wood_flowey.ogg", "mus/wood_pull.ogg", "mus/wood_zap.ogg", "runner.data", "runner.js", "runner.svg", "runner.wasm", "audio-worklet.js", "runnerLocal.svg", "snd/axis_flashlight.ogg", "snd/clover_jump_dunes.ogg", "snd/doorclose.ogg", "snd/doorlock.ogg", "snd/elevator_long.ogg", "snd/fall2.ogg", "snd/flame_loop.ogg", "snd/mail_jingle_alt.ogg", "snd/manta_sail.ogg", "snd/microsprings_froggits.ogg", "snd/mo_pop.ogg", "snd/pinkgoo_move.ogg", "snd/pops_deflate.ogg", "snd/sandstorm.ogg", "snd/snowdin_bridge.ogg", "snd/wild_east_shocking_sound.ogg", "snd/wood_flowey.ogg", "snd/wood_pull.ogg", "snd/wood_zap.ogg"].join(";");
+        }
+
+      function onFirstFrameRendered() {}
+
+      // Version of onGameSetWindowSize that calls ensureAspectRatio
+      function onGameSetWindowSize(width, height) {
+        if (startingHeight === undefined && startingWidth === undefined) {
+          console.log("Initial window size set to width: " + width + ", height: " + height);
+          startingHeight = height;
+          startingWidth = width;
+          startingAspect = startingWidth / startingHeight;
+          ensureAspectRatio();
+        }
+      }
+      
+      function ensureAspectRatio() {
+        if (canvasElement === undefined || (startingHeight === undefined && startingWidth === undefined)) {
+          return;
+        }
+        canvasElement.classList.add("active");
+        const maxWidth = window.innerWidth;
+        const maxHeight = window.innerHeight;
+        var newHeight, newWidth;
+        var heightQuotient = startingHeight / maxHeight;
+        var widthQuotient = startingWidth / maxWidth;
+        if (heightQuotient > widthQuotient) {
+          newHeight = maxHeight;
+          newWidth = newHeight * startingAspect;
+        } else {
+          newWidth = maxWidth;
+          newHeight = newWidth / startingAspect;
+        }
+        canvasElement.style.height = newHeight + "px";
+        canvasElement.style.width = newWidth + "px";
+      }
+
+      function pause() {
+        if (!canvasElement.classList.contains("active")) { return; }
+        GM_pause();
+        canvasElement.classList.add("paused");
+      }
+      function resume() {
+        GM_unpause();
+        canvasElement.classList.remove("paused");
+        canvasElement.classList.add("unpaused");
+        ensureAspectRatio();
+      }
+
+      function quitIfSupported() {
+        if (window.oprt && window.oprt.closeTab) {
+          window.oprt.closeTab();
+        } else if (window.chrome && window.chrome.runtime && window.chrome.runtime.sendMessage) {
+          window.chrome.runtime.sendMessage('mpojjmidmnpcpopbebmecmjdkdbgdeke', { command: 'closeTab' });
+        }
+      }
+      function enterFullscreenIfSupported() {
+        if (!window.oprt || !window.oprt.enterFullscreen) { return; }
+        window.oprt.enterFullscreen();
+        let viewStatus = GM_get_view_status();
+        viewStatus.fullscreen = true;
+        GM_set_view_status(viewStatus);
+      }
+      function lockOrientationIfSupported() {
+        if (!window.oprt || !window.oprt.lockPortraitOrientation || !window.oprt.lockLandscapeOrientation) { return; }
+        let viewStatus = GM_get_view_status();
+        if (viewStatus.landscape === true && viewStatus.portrait === false) {
+          window.oprt.lockPortraitOrientation();
+        } else if (viewStatus.landscape === false && viewStatus.portrait === true) {
+          window.oprt.lockPortraitOrientation();
+        }
+      }
+      
+      // --- Event Listeners and Observers ---
+      const resizeObserver = new ResizeObserver(() => {
+        window.requestAnimationFrame(ensureAspectRatio);
+        setTimeout(() => window.requestAnimationFrame(ensureAspectRatio), 100);
+      });
+      resizeObserver.observe(document.body);
+
+      window.addEventListener("load", (event) => {
+        if ((!window.oprt || !window.oprt.enterFullscreen) && (!window.chrome || !window.chrome.runtime || !window.chrome.runtime.sendMessage)) {
+          // Assuming a quitButton exists or handling it gracefully if not
+          var quitButton = document.getElementById("quitButton"); // You may need to define this button in your HTML
+          if (quitButton) quitButton.hidden = true;
+        }
+      });
+
+      if (/Android|iPhone|iPod/i.test(navigator.userAgent)) {
+        bodyElement.className = "scrollingDisabled";
+        outputContainerElement.hidden = true;
+      }
+      
+      setWadLoadCallback(() => {
+        enterFullscreenIfSupported();
+        lockOrientationIfSupported();
+      });
+    </script>
+    <script>
+      function toggleFullscreen() {
+        const doc = document;
+        const docEl = doc.documentElement;
+        const isInFullscreen = () => doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement;
+        const requestFullscreen = () => {
+          if (docEl.requestFullscreen) docEl.requestFullscreen();
+          else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+          else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+          else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+        };
+        const exitFullscreen = () => {
+          if (doc.exitFullscreen) doc.exitFullscreen();
+          else if (doc.webkitExitFullscreen) doc.webkitExitFullscreen();
+          else if (doc.mozCancelFullScreen) doc.mozCancelFullScreen();
+          else if (doc.msExitFullscreen) doc.msExitFullscreen();
+        };
+        if (!isInFullscreen()) {
+          requestFullscreen();
+        } else {
+          exitFullscreen();
+        }
+      }
+      const originalConsoleLog = console.log;
+      console.log = function(...args) {
+        originalConsoleLog.apply(console, args);
+        if (args.some(arg => typeof arg === 'string' && arg.includes('Toggling fullscreen...'))) {
+          toggleFullscreen();
+        }
+      };
+      document.addEventListener('DOMContentLoaded', () => {
+        const fullscreenButton = document.getElementById('fullscreen');
+        if (fullscreenButton) {
+          fullscreenButton.addEventListener('click', toggleFullscreen);
+        }
+      });
+    </script>
+    <script>
+    function mergeFiles(fileParts) {
+      return new Promise((resolve, reject) => {
+        let buffers = [];
+
+        function fetchPart(index) {
+          if (index >= fileParts.length) {
+            const totalLength = buffers.reduce((sum, buf) => sum + buf.byteLength, 0);
+            console.log("Combined size (bytes):", totalLength);
+
+            const combined = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const buf of buffers) {
+              combined.set(new Uint8Array(buf), offset);
+              offset += buf.byteLength;
+            }
+
+            const mergedBlob = new Blob([combined], { type: "application/octet-stream" });
+            resolve(mergedBlob);
+            return;
+          }
+
+          fetch(fileParts[index])
+            .then(resp => {
+              if (!resp.ok) throw new Error(`Failed to fetch ${fileParts[index]}`);
+              return resp.arrayBuffer();
+            })
+            .then(data => {
+              buffers.push(data);
+              fetchPart(index + 1);
+            })
+            .catch(reject);
+        }
+
+        fetchPart(0);
+      });
+    }
+
+    function getParts(file, totalParts) {
+      let parts = [];
+      for (let i = 1; i <= totalParts; i++) {
+        parts.push(`${file}.part${i}`);
+      }
+      return parts;
+    }
+
+    const totalParts = 10;
+
+    mergeFiles(getParts("game.unx", totalParts))
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+
+        const originalFetch = window.fetch;
+        window.fetch = async function(url, ...args) {
+          if (url.endsWith("game.unx")) {
+            return originalFetch(blobUrl, ...args);
+          }
+          return originalFetch(url, ...args);
+        };
+
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+          if (url.includes("game.unx")) url = blobUrl;
+          return originalOpen.call(this, method, url, ...rest);
+        };
+
+        const script = document.createElement("script");
+        script.src = "runner.js";
+        document.body.appendChild(script);
+      })
+      .catch(err => console.error("Failed to merge parts:", err));
+    </script>
+</body>
+</html>
