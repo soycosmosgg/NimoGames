@@ -127,9 +127,14 @@ window.NIMO_GAMES = [
   {
     id: '616603',
     title: 'UNDERTALE Yellow',
+  },
+  {
+    id: '11913',
+    title: 'Uno',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/nimogamesdev/ng-source@main/game10/',
+    cdnProbe: 'js/main.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
   }
-
-
 
 ].map(game => {
   const artworkBase = `https://cdn-ngames.pages.dev/images/${game.id}`;
