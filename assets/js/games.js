@@ -115,7 +115,11 @@ window.NIMO_GAMES = [
   {
     id: '198666',
     title: 'Ragdoll Archers',
-  }
+  },
+  {
+    id: '142609',
+    title: 'Pou',
+  },
 
 
 ].map(game => {
