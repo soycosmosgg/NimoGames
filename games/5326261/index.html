@@ -70,8 +70,8 @@ function updateStatus(currentBytes) {
 
 window.fetch = function(url, ...args) {
     const u = url.toString();
-    if (u.includes("Brotato.pck") || u.includes("Brotato.wasm")) {
-        const f = u.includes(".pck") ? "Brotato.pck" : "Brotato.wasm";
+    if (u.includes("Brotato.wasm")) {
+        const f = "Brotato.wasm";
         if (mergedData[f]) return Promise.resolve(new Response(mergedData[f]));
         return new Promise((resolve) => {
             if (!pendingRequests[f]) pendingRequests[f] = [];
@@ -86,7 +86,7 @@ async function merge(name, start, end) {
     for (let i = start; i <= end; i++) {
         const url = BASE + encodeURIComponent(name + ".part" + i);
         const r = await originalFetch(url);
-        if (!r.ok) throw new Error();
+        if (!r.ok) throw new Error(`Could not load ${name}.part${i} (HTTP ${r.status}).`);
         const data = await r.arrayBuffer();
         bufs.push(data);
         bytesLoadedSoFar += data.byteLength;
@@ -103,7 +103,7 @@ async function merge(name, start, end) {
 async function fetchSingle(name) {
     const url = BASE + encodeURIComponent(name);
     const r = await originalFetch(url);
-    if (!r.ok) throw new Error();
+    if (!r.ok) throw new Error(`Could not load ${name} (HTTP ${r.status}).`);
     const data = await r.arrayBuffer();
     bytesLoadedSoFar += data.byteLength;
     updateStatus(bytesLoadedSoFar);
@@ -122,33 +122,40 @@ async function init() {
 
         const s = document.createElement('script');
         s.src = BASE + "Brotato.js";
-        s.onload = () => {
-            const engine = new Engine({
-                "args":[],
-                "canvasResizePolicy":2,
-                "executable":"Brotato",
-                "experimentalVK":false,
-                "fileSizes":{"Brotato.pck":147972096,"Brotato.wasm":19796835},
-                "focusCanvas":true,
-                "gdnativeLibs":[]
-            });
+        s.onload = async () => {
+            try {
+                const engine = new Engine({
+                    "args":[],
+                    "canvasResizePolicy":2,
+                    "executable":"Brotato",
+                    "experimentalVK":false,
+                    "fileSizes":{"Brotato.pck":147972096,"Brotato.wasm":19796835},
+                    "focusCanvas":true,
+                    "gdnativeLibs":[]
+                });
 
-            engine.startGame({
-                onProgress: (current, total) => {
-                    if (total > 0) {
-                        updateStatus(bytesLoadedSoFar);
-                    }
-                }
-            }).then(() => {
+                const projectData = await mergedData["Brotato.pck"].arrayBuffer();
+                await engine.preloadFile(projectData, "Brotato.pck");
+                await engine.start({ "args":["--main-pack", "Brotato.pck"] });
                 statusEl.style.display = 'none';
                 window.dispatchEvent(new Event('resize'));
-            });
+            } catch (error) {
+                showLoadError(error);
+            }
         };
+        s.onerror = () => showLoadError(new Error("Could not load Brotato.js."));
         document.body.appendChild(s);
-    } catch (e) {
-        statusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> LOAD ERROR`;
+    } catch (error) {
+        showLoadError(error);
     }
 }
+
+function showLoadError(error) {
+    statusEl.style.color = "#f44";
+    statusEl.style.background = "none";
+    statusEl.textContent = `LOAD ERROR: ${error.message}`;
+}
+
 init();
 })();
 </script>
