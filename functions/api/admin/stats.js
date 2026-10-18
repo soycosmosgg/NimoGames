@@ -1,6 +1,6 @@
-import { matchesAdminSecret } from '../../_utils/admin-auth.js';
+import { authorizeAdminRequest } from '../../_utils/admin-lockout.js';
 
-const ACTIVE_VISITOR_TTL_SECONDS = 90;
+const ACTIVE_VISITOR_TTL_SECONDS = 120;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -24,11 +24,15 @@ export async function onRequestPost({ request, env }) {
   }
 
   const authorization = request.headers.get('authorization') || '';
-  if (authorization.length > 512 || !authorization.startsWith('Bearer ')) {
-    return jsonResponse({ error: 'Invalid admin secret.' }, 401);
-  }
-  if (!await matchesAdminSecret(authorization.slice('Bearer '.length), env.ADMIN_SECRET)) {
-    return jsonResponse({ error: 'Invalid admin secret.' }, 401);
+  const suppliedSecret = authorization.length <= 512 && authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : '';
+  try {
+    const authorizationResult = await authorizeAdminRequest(request, env, suppliedSecret);
+    if (!authorizationResult.authorized) return authorizationResult.response;
+  } catch (error) {
+    console.error('[admin-stats] Failed to verify admin access.', error);
+    return jsonResponse({ error: 'Unable to verify admin access.' }, 500);
   }
 
   const now = Math.floor(Date.now() / 1000);
@@ -37,11 +41,7 @@ export async function onRequestPost({ request, env }) {
   const weekStart = new Date((now - 6 * 24 * 60 * 60) * 1000).toISOString().slice(0, 10);
 
   try {
-    await env.VISITORS_DB.prepare(
-      'DELETE FROM active_visitors WHERE last_seen < ?'
-    ).bind(cutoff).run();
-
-    const [activeResult, dailyRows] = await Promise.all([
+    const [activeResult, dailyRows, gameDailyRows] = await Promise.all([
       env.VISITORS_DB.prepare(
         'SELECT COUNT(*) AS count FROM active_visitors WHERE last_seen >= ?'
       ).bind(cutoff).first(),
@@ -50,6 +50,11 @@ export async function onRequestPost({ request, env }) {
         FROM site_analytics_daily
         WHERE day >= ? AND day <= ?
         ORDER BY day ASC
+      `).bind(weekStart, today).all(),
+      env.VISITORS_DB.prepare(`
+        SELECT day, game_id, game_launches
+        FROM game_analytics_daily
+        WHERE day >= ? AND day <= ?
       `).bind(weekStart, today).all()
     ]);
 
@@ -64,14 +69,33 @@ export async function onRequestPost({ request, env }) {
       }
       return [row.day, { pageViews: row.page_views, peakVisitors: row.peak_visitors }];
     }));
+    const gameLaunchesByDay = new Map();
+    let popularGame = null;
+    (gameDailyRows.results || []).forEach(row => {
+      if (typeof row.day !== 'string' || typeof row.game_id !== 'string' ||
+          !Number.isSafeInteger(row.game_launches) || row.game_launches < 0) {
+        throw new Error('D1 returned invalid daily game analytics.');
+      }
+      gameLaunchesByDay.set(row.day, (gameLaunchesByDay.get(row.day) || 0) + row.game_launches);
+      if (row.day === today && (!popularGame || row.game_launches > popularGame.gameLaunches ||
+          (row.game_launches === popularGame.gameLaunches && row.game_id < popularGame.id))) {
+        popularGame = { id: row.game_id, gameLaunches: row.game_launches };
+      }
+    });
 
     return jsonResponse({
       activeVisitors: activeResult.count,
       todayPeakVisitors: days.get(today)?.peakVisitors || 0,
+      popularGame,
       last7Days: Array.from({ length: 7 }, (_, index) => {
         const date = new Date((now - (6 - index) * 24 * 60 * 60) * 1000);
         const day = date.toISOString().slice(0, 10);
         return { day, pageViews: days.get(day)?.pageViews || 0 };
+      }),
+      last7DaysGameLaunches: Array.from({ length: 7 }, (_, index) => {
+        const date = new Date((now - (6 - index) * 24 * 60 * 60) * 1000);
+        const day = date.toISOString().slice(0, 10);
+        return { day, gameLaunches: gameLaunchesByDay.get(day) || 0 };
       })
     });
   } catch (error) {

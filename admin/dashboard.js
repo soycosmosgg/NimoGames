@@ -18,18 +18,11 @@
   const popularGameTitle = document.getElementById('popular-game-title');
   const popularGameViews = document.getElementById('popular-game-views');
   const miniViewsChart = document.getElementById('mini-views-chart');
+  const catalogGames = Array.isArray(window.NIMO_GAMES) ? window.NIMO_GAMES : [];
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminLanguageStorageKey = 'nimo-games-admin-language';
   const numberFormat = new Intl.NumberFormat('es-ES');
   const dayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'short', timeZone: 'UTC' });
-  const popularGames = [
-    { id: '945360', title: 'Among Us', image: 'https://cdn-ngames.pages.dev/images/945360/hero.webp', visits: 3900 },
-    { id: '285900', title: 'Gang Beasts', image: 'https://cdn-ngames.pages.dev/images/285900/hero.webp', visits: 3400 },
-    { id: '3527290', title: 'PEAK', image: 'https://cdn-ngames.pages.dev/images/3527290/hero.webp', visits: 3600 },
-    { id: '367520', title: 'Hollow Knight', image: 'https://cdn-ngames.pages.dev/images/367520/hero.webp', visits: 3100 },
-    { id: '98266', title: 'Minecraft', image: 'https://cdn-ngames.pages.dev/images/98266/hero.webp', visits: 4200 },
-    { id: '322170', title: 'Geometry Dash', image: 'https://cdn-ngames.pages.dev/images/322170/hero.webp', visits: 3550 }
-  ];
   const translations = {
     es: {
       gateLabel: 'Acceso al panel de administración',
@@ -53,6 +46,7 @@
       serviceUnavailable: 'El servicio de administración no está configurado. Revisa la base de datos y ADMIN_SECRET en Pages.',
       statsUnavailable: 'No se pudieron cargar las estadísticas',
       invalidStats: 'El servidor devolvió estadísticas con un formato no válido.',
+      rateLimited: 'Has alcanzado el límite de intentos. Inténtalo de nuevo en',
       expiredSecret: 'La clave dejó de ser válida. Desbloquea el panel de nuevo.',
       verifyFailed: 'No se pudo verificar la clave.'
     },
@@ -78,6 +72,7 @@
       serviceUnavailable: 'The admin service is not configured. Check the database and ADMIN_SECRET in Pages.',
       statsUnavailable: 'Could not load statistics',
       invalidStats: 'The server returned statistics in an invalid format.',
+      rateLimited: 'Too many attempts. Try again in',
       expiredSecret: 'The key is no longer valid. Sign in again.',
       verifyFailed: 'Could not verify the key.'
     }
@@ -134,6 +129,7 @@
   }
 
   async function requestStats(secret) {
+    const languageText = translations[currentLanguage];
     const response = await fetch('/api/admin/stats', {
       method: 'POST',
       headers: {
@@ -143,11 +139,11 @@
       body: '{}',
       cache: 'no-store'
     });
-    const text = await response.text();
+    const responseText = await response.text();
     let result;
 
     try {
-      result = JSON.parse(text);
+      result = JSON.parse(responseText);
     } catch {
       if (response.status === 404) {
         throw new Error('Las estadísticas aún no están disponibles en este servidor. Despliégalo con Pages Functions habilitado.');
@@ -156,6 +152,13 @@
     }
 
     if (!response.ok) {
+      if (response.status === 429) {
+        const retryAfterSeconds = Number(result.retryAfterSeconds);
+        const remainingTime = Number.isSafeInteger(retryAfterSeconds) && retryAfterSeconds > 0
+          ? ` ${languageText.rateLimited} ${Math.ceil(retryAfterSeconds / 60)} min.`
+          : result.error || languageText.rateLimited;
+        throw new Error(remainingTime);
+      }
       if (response.status === 401) {
         const error = new Error('La clave de administrador no es válida.');
         error.name = 'UnauthorizedError';
@@ -177,7 +180,17 @@
         stats.last7Days.some(day =>
           !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
           !Number.isSafeInteger(day.pageViews) || day.pageViews < 0
-        )) {
+        ) ||
+        !Array.isArray(stats.last7DaysGameLaunches) || stats.last7DaysGameLaunches.length !== 7 ||
+        stats.last7DaysGameLaunches.some(day =>
+          !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
+          !Number.isSafeInteger(day.gameLaunches) || day.gameLaunches < 0
+        ) ||
+        (stats.popularGame !== null && (
+          !stats.popularGame || typeof stats.popularGame.id !== 'string' ||
+          !Number.isSafeInteger(stats.popularGame.gameLaunches) || stats.popularGame.gameLaunches < 0 ||
+          !catalogGames.some(game => game.id === stats.popularGame.id)
+        ))) {
       throw new Error('El servidor devolvió estadísticas con un formato no válido.');
     }
   }
@@ -218,32 +231,56 @@
     chart.setAttribute('aria-label', `Visualizaciones de los últimos siete días: ${numberFormat.format(total)} en total.`);
     chartTotalDisplay.textContent = numberFormat.format(total);
     weeklyViewsDisplay.textContent = numberFormat.format(total);
-    renderMiniChart(days);
   }
 
   function renderMiniChart(days) {
     if (!miniViewsChart) return;
-    const maximum = Math.max(1, ...days.map(day => day.pageViews));
+    const maximum = Math.max(1, ...days.map(day => day.gameLaunches));
+    const total = days.reduce((sum, day) => sum + day.gameLaunches, 0);
     miniViewsChart.replaceChildren();
 
     days.forEach(day => {
+      const date = new Date(`${day.day}T00:00:00Z`);
+      const column = document.createElement('div');
+      column.className = 'admin-mini-chart-day';
+      column.setAttribute('aria-label', `${dayFormat.format(date)}: ${numberFormat.format(day.gameLaunches)} aperturas`);
+
       const bar = document.createElement('span');
       bar.className = 'admin-mini-chart-bar';
-      bar.title = `${day.day}: ${numberFormat.format(day.pageViews)} visualizaciones`;
-      bar.style.setProperty('--mini-bar-height', `${Math.max(10, (day.pageViews / maximum) * 100)}%`);
-      miniViewsChart.append(bar);
+      bar.style.setProperty('--mini-bar-height', `${day.gameLaunches === 0 ? 0 : Math.max(8, (day.gameLaunches / maximum) * 100)}%`);
+
+      const label = document.createElement('span');
+      label.className = 'admin-mini-chart-label';
+      label.textContent = dayFormat.format(date).replace('.', '');
+
+      column.append(bar, label);
+      miniViewsChart.append(column);
     });
+    miniViewsChart.setAttribute('aria-label', `Aperturas de juegos de los últimos siete días: ${numberFormat.format(total)} en total.`);
+    if (total === 0) {
+      const emptyState = document.createElement('p');
+      emptyState.className = 'admin-mini-chart-empty';
+      emptyState.textContent = 'Sin aperturas registradas esta semana';
+      miniViewsChart.replaceChildren(emptyState);
+    }
   }
 
-  function renderPopularGame() {
+  function renderPopularGame(popularGame) {
     if (!popularGameImage || !popularGameTitle || !popularGameViews) return;
-    const index = new Date().getDate() % popularGames.length;
-    const game = popularGames[index];
-    const visitsLabel = `${numberFormat.format(game.visits)} visitas`;
-    popularGameImage.src = game.image;
-    popularGameImage.alt = `Juego más popular del día: ${game.title}`;
+    if (!popularGame) {
+      popularGameImage.hidden = true;
+      popularGameTitle.textContent = 'Sin datos de hoy';
+      popularGameViews.textContent = 'Todavía no hay aperturas registradas';
+      return;
+    }
+
+    const game = catalogGames.find(item => item.id === popularGame.id);
+    if (!game) throw new Error('El juego más abierto no existe en el catálogo.');
+    popularGameImage.src = game.hero;
+    popularGameImage.alt = `Imagen de ${game.title}`;
+    popularGameImage.hidden = false;
     popularGameTitle.textContent = game.title;
-    popularGameViews.textContent = visitsLabel;
+    popularGameViews.textContent = `${numberFormat.format(popularGame.gameLaunches)} aperturas`;
   }
 
   function renderStats(stats) {
@@ -251,7 +288,8 @@
     activeVisitorsDisplay.textContent = numberFormat.format(stats.activeVisitors);
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
     renderChart(stats.last7Days);
-    renderPopularGame();
+    renderMiniChart(stats.last7DaysGameLaunches);
+    renderPopularGame(stats.popularGame);
   }
 
   function lockPanel(message = '') {
@@ -319,7 +357,7 @@
         minute: '2-digit'
       }).format(new Date())}.`, Boolean(storageWarning));
       window.clearInterval(refreshTimer);
-      refreshTimer = window.setInterval(refreshStats, 30000);
+      refreshTimer = window.setInterval(refreshStats, 60000);
     } catch (error) {
       console.error('[admin-dashboard] Could not unlock the admin panel.', error);
       if (error instanceof Error && error.name === 'UnauthorizedError') {

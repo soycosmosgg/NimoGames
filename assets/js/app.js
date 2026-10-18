@@ -48,6 +48,7 @@
   const avatarGreetingStorageKey = 'nimo-games-visited';
   const seenLiveMessageStorageKey = 'nimo-games-seen-live-message';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
+  const pendingGameLaunches = new Map();
   let currentMessageUpdatedAt = null;
   let messageTypingTimer = null;
   let messageHideTimer = null;
@@ -66,6 +67,8 @@
   let gameTransitionTimer = null;
   let gameTransitionId = 0;
   let gameIsClosing = false;
+  let visitorSessionId = null;
+  let visitorUpdateInProgress = false;
   let pendingVersionSelection = null;
   const homeGameLimit = 5;
   const greetingVisibleDurationMs = 30000;
@@ -318,11 +321,16 @@
   }
 
   async function updateVisitorCount(sessionId, pageView = false) {
+    if (visitorUpdateInProgress) return;
+    visitorUpdateInProgress = true;
+    const launches = Object.fromEntries(pendingGameLaunches);
+    pendingGameLaunches.clear();
+
     try {
       const response = await window.fetch('/api/visitors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, pageView }),
+        body: JSON.stringify({ sessionId, pageView, gameLaunches: launches }),
         cache: 'no-store'
       });
       if (!response.ok) {
@@ -335,17 +343,39 @@
       }
       visitorCountDisplay.textContent = new Intl.NumberFormat('es-ES').format(result.count);
     } catch (error) {
+      Object.entries(launches).forEach(([gameId, count]) => {
+        pendingGameLaunches.set(gameId, (pendingGameLaunches.get(gameId) || 0) + count);
+      });
       console.error('No se pudo actualizar el contador de visitantes.', error);
       visitorCountDisplay.textContent = '—';
+    } finally {
+      visitorUpdateInProgress = false;
+    }
+  }
+
+  function queueGameLaunch(gameId) {
+    pendingGameLaunches.set(gameId, (pendingGameLaunches.get(gameId) || 0) + 1);
+  }
+
+  function sendPendingGameLaunchesOnPageHide() {
+    if (!visitorSessionId || pendingGameLaunches.size === 0) return;
+    const body = JSON.stringify({
+      sessionId: visitorSessionId,
+      gameLaunches: Object.fromEntries(pendingGameLaunches)
+    });
+    const queued = new Blob([body], { type: 'application/json' });
+    if (window.navigator.sendBeacon('/api/visitors', queued)) {
+      pendingGameLaunches.clear();
     }
   }
 
   function startVisitorCounter() {
-    const sessionId = getVisitorSessionId();
-    if (!sessionId) return;
+    visitorSessionId = getVisitorSessionId();
+    if (!visitorSessionId) return;
 
-    updateVisitorCount(sessionId, true);
-    window.setInterval(() => updateVisitorCount(sessionId), 30000);
+    updateVisitorCount(visitorSessionId, true);
+    window.setInterval(() => updateVisitorCount(visitorSessionId), 60000);
+    window.addEventListener('pagehide', sendPendingGameLaunchesOnPageHide);
   }
 
   function updateClock() {
@@ -376,6 +406,7 @@
       return;
     }
     if (selectedVersion) game = { ...game, ...selectedVersion };
+    queueGameLaunch(game.id);
     recentGameIds = [game.id, ...recentGameIds.filter(id => id !== game.id)];
     saveRecentGameIds();
     homeGames = buildHomeGames();

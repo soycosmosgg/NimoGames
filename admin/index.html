@@ -6,8 +6,9 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#282a30">
   <title>Panel de administración | Nimo Games</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-20">
-  <script src="/admin/dashboard.js?v=admin-dashboard-6" defer></script>
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-21">
+  <script src="/assets/js/games.js?v=game-catalog-1" defer></script>
+  <script src="/admin/dashboard.js?v=admin-dashboard-7" defer></script>
 </head>
 <body>
   <main class="admin-gate" id="admin-gate">
@@ -171,16 +172,16 @@
         <section class="admin-insights" aria-label="Actividad destacada">
           <article class="admin-card admin-popular-game">
             <header class="admin-card-header">
-              <h2>Juego más popular del día</h2>
-              <p>En la actualidad, el favorito del tráfico</p>
+              <h2>Juego más abierto hoy</h2>
+              <p>Aperturas registradas desde que se activó esta estadística</p>
             </header>
             <div class="admin-popular-game-body">
-              <img id="popular-game-image" class="admin-popular-game-image" src="https://cdn-ngames.pages.dev/images/945360/hero.webp" alt="Juego más popular del día">
+              <img id="popular-game-image" class="admin-popular-game-image" alt="" hidden>
               <div class="admin-popular-game-copy">
                 <p class="admin-popular-game-tag">Top del día</p>
-                <h3 id="popular-game-title">Among Us</h3>
+                <h3 id="popular-game-title">Sin datos de hoy</h3>
                 <div class="admin-popular-game-meta">
-                  <span id="popular-game-views">3.9k visitas</span>
+                  <span id="popular-game-views">Todavía no hay aperturas registradas</span>
                   <span>hoy</span>
                 </div>
               </div>
@@ -189,10 +190,10 @@
 
           <article class="admin-card admin-mini-chart-card">
             <header class="admin-card-header">
-              <h2>Ritmo de visitas</h2>
+              <h2>Juegos abiertos</h2>
               <p>Últimos 7 días</p>
             </header>
-            <div class="admin-mini-chart" id="mini-views-chart" role="img" aria-label="Ritmo de visitas de los últimos siete días"></div>
+            <div class="admin-mini-chart" id="mini-views-chart" role="img" aria-label="Juegos abiertos de los últimos siete días"></div>
           </article>
         </section>
       </main>

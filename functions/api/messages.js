@@ -1,4 +1,4 @@
-import { matchesAdminSecret } from '../_utils/admin-auth.js';
+import { authorizeAdminRequest } from '../_utils/admin-lockout.js';
 
 const MAX_REQUEST_LENGTH = 8192;
 const MAX_MESSAGE_LENGTH = 250;
@@ -55,12 +55,15 @@ export async function onRequestPost({ request, env }) {
   }
 
   const authorization = request.headers.get('authorization') || '';
-  if (authorization.length > 512 || !authorization.startsWith('Bearer ')) {
-    return jsonResponse({ error: 'Invalid admin secret.' }, 401);
-  }
-  const suppliedSecret = authorization.slice('Bearer '.length);
-  if (!await matchesAdminSecret(suppliedSecret, env.ADMIN_SECRET)) {
-    return jsonResponse({ error: 'Invalid admin secret.' }, 401);
+  const suppliedSecret = authorization.length <= 512 && authorization.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length)
+    : '';
+  try {
+    const authorizationResult = await authorizeAdminRequest(request, env, suppliedSecret);
+    if (!authorizationResult.authorized) return authorizationResult.response;
+  } catch (error) {
+    console.error('[messages] Failed to verify admin access.', error);
+    return jsonResponse({ error: 'Unable to verify admin access.' }, 500);
   }
 
   if (!request.headers.get('content-type')?.toLowerCase().includes('application/json')) {

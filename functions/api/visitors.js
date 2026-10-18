@@ -1,5 +1,10 @@
-const ACTIVE_VISITOR_TTL_SECONDS = 90;
+const ACTIVE_VISITOR_TTL_SECONDS = 120;
 const SESSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const GAME_IDS = new Set([
+  '945360', '285900', '3527290', '2835570', '367520', '322170', '98266', '12100',
+  '1388880', '319510', '332800', '354140', '388090', '871720', '758260', '302895',
+  '9734614', '493632', '3314790'
+]);
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -26,7 +31,7 @@ export async function onRequestPost({ request, env }) {
   } catch {
     return jsonResponse({ error: 'Unable to read request body.' }, 400);
   }
-  if (body.length > 256) {
+  if (body.length > 2048) {
     return jsonResponse({ error: 'Request body is too large.' }, 413);
   }
 
@@ -40,15 +45,31 @@ export async function onRequestPost({ request, env }) {
   if (!payload || typeof payload.sessionId !== 'string' || !SESSION_ID_PATTERN.test(payload.sessionId)) {
     return jsonResponse({ error: 'A valid sessionId is required.' }, 400);
   }
+  if (payload.pageView !== undefined && typeof payload.pageView !== 'boolean') {
+    return jsonResponse({ error: 'pageView must be a boolean.' }, 400);
+  }
+
+  const gameLaunches = payload.gameLaunches === undefined ? {} : payload.gameLaunches;
+  if (!gameLaunches || typeof gameLaunches !== 'object' || Array.isArray(gameLaunches)) {
+    return jsonResponse({ error: 'gameLaunches must be an object.' }, 400);
+  }
+  const launchEntries = Object.entries(gameLaunches);
+  if (launchEntries.length > GAME_IDS.size || launchEntries.some(([gameId, count]) =>
+    !GAME_IDS.has(gameId) || !Number.isSafeInteger(count) || count < 1 || count > 1000
+  )) {
+    return jsonResponse({ error: 'gameLaunches contains invalid entries.' }, 400);
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const cutoff = now - ACTIVE_VISITOR_TTL_SECONDS;
   const today = new Date(now * 1000).toISOString().slice(0, 10);
 
   try {
-    await env.VISITORS_DB.prepare(
-      'DELETE FROM active_visitors WHERE last_seen < ?'
-    ).bind(cutoff).run();
+    if (payload.pageView === true) {
+      await env.VISITORS_DB.prepare(
+        'DELETE FROM active_visitors WHERE last_seen < ?'
+      ).bind(cutoff).run();
+    }
 
     await env.VISITORS_DB.prepare(`
       INSERT INTO active_visitors (session_id, last_seen)
@@ -70,7 +91,19 @@ export async function onRequestPost({ request, env }) {
       ON CONFLICT (day) DO UPDATE SET
         page_views = page_views + excluded.page_views,
         peak_visitors = MAX(peak_visitors, excluded.peak_visitors)
+      WHERE excluded.page_views > 0 OR excluded.peak_visitors > peak_visitors
     `).bind(today, payload.pageView === true ? 1 : 0, result.count).run();
+
+    if (launchEntries.length > 0) {
+      const values = launchEntries.map(() => '(?, ?, ?)').join(', ');
+      const bindings = launchEntries.flatMap(([gameId, count]) => [today, gameId, count]);
+      await env.VISITORS_DB.prepare(`
+        INSERT INTO game_analytics_daily (day, game_id, game_launches)
+        VALUES ${values}
+        ON CONFLICT (day, game_id) DO UPDATE SET
+          game_launches = game_launches + excluded.game_launches
+      `).bind(...bindings).run();
+    }
 
     return jsonResponse({ count: result.count });
   } catch (error) {

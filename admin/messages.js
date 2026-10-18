@@ -37,6 +37,12 @@
     }
 
     if (!response.ok) {
+      if (response.status === 429) {
+        const retryAfterSeconds = Number(result.retryAfterSeconds);
+        if (Number.isSafeInteger(retryAfterSeconds) && retryAfterSeconds > 0) {
+          throw new Error(`Acceso bloqueado temporalmente. Inténtalo de nuevo en ${Math.ceil(retryAfterSeconds / 60)} min.`);
+        }
+      }
       if (response.status === 401) {
         const error = new Error('La clave de administrador no es válida. Revísala e inténtalo de nuevo.');
         error.name = 'UnauthorizedError';
