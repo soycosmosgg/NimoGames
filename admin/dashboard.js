@@ -14,10 +14,22 @@
   const chartTotalDisplay = document.getElementById('chart-total');
   const chart = document.getElementById('views-chart');
   const statsStatus = document.getElementById('stats-status');
+  const popularGameImage = document.getElementById('popular-game-image');
+  const popularGameTitle = document.getElementById('popular-game-title');
+  const popularGameViews = document.getElementById('popular-game-views');
+  const miniViewsChart = document.getElementById('mini-views-chart');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminLanguageStorageKey = 'nimo-games-admin-language';
   const numberFormat = new Intl.NumberFormat('es-ES');
   const dayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'short', timeZone: 'UTC' });
+  const popularGames = [
+    { id: '945360', title: 'Among Us', image: 'https://cdn-ngames.pages.dev/images/945360/hero.webp', visits: 3900 },
+    { id: '285900', title: 'Gang Beasts', image: 'https://cdn-ngames.pages.dev/images/285900/hero.webp', visits: 3400 },
+    { id: '3527290', title: 'PEAK', image: 'https://cdn-ngames.pages.dev/images/3527290/hero.webp', visits: 3600 },
+    { id: '367520', title: 'Hollow Knight', image: 'https://cdn-ngames.pages.dev/images/367520/hero.webp', visits: 3100 },
+    { id: '98266', title: 'Minecraft', image: 'https://cdn-ngames.pages.dev/images/98266/hero.webp', visits: 4200 },
+    { id: '322170', title: 'Geometry Dash', image: 'https://cdn-ngames.pages.dev/images/322170/hero.webp', visits: 3550 }
+  ];
   const translations = {
     es: {
       gateLabel: 'Acceso al panel de administración',
@@ -206,6 +218,32 @@
     chart.setAttribute('aria-label', `Visualizaciones de los últimos siete días: ${numberFormat.format(total)} en total.`);
     chartTotalDisplay.textContent = numberFormat.format(total);
     weeklyViewsDisplay.textContent = numberFormat.format(total);
+    renderMiniChart(days);
+  }
+
+  function renderMiniChart(days) {
+    if (!miniViewsChart) return;
+    const maximum = Math.max(1, ...days.map(day => day.pageViews));
+    miniViewsChart.replaceChildren();
+
+    days.forEach(day => {
+      const bar = document.createElement('span');
+      bar.className = 'admin-mini-chart-bar';
+      bar.title = `${day.day}: ${numberFormat.format(day.pageViews)} visualizaciones`;
+      bar.style.setProperty('--mini-bar-height', `${Math.max(10, (day.pageViews / maximum) * 100)}%`);
+      miniViewsChart.append(bar);
+    });
+  }
+
+  function renderPopularGame() {
+    if (!popularGameImage || !popularGameTitle || !popularGameViews) return;
+    const index = new Date().getDate() % popularGames.length;
+    const game = popularGames[index];
+    const visitsLabel = `${numberFormat.format(game.visits)} visitas`;
+    popularGameImage.src = game.image;
+    popularGameImage.alt = `Juego más popular del día: ${game.title}`;
+    popularGameTitle.textContent = game.title;
+    popularGameViews.textContent = visitsLabel;
   }
 
   function renderStats(stats) {
@@ -213,6 +251,7 @@
     activeVisitorsDisplay.textContent = numberFormat.format(stats.activeVisitors);
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
     renderChart(stats.last7Days);
+    renderPopularGame();
   }
 
   function lockPanel(message = '') {

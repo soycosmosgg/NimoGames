@@ -116,7 +116,7 @@
           <div>
             <p class="admin-eyebrow">Resumen</p>
             <h1 id="page-title">Panel de administración</h1>
-            <p class="admin-description">Actividad de Nimo Games y acceso a las herramientas del sitio.</p>
+            <p class="admin-description">Actividad diaria de Nimo Games y evolución del tráfico del sitio.</p>
           </div>
           <span class="admin-pill"><span class="admin-pill-dot" aria-hidden="true"></span>Datos en tiempo real</span>
         </section>
@@ -168,30 +168,31 @@
           </div>
         </section>
 
-        <section class="admin-card admin-analytics" aria-labelledby="tools-title">
-          <header class="admin-card-header">
-            <h2 id="tools-title">Herramientas</h2>
-            <p>Acceso rápido a las funciones de administración.</p>
-          </header>
-          <article class="admin-tool">
-            <div class="admin-tool-copy">
-              <span class="admin-tool-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5h-7L5 21v-4.8a2.5 2.5 0 0 1-1-1.7z" />
-                  <path d="M8 9h8M8 13h5" />
-                </svg>
-              </span>
-              <div>
-                <h3>Mensajes en vivo</h3>
-                <p>Envía avisos a las personas que tienen el sitio abierto.</p>
+        <section class="admin-insights" aria-label="Actividad destacada">
+          <article class="admin-card admin-popular-game">
+            <header class="admin-card-header">
+              <h2>Juego más popular del día</h2>
+              <p>En la actualidad, el favorito del tráfico</p>
+            </header>
+            <div class="admin-popular-game-body">
+              <img id="popular-game-image" class="admin-popular-game-image" src="https://cdn-ngames.pages.dev/images/945360/hero.webp" alt="Juego más popular del día">
+              <div class="admin-popular-game-copy">
+                <p class="admin-popular-game-tag">Top del día</p>
+                <h3 id="popular-game-title">Among Us</h3>
+                <div class="admin-popular-game-meta">
+                  <span id="popular-game-views">3.9k visitas</span>
+                  <span>hoy</span>
+                </div>
               </div>
             </div>
-            <a class="admin-button" href="/admin/messages.html">
-              Abrir mensajes
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </a>
+          </article>
+
+          <article class="admin-card admin-mini-chart-card">
+            <header class="admin-card-header">
+              <h2>Ritmo de visitas</h2>
+              <p>Últimos 7 días</p>
+            </header>
+            <div class="admin-mini-chart" id="mini-views-chart" role="img" aria-label="Ritmo de visitas de los últimos siete días"></div>
           </article>
         </section>
       </main>

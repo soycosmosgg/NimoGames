@@ -254,7 +254,75 @@ button, input, textarea { font: inherit; }
 .admin-logout:hover { border-color: #9ca3af; color: #111827; }
 .admin-logout:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
 .admin-analytics { margin-top: 16px; }
+.admin-insights {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+  gap: 14px;
+  margin-top: 16px;
+}
 .admin-chart-card { padding: 18px 20px 14px; }
+.admin-popular-game .admin-card-header,
+.admin-mini-chart-card .admin-card-header { padding-bottom: 10px; }
+.admin-popular-game-body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 18px 18px;
+}
+.admin-popular-game-image {
+  width: 86px;
+  height: 86px;
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, .14);
+}
+.admin-popular-game-copy {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.admin-popular-game-tag {
+  margin: 0;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.admin-popular-game-copy h3 {
+  margin: 0;
+  color: #24292f;
+  font-size: 17px;
+  font-weight: 650;
+}
+.admin-popular-game-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 11px;
+}
+.admin-popular-game-meta span:first-child {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+.admin-mini-chart {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  align-items: end;
+  gap: 8px;
+  height: 118px;
+  padding: 16px 18px 18px;
+}
+.admin-mini-chart-bar {
+  --mini-bar-height: 18%;
+  display: block;
+  height: var(--mini-bar-height);
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #93c5fd 0%, #2563eb 100%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, .18);
+}
 
 .admin-chart-heading {
   display: flex;
@@ -729,6 +797,14 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 .admin-shell .admin-chart-value,
 .admin-shell .admin-chart-label { color: #a1a1aa; }
 .admin-shell .admin-chart-day[data-today="true"] .admin-chart-label { color: #93c5fd; }
+.admin-shell .admin-insights .admin-card-header h2,
+.admin-shell .admin-popular-game-copy h3 { color: #f3f4f6; }
+.admin-shell .admin-card-header p,
+.admin-shell .admin-popular-game-meta,
+.admin-shell .admin-popular-game-tag { color: #a1a1aa; }
+.admin-shell .admin-popular-game-tag { color: #93c5fd; }
+.admin-shell .admin-popular-game-meta span:first-child { color: #93c5fd; }
+.admin-shell .admin-mini-chart-bar { background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%); }
 .admin-shell .admin-tool { color: #f3f4f6; }
 .admin-shell .admin-logout { border-color: #41444c; background: var(--admin-panel); color: #d1d5db; }
 .admin-shell .admin-logout:hover { border-color: #6b7280; color: #fff; }
@@ -787,12 +863,15 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-content { padding: 24px 18px 42px; }
   .admin-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
   .admin-overview { gap: 8px; }
+  .admin-insights { grid-template-columns: 1fr; }
   .admin-stat { min-height: 70px; gap: 8px; padding: 9px; }
   .admin-stat-icon { width: 30px; height: 30px; }
   .admin-stat-label { font-size: 9px; }
   .admin-stat-value { font-size: 11px; }
   .admin-chart-card { padding-inline: 12px; }
   .admin-chart { gap: 4px; }
+  .admin-popular-game-body { gap: 12px; }
+  .admin-popular-game-image { width: 72px; height: 72px; }
   .admin-tool { align-items: flex-start; flex-direction: column; gap: 16px; }
   .admin-tool .admin-button { width: 100%; }
 }
