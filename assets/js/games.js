@@ -120,6 +120,10 @@ window.NIMO_GAMES = [
     id: '142609',
     title: 'Pou',
   },
+  {
+    id: '5493605',
+    title: 'Shift at Midnight',
+  }
 
 
 ].map(game => {
