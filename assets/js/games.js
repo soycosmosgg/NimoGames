@@ -134,6 +134,13 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/nimogamesdev/ng-source@main/game10/',
     cdnProbe: 'js/main.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
+    id: '5326261',
+    title: 'Brotato',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/',
+    cdnProbe: 'Brotato.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
   }
 
 ].map(game => {

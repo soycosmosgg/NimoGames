@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Brotato | Nimo Games</title>
+<script src="/assets/js/nimo-sdk.js"
+        data-base="https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/"
+        data-probe="Brotato.js"
+        data-providers="jsdelivr,jsdelivr-gcore,rawcdn"
+        data-game-id="5326261"
+        data-loading="true"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+<style>
+body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+#canvas { display: block; width: 100vw !important; height: 100vh !important; position: fixed; top: 0; left: 0; border: none; outline: none; object-fit: fill; }
+
+#status { 
+    position: absolute; 
+    top: 30px; 
+    left: 0; 
+    width: 100%; 
+    z-index: 10; 
+    text-align: center; 
+    font-family: 'Orbitron', sans-serif; 
+    font-size: 22px;
+    letter-spacing: 3px;
+    background: linear-gradient(to right, #500, #550, #050, #055, #005, #505, #500);
+    background-size: 200% auto;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: rainbow 3s linear infinite;
+    pointer-events: none;
+    text-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
+
+#status i { margin-right: 15px; }
+
+@keyframes rainbow { to { background-position: 200% center; } }
+</style>
+<script src="https://cdn.jsdelivr.net/gh/gzuidhof/coi-serviceworker@latest/coi-serviceworker.min.js"></script>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="status">
+    <i class="fas fa-compact-disc fa-spin"></i> LOADING: 0.00 / 160.54 MB
+</div>
+
+<script>
+(function() {
+'use strict';
+const BASE = window.NIMO_CDN_BASE ||
+    "https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/";
+const TOTAL_MB = "160.54";
+
+const originalFetch = window.fetch;
+const mergedData = {};
+const pendingRequests = {};
+let bytesLoadedSoFar = 0;
+
+const statusEl = document.getElementById('status');
+
+function updateStatus(currentBytes) {
+    const currentMB = (currentBytes / 1048576).toFixed(2);
+    statusEl.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> LOADING: ${currentMB} / ${TOTAL_MB} MB`;
+}
+
+window.fetch = function(url, ...args) {
+    const u = url.toString();
+    if (u.includes("Brotato.pck") || u.includes("Brotato.wasm")) {
+        const f = u.includes(".pck") ? "Brotato.pck" : "Brotato.wasm";
+        if (mergedData[f]) return Promise.resolve(new Response(mergedData[f]));
+        return new Promise((resolve) => {
+            if (!pendingRequests[f]) pendingRequests[f] = [];
+            pendingRequests[f].push(resolve);
+        });
+    }
+    return originalFetch(url, ...args);
+};
+
+async function merge(name, start, end) {
+    const bufs = [];
+    for (let i = start; i <= end; i++) {
+        const url = BASE + encodeURIComponent(name + ".part" + i);
+        const r = await originalFetch(url);
+        if (!r.ok) throw new Error();
+        const data = await r.arrayBuffer();
+        bufs.push(data);
+        bytesLoadedSoFar += data.byteLength;
+        updateStatus(bytesLoadedSoFar);
+    }
+    const b = new Blob(bufs, { type: 'application/octet-stream' });
+    mergedData[name] = b;
+    if (pendingRequests[name]) {
+        pendingRequests[name].forEach(res => res(new Response(b)));
+        delete pendingRequests[name];
+    }
+}
+
+async function fetchSingle(name) {
+    const url = BASE + encodeURIComponent(name);
+    const r = await originalFetch(url);
+    if (!r.ok) throw new Error();
+    const data = await r.arrayBuffer();
+    bytesLoadedSoFar += data.byteLength;
+    updateStatus(bytesLoadedSoFar);
+    const b = new Blob([data], { type: 'application/octet-stream' });
+    mergedData[name] = b;
+    if (pendingRequests[name]) {
+        pendingRequests[name].forEach(res => res(new Response(b)));
+        delete pendingRequests[name];
+    }
+}
+
+async function init() {
+    try {
+        await merge("Brotato.pck", 0, 8);
+        await fetchSingle("Brotato.wasm");
+
+        const s = document.createElement('script');
+        s.src = BASE + "Brotato.js";
+        s.onload = () => {
+            const engine = new Engine({
+                "args":[],
+                "canvasResizePolicy":2,
+                "executable":"Brotato",
+                "experimentalVK":false,
+                "fileSizes":{"Brotato.pck":147972096,"Brotato.wasm":19796835},
+                "focusCanvas":true,
+                "gdnativeLibs":[]
+            });
+
+            engine.startGame({
+                onProgress: (current, total) => {
+                    if (total > 0) {
+                        updateStatus(bytesLoadedSoFar);
+                    }
+                }
+            }).then(() => {
+                statusEl.style.display = 'none';
+                window.dispatchEvent(new Event('resize'));
+            });
+        };
+        document.body.appendChild(s);
+    } catch (e) {
+        statusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> LOAD ERROR`;
+    }
+}
+init();
+})();
+</script>
+</body>
+</html>
