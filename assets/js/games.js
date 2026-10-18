@@ -111,7 +111,12 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/web-ports/clover-pit@main/',
     cdnProbe: 'Build/CloverPit.loader.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore']
+  },
+  {
+    id: '198666',
+    title: 'Ragdoll Archers',
   }
+
 
 ].map(game => {
   const artworkBase = `https://cdn-ngames.pages.dev/images/${game.id}`;
