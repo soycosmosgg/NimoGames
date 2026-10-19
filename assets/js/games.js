@@ -155,6 +155,10 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/Clustertruck-Port@main/',
     cdnProbe: 'Build/ClusterTruckWEB.loader.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
+    id: '796817',
+    title: 'Blackjack'
   }
 ].map(game => {
   const artworkBase = `https://cdn-ngames.pages.dev/images/${game.id}`;
