@@ -1008,28 +1008,29 @@ button {
 
 .abuse-event-rain-item {
   position: absolute;
-  top: -12vh;
   color: #fbbf24;
   font-size: clamp(24px, 4vw, 54px);
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 3px 12px rgba(0, 0, 0, .6);
-  animation: abuse-event-bounce 10s cubic-bezier(.36, 0, .64, 1) infinite;
+  opacity: 0;
+  animation: abuse-event-fall var(--rain-duration) linear 1 both;
   will-change: transform;
 }
 
 .abuse-event-rain-item:nth-child(3n) { color: #f87171; }
 .abuse-event-rain-item:nth-child(3n + 1) { color: #67e8f9; }
 
-@keyframes abuse-event-bounce {
-  0% { transform: translate3d(0, -15vh, 0) rotate(0deg); }
-  14% { transform: translate3d(var(--bounce-x-one), 20vh, 0) rotate(135deg); }
-  25% { transform: translate3d(var(--bounce-x-one), 5vh, 0) rotate(225deg); }
-  42% { transform: translate3d(var(--bounce-x-two), 72vh, 0) rotate(390deg); }
-  53% { transform: translate3d(var(--bounce-x-two), 48vh, 0) rotate(500deg); }
-  70% { transform: translate3d(var(--bounce-x-three), 112vh, 0) rotate(680deg); }
-  81% { transform: translate3d(var(--bounce-x-three), 82vh, 0) rotate(790deg); }
-  100% { transform: translate3d(var(--bounce-x-one), 130vh, 0) rotate(1080deg); }
+@keyframes abuse-event-fall {
+  0% { opacity: 0; transform: translate3d(0, -15vh, 0) rotate(-8deg); }
+  8% { opacity: 1; transform: translate3d(var(--fall-x-one), -12vh, 0) rotate(-4deg); }
+  30% { transform: translate3d(var(--fall-x-two), 0, 0) rotate(3deg); }
+  55% { transform: translate3d(var(--fall-x-three), 32vh, 0) rotate(9deg); }
+  72% { transform: translate3d(var(--fall-x-two), 66vh, 0) rotate(14deg); }
+  79% { transform: translate3d(var(--fall-x-one), 72vh, 0) rotate(16deg); }
+  84% { transform: translate3d(var(--fall-x-three), 66vh, 0) rotate(12deg); }
+  91% { transform: translate3d(var(--fall-x-two), 82vh, 0) rotate(9deg); }
+  100% { opacity: 0; transform: translate3d(var(--fall-x-one), 115vh, 0) rotate(14deg); }
 }
 
 .abuse-event-invitation {
@@ -1066,7 +1067,7 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .abuse-event-rain .abuse-event-rain-item {
-    animation-name: abuse-event-bounce !important;
+    animation-name: abuse-event-fall !important;
     animation-duration: var(--rain-duration) !important;
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;

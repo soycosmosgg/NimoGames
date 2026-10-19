@@ -355,16 +355,16 @@
       item.className = 'abuse-event-rain-item';
       item.textContent = symbol;
       const { column, phase } = positions[index];
-      const duration = 7 + Math.random() * 3;
-      const horizontalJitter = (Math.random() * 2 - 1) * 3;
-      const phaseOffset = phase + Math.random() * 0.4;
-      item.style.left = `${5 + column * (88 / 6) + horizontalJitter}%`;
-      item.style.setProperty('--bounce-x-one', `${(Math.random() * 2 - 1) * 6}vw`);
-      item.style.setProperty('--bounce-x-two', `${(Math.random() * 2 - 1) * 9}vw`);
-      item.style.setProperty('--bounce-x-three', `${(Math.random() * 2 - 1) * 5}vw`);
+      const duration = 3.4 + Math.random() * 2.2;
+      const horizontalJitter = (Math.random() * 2 - 1) * 1.5;
+      const startHeight = 5 + phase * 12 + Math.random() * 10;
+      item.style.left = `${2 + column * 14 + horizontalJitter}%`;
+      item.style.top = `${-startHeight}vh`;
+      item.style.setProperty('--fall-x-one', `${(Math.random() * 2 - 1) * 2}vw`);
+      item.style.setProperty('--fall-x-two', `${(Math.random() * 2 - 1) * 4}vw`);
+      item.style.setProperty('--fall-x-three', `${(Math.random() * 2 - 1) * 2}vw`);
       item.style.setProperty('--rain-duration', `${duration}s`);
-      item.style.animationDelay = `${-(phaseOffset / 6) * duration}s`;
-      item.style.animationDuration = `${duration}s`;
+      item.style.animationDelay = `${Math.random() * 2.4}s`;
       overlay.appendChild(item);
     }
     document.body.appendChild(overlay);
