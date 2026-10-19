@@ -2,7 +2,7 @@
   const identityDisplay = document.getElementById('admin-identity');
   const status = document.getElementById('abuse-status');
   const numberRainButton = document.getElementById('start-number-rain');
-  const tacoEventButton = document.getElementById('start-taco-event');
+  const gameInviteButton = document.getElementById('send-game-invite');
   const gameSelect = document.getElementById('event-game');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminIdentityStorageKey = 'nimo-games-admin-identity';
@@ -30,7 +30,7 @@
   function populateGames() {
     if (games.length === 0) {
       showStatus('No se pudo cargar el catálogo de juegos.', true);
-      tacoEventButton.disabled = true;
+      gameInviteButton.disabled = true;
       return;
     }
     const fragment = document.createDocumentFragment();
@@ -49,7 +49,7 @@
       return;
     }
     numberRainButton.disabled = true;
-    tacoEventButton.disabled = true;
+    gameInviteButton.disabled = true;
     showStatus('Publicando evento…');
     try {
       const response = await fetch('/api/admin/abuse', {
@@ -82,20 +82,20 @@
       showStatus(
         eventType === 'number-rain'
           ? 'Lluvia de 67 publicada. Los visitantes la verán durante 10 segundos.'
-          : 'Evento de tacos publicado. Los visitantes podrán aceptar o rechazar la invitación.'
+          : 'Invitación publicada. Cada visitante puede abrir el juego o rechazarla.'
       );
     } catch (error) {
       console.error('[admin-abuse] Failed to publish a live event.', error);
       showStatus(error instanceof Error ? error.message : 'No se pudo publicar el evento.', true);
     } finally {
       numberRainButton.disabled = false;
-      tacoEventButton.disabled = false;
+      gameInviteButton.disabled = false;
     }
   }
 
   numberRainButton.addEventListener('click', () => publishEvent('number-rain'));
-  tacoEventButton.addEventListener('click', () =>
-    publishEvent('taco-event', gameSelect.value)
+  gameInviteButton.addEventListener('click', () =>
+    publishEvent('game-invite', gameSelect.value)
   );
   populateGames();
   readSavedSession();

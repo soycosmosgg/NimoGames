@@ -251,10 +251,10 @@
       messageLoadErrorReported = false;
       if (payload.event !== null && payload.event !== undefined) {
         const event = payload.event;
-        if (!['number-rain', 'taco-event'].includes(event.eventType) ||
+        if (!['number-rain', 'game-invite'].includes(event.eventType) ||
             !['Arb', 'Miticraft89'].includes(event.sender) ||
             !Number.isSafeInteger(event.createdAt) || event.createdAt < 0 ||
-            (event.eventType === 'taco-event' &&
+            (event.eventType === 'game-invite' &&
               (typeof event.gameId !== 'string' || !catalogGames.some(game => game.id === event.gameId)))) {
           throw new Error('The live event response has an invalid format.');
         }
@@ -332,11 +332,16 @@
   }
 
   function showAbuseEvent(event) {
+    if (event.eventType === 'game-invite') {
+      showOptionalGameInvitation(event.gameId);
+      return;
+    }
+
     hideAbuseEvent();
     const overlay = document.createElement('div');
     overlay.className = 'abuse-event-rain';
     overlay.setAttribute('aria-hidden', 'true');
-    const symbol = event.eventType === 'number-rain' ? '67' : '🌮';
+    const symbol = '67';
     for (let index = 0; index < 42; index += 1) {
       const item = document.createElement('span');
       item.className = 'abuse-event-rain-item';
@@ -355,9 +360,6 @@
       overlay.remove();
       abuseEventOverlay = null;
       abuseEventTimer = null;
-      if (event.eventType === 'taco-event') {
-        showOptionalGameInvitation(event.gameId);
-      }
     }, liveMessageVisibleDurationMs);
   }
 
@@ -372,7 +374,7 @@
     dialog.setAttribute('aria-labelledby', 'abuse-event-title');
     const heading = document.createElement('h2');
     heading.id = 'abuse-event-title';
-    heading.textContent = '¡Evento de tacos!';
+    heading.textContent = '¿Te apuntas a otro juego?';
     const description = document.createElement('p');
     description.textContent = `¿Te apetece unirte a una partida de ${game.title}? Tú decides.`;
     const previouslyFocused = document.activeElement;

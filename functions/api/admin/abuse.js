@@ -67,11 +67,11 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ error: 'Invalid JSON request body.' }, 400);
   }
 
-  if (!payload || !['number-rain', 'taco-event'].includes(payload.eventType)) {
+  if (!payload || !['number-rain', 'game-invite'].includes(payload.eventType)) {
     return jsonResponse({ error: 'Choose a supported event.' }, 400);
   }
-  const gameId = payload.eventType === 'taco-event' ? payload.gameId : null;
-  if (payload.eventType === 'taco-event' && !GAME_IDS.has(gameId)) {
+  const gameId = payload.eventType === 'game-invite' ? payload.gameId : null;
+  if (payload.eventType === 'game-invite' && !GAME_IDS.has(gameId)) {
     return jsonResponse({ error: 'Choose a valid game for the optional event.' }, 400);
   }
 

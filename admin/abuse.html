@@ -8,7 +8,7 @@
   <title>Abuse | Administración de Nimo Games</title>
   <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-26">
   <script src="/assets/js/games.js?v=game-catalog-2" defer></script>
-  <script src="/admin/abuse.js?v=admin-abuse-1" defer></script>
+  <script src="/admin/abuse.js?v=admin-abuse-2" defer></script>
 </head>
 <body>
   <div class="admin-shell">
@@ -62,7 +62,7 @@
           <div>
             <p class="admin-eyebrow">Eventos para visitantes</p>
             <h1 id="page-title">Abuse</h1>
-            <p class="admin-description">Lanza bromas visuales breves y una invitación opcional a jugar.</p>
+            <p class="admin-description">Lanza una lluvia breve de 67 o invita a los visitantes a abrir otro juego.</p>
           </div>
         </section>
 
@@ -73,13 +73,13 @@
             <p>Hace caer números por la pantalla durante 10 segundos. No bloquea los controles ni cambia de página.</p>
             <button class="admin-button admin-submit" id="start-number-rain" type="button">Iniciar lluvia</button>
           </section>
-          <section class="admin-card admin-abuse-card" aria-labelledby="tacos-title">
-            <span class="admin-abuse-icon" aria-hidden="true">🌮</span>
-            <h2 id="tacos-title">Evento de tacos</h2>
-            <p>Los tacos caen durante 10 segundos; después, el visitante puede aceptar o rechazar la invitación al juego elegido.</p>
+          <section class="admin-card admin-abuse-card" aria-labelledby="game-invite-title">
+            <span class="admin-abuse-icon" aria-hidden="true">▶</span>
+            <h2 id="game-invite-title">Invitar a otro juego</h2>
+            <p>Envía una invitación al juego seleccionado. Cada visitante decide si quiere abrirlo o seguir jugando.</p>
             <label class="admin-label" for="event-game">Juego del evento</label>
             <select class="admin-input" id="event-game"></select>
-            <button class="admin-button admin-submit" id="start-taco-event" type="button">Lanzar evento opcional</button>
+            <button class="admin-button admin-submit" id="send-game-invite" type="button">Enviar invitación</button>
           </section>
         </div>
         <p class="admin-abuse-notice" id="abuse-status" role="status" aria-live="polite"></p>
@@ -88,7 +88,7 @@
             <circle cx="12" cy="12" r="9" />
             <path d="M12 11v5M12 8h.01" />
           </svg>
-          <span>Los eventos son temporales y visibles en las páginas abiertas. No se fuerza ninguna redirección: cada visitante decide si participa.</span>
+          <span>La lluvia de 67 dura 10 segundos. Las invitaciones no redirigen ni cambian de juego sin que el visitante pulse «Jugar».</span>
         </aside>
       </main>
     </div>

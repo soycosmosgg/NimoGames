@@ -1065,9 +1065,13 @@ button {
 .abuse-event-actions button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .abuse-event-rain-item {
-    top: 20%;
-    animation-name: none;
+  .abuse-event-rain .abuse-event-rain-item {
+    animation-name: abuse-event-bounce !important;
+    animation-duration: 10s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    animation-timing-function: linear !important;
+    animation-fill-mode: both !important;
   }
 }
 
