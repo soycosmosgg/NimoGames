@@ -54,6 +54,13 @@ window.NIMO_GAMES = [
     title: 'Doki Doki Literature Club!'
   },
   {
+    id: '8944',
+    title: 'Clustertruck',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/Clustertruck-Port@main/',
+    cdnProbe: 'Build/ClusterTruckWEB.loader.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '103012',
     title: "Friday Night Funkin'",
     cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fridayfunk@65da3b8e88b909a8e27f8d750533a758d8dc54f3/',
