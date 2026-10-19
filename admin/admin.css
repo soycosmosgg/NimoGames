@@ -1017,7 +1017,10 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-stat-label { font-size: 9px; }
   .admin-stat-value { font-size: 11px; }
   .admin-chart-card { padding-inline: 12px; }
+<<<<<<< HEAD
   .admin-compose-grid { grid-template-columns: 1fr; }
+=======
+>>>>>>> afa67396be2894fa1ca9c08966ca93e2f84a32ef
   .admin-location-content { grid-template-columns: minmax(110px, .45fr) minmax(0, 1fr); gap: 14px; padding: 14px; }
   .admin-location-donut { width: min(100%, 150px); }
   .admin-location-item { gap: 7px; font-size: 10px; }
