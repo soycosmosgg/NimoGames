@@ -1067,8 +1067,7 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .abuse-event-rain .abuse-event-rain-item {
     animation-name: abuse-event-bounce !important;
-    animation-duration: 10s !important;
-    animation-delay: 0s !important;
+    animation-duration: var(--rain-duration) !important;
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;
     animation-fill-mode: both !important;
