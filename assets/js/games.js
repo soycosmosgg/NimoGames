@@ -53,35 +53,42 @@ window.NIMO_GAMES = [
     id: '1388880',
     title: 'Doki Doki Literature Club!'
   },
-  /* {
+  {
+    id: '103012',
+    title: "Friday Night Funkin'",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fridayfunk@65da3b8e88b909a8e27f8d750533a758d8dc54f3/',
+    cdnProbe: 'Funkin.js'
+  },
+  {
     id: '319510',
     title: "Five Nights at Freddy's",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/1/',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/1/',
     cdnProbe: 'favicon.ico'
-  }, {
+  },
+  {
     id: '332800',
-    title: 'Five Nights at Freddy’s 2',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/2/',
-    cdnProbe: 'src/Runtime.js',
-    cdnProviders: ['rawcdn'],
-    cdnProvidersExact: true
-  }, {
+    title: "Five Nights at Freddy's 2",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/2/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
     id: '354140',
-    title: 'Five Nights at Freddy’s 3',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/3/',
+    title: "Five Nights at Freddy's 3",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/3/',
     cdnProbe: 'favicon.ico'
-  }, {
+  },
+  {
     id: '388090',
-    title: 'Five Nights at Freddy’s 4',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/4/',
+    title: "Five Nights at Freddy's 4",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/4/',
     cdnProbe: 'favicon.ico'
-  }, {
+  },
+  {
     id: '871720',
     title: "Freddy Fazbear's Ultimate Custom Night",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/rockisdirt/ultimate-custom-night.github.io@main/',
-    cdnProbe: 'src/Runtime.js',
-    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
-  }, */
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/ucn/',
+    cdnProbe: 'favicon.ico'
+  },
   {
     id: '758260',
     title: "Jetpack Joyride",

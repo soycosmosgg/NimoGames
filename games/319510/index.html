@@ -1,351 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/assets/js/nimo-sdk.js"
-            data-base="https://cdn.jsdelivr.net/gh/irv77/hd_fnaf@main/1/"
-            data-probe="favicon.ico"
-            data-game-id="319510" data-loading="true"></script>
+  <head>
+    <base href="https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/1/" />
     <title>Five Nights at Freddy's | Nimo Games</title>
-    <meta name="description" content="Survive the night at Freddy Fazbear's Pizza in Five Nights at Freddy's. Monitor the security cameras and manage your power.">
+    <meta name="description" content="Play the original Five Nights at Freddy's survival horror game. Monitor security cameras, manage limited power, and survive the night at Freddy Fazbear's Pizza.">
     <link rel="canonical" href="https://nimogames.qzz.io/games/319510/index.html">
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preload" href="resources/office.png" as="image">
-    <link rel="icon" href="favicon.ico" />
-    <style>
-        html {
-            display: block;
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            overflow: hidden;
-            height: 100%;
-        }
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/1/"
+            data-probe="favicon.ico"
+            data-game-id="319510"></script>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, target-densitydpi=device-dpi"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="HandheldFriendly" content="true" />
+  </head>
 
-        body {
-            position: relative;
-            background-color: black;
-            background-image: url(resources/office.png);
-            background-position: center;
-            background-size: cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            height: 100%;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        .selection {
-            height: auto;
-            min-height: 100vh;
-            width: 100%;
-            display: flex;
-            overflow: hidden;
-        }
-
-        .launcher-text {
-            position: absolute;
-            left: 50%;
-            transform: translate(-50%, 0);
-            bottom: 2.5vh;
-            z-index: 1;
-        }
-
-        .vignette {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-        }
-
-        .glitch {
-            position: absolute;
-            background-image: url(resources/background.gif);
-            background-position: center;
-            background-size: 50vw;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            opacity: 0.75;
-            z-index: -1;
-        }
-
-        canvas {
-            display: none;
-            user-select: none;
-        }
-
-        #title {
-            position: absolute;
-            top: 10vh;
-            left: 5vw;
-            z-index: 1;
-            height: 20vh;
-        }
-
-        #animatronic {
-            position: absolute;
-            top: -5vh;
-            right: 7vw;
-            height: 120vh;
-        }
-
-        .loader {
-            position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            left: 50%;
-            transform: translate(-50%, 0);
-            bottom: 12vh;
-            z-index: 1;
-            color: white;
-            font-family: monospace;
-            text-align: center;
-            font-weight: lighter;
-            width: 85vw;
-        }
-
-        .loader h1 {
-            margin: 0;
-            font-size: 5vw;
-        }
-
-        .loader hr{
-            margin: 0;
-            border: white solid 0.1vw;
-            width: 0%;
-        }
-
-        .loader h2 {
-            margin: 1vh 0;
-            font-size: 1.4vw;
-        }
-    </style>
-</head>
-
-<body>
-    <canvas id="MMFCanvas" width="1280" height="720"> Your browser does not support Canvas, Please try again.</canvas>
-    <div class="selection" id="selection">
-        <img id="title" src="resources/title.png">
-        <img id="animatronic" src="resources/animatronic.png">
-        <div class="loader">
-            <h1 id="percentage">0%</h1>
-            <hr id="bar">
-            <h2 id="stage">STARTING UP...</h2>
-        </div>
-        <a href="https://dsc.gg/Nimo">
-            <div class="launcher-text"><img src="resources/launcher-text.png" style="width: 45vw;"></div>
-        </a>
+  <body>
+    <div
+      style="display: inline-block; -webkit-user-select: none; text-align: left"
+    >
+      <canvas id="MMFCanvas" width="1280" height="720">
+        Your browser does not support Canvas, Please try again.
+      </canvas>
     </div>
-    <div class="glitch"></div>
-    <img src="resources/vignette.png" class="vignette">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
-</body>
-<!--Made by irv77-->
-<script>
-    const parts = 20;
-    let gametitle, runtimecanvas
-    gametitle = document.title;
-    runtimecanvas = "resources/FNAF1HTML5.cch";
-    // Prevents touchscreen move
-    window.addEventListener("scroll", preventMotion, false);
-    window.addEventListener("touchmove", preventMotion, false);
-    function preventMotion(event) {
-        window.scrollTo(0, 0);
-        event.preventDefault();
-        event.stopPropagation();
-    }
-    // Fullscreen Key
-    const pressedKeys = {};
-    document.addEventListener('keydown', event => {
-        pressedKeys[event.key] = true;
-        if (pressedKeys['-'] && pressedKeys['=']) {
-            document.querySelector('canvas').requestFullscreen();
-            delete pressedKeys[event.key];
-        }
-    });
-    document.addEventListener('keyup', (event) => {
-        delete pressedKeys[event.key];
-    });
-    // -----------------
-    window.addEventListener('DOMContentLoaded', function () {
-        const map = new Map();
-
-        function updateProgress(text, percent) {
-            document.title = percent + '% ' + gametitle
-            document.getElementById('percentage').innerHTML = percent + '%';
-            document.getElementById('bar').style.width = percent + '%';
-            document.getElementById('stage').innerHTML = text;
-        }
-
-        async function intercept() {
-            const ogfetch = window.fetch;
-            window.fetch = async function (input, init) {
-                if (typeof input === 'string' && input.startsWith('resources/')) {
-                    const fileName = input.split('/').pop();
-                    if (map.has(fileName)) {
-                        return ogfetch(map.get(fileName), init);
-                    }
-                }
-                return ogfetch(input, init);
-            };
-
-            const ogopen = XMLHttpRequest.prototype.open;
-            XMLHttpRequest.prototype.open = function (method, url) {
-                if (url.startsWith('resources/')) {
-                    const fileName = url.split('/').pop();
-                    if (map.has(fileName)) {
-                        url = map.get(fileName);
-                    }
-                }
-                return ogopen.apply(this, arguments);
-            };
-
-            const types = [HTMLImageElement, HTMLAudioElement, HTMLVideoElement];
-            for (const Tag of types) {
-                const descriptor = Object.getOwnPropertyDescriptor(Tag.prototype, 'src');
-                if (descriptor && descriptor.set) {
-                    Object.defineProperty(Tag.prototype, 'src', {
-                        configurable: true,
-                        enumerable: true,
-                        get: descriptor.get,
-                        set: function (val) {
-                            if (typeof val === 'string' && val.startsWith('resources/')) {
-                                const fileName = val.split('/').pop();
-                                if (map.has(fileName)) {
-                                    val = map.get(fileName);
-                                }
-                            }
-                            descriptor.set.call(this, val);
-                        }
-                    });
-                }
-            }
-        }
-
-        async function extract(resourcesBlob) {
-            updateProgress('PREPARING ARCHIVE...', 50);
-            const archiveData = await resourcesBlob.arrayBuffer();
-            const zip = await JSZip.loadAsync(archiveData);
-            const files = Object.keys(zip.files).filter(name => !zip.files[name].dir);
-            const totalFiles = files.length;
-
-            let nextFile = 0;
-            let completedFiles = 0;
-            async function extractFiles() {
-                while (nextFile < totalFiles) {
-                    const fileIndex = nextFile++;
-                    const fileName = files[fileIndex];
-                    const blob = await zip.files[fileName].async("blob");
-                    map.set(fileName, URL.createObjectURL(blob));
-                    completedFiles++;
-                    updateProgress('BOOTING UP ARCHIVE...', 50 + Math.floor((completedFiles / totalFiles) * 50));
-                }
-            }
-
-            const workerCount = Math.min(4, totalFiles);
-            await Promise.all(Array.from({ length: workerCount }, extractFiles));
-        }
-
-        async function wedone(resourcesBlob, resourcesUrl) {
-            await extract(resourcesBlob);
-            await intercept();
-
-            const script = document.createElement('script');
-            script.src = 'src/Runtime.js';
-            script.onload = () => {
-                new Runtime("MMFCanvas", runtimecanvas);
-            };
-            document.getElementById('MMFCanvas').style.display = 'block';
-            document.getElementById('selection').style.display = 'none';
-            document.title = gametitle;
-            document.head.appendChild(script);
-        }
-
-        const originalFetch = window.fetch;
-
-        async function mergeFiles(fileParts) {
-            const buffers = new Array(fileParts.length);
-            const partProgress = new Array(fileParts.length).fill(0);
-            let nextPart = 0;
-
-            function updateDownloadProgress() {
-                const progress = partProgress.reduce((sum, value) => sum + value, 0) / fileParts.length;
-                updateProgress('LOCATING ARCHIVE...', Math.min(49, Math.floor(progress * 50)));
-            }
-
-            async function downloadParts() {
-                while (nextPart < fileParts.length) {
-                    const partIndex = nextPart++;
-                    const part = fileParts[partIndex];
-                    const response = await fetch(part);
-                    if (!response.ok) throw new Error("Missing part: " + part);
-
-                    const contentLength = Number(response.headers.get('Content-Length'));
-                    if (!response.body) {
-                        buffers[partIndex] = await response.blob();
-                        partProgress[partIndex] = 1;
-                        updateDownloadProgress();
-                        continue;
-                    }
-
-                    const reader = response.body.getReader();
-                    const chunks = [];
-                    let loadedBytes = 0;
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-                        chunks.push(value);
-                        loadedBytes += value.byteLength;
-                        if (contentLength > 0) {
-                            partProgress[partIndex] = Math.min(loadedBytes / contentLength, .99);
-                            updateDownloadProgress();
-                        }
-                    }
-                    buffers[partIndex] = new Blob(chunks);
-                    partProgress[partIndex] = 1;
-                    updateDownloadProgress();
-                }
-            }
-
-            const workerCount = Math.min(6, fileParts.length);
-            await Promise.all(Array.from({ length: workerCount }, downloadParts));
-            return new Blob(buffers, { type: 'application/zip' });
-        }
-
-        function getParts(file, start, end) {
-            let parts = [];
-            for (let i = start; i <= end; i++) {
-                parts.push(file + ".part" + i);
-            }
-            return parts;
-        }
-        mergeFiles(getParts("src/resources.zip", 1, parts)).then(resourcesBlob => {
-            const resources = URL.createObjectURL(resourcesBlob);
-            window.fetch = async function (url, ...args) {
-                if (url.endsWith("resources.zip")) {
-                    return originalFetch(resources, ...args);
-                } else {
-                    return originalFetch(url, ...args);
-                }
-            };
-            return wedone(resourcesBlob, resources);
-        }).catch(error => {
-            console.error('No se pudo cargar el archivo del juego.', error);
-            updateProgress('ERROR LOADING GAME FILES...', 0);
-        });
-    }, { once: true });
-</script>
+    <div id="progress-container">
+      <div style="margin-bottom: 6px">
+        Downloading... <span id="download-text">0%</span>
+      </div>
+      <div
+        style="
+          width: 100%;
+          background: #444;
+          border-radius: 6px;
+          overflow: hidden;
+        "
+      >
+        <div
+          id="download-bar"
+          style="
+            height: 10px;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.2s;
+          "
+        ></div>
+      </div>
+      <div style="margin: 12px 0 6px">
+        Extracting... <span id="extract-text">0%</span>
+      </div>
+      <div
+        style="
+          width: 100%;
+          background: #444;
+          border-radius: 6px;
+          overflow: hidden;
+        "
+      >
+        <div
+          id="extract-bar"
+          style="
+            height: 10px;
+            background: #10b981;
+            width: 0%;
+            transition: width 0.2s;
+          "
+        ></div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>

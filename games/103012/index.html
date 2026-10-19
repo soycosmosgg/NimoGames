@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <base
+      href="https://cdn.jsdelivr.net/gh/bubblfan/fridayfunk@65da3b8e88b909a8e27f8d750533a758d8dc54f3/"
+    />
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/bubblfan/fridayfunk@65da3b8e88b909a8e27f8d750533a758d8dc54f3/"
+            data-probe="Funkin.js"
+            data-game-id="103012"></script>
+    <meta charset="utf-8" />
+
+    <title>Friday Night Funkin'</title>
+
+    <meta
+      id="viewport"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <link rel="shortcut icon" type="image/png" href="favicon.png" />
+
+    <script type="text/javascript" src="Funkin.js"></script>
+
+    <script>
+      window.addEventListener(
+        "touchmove",
+        function (event) {
+          event.preventDefault();
+        },
+        { capture: false, passive: false },
+      );
+      if (
+        typeof window.devicePixelRatio != "undefined" &&
+        window.devicePixelRatio > 2
+      ) {
+        var meta = document.getElementById("viewport");
+        meta.setAttribute(
+          "content",
+          "width=device-width, initial-scale=" +
+            2 / window.devicePixelRatio +
+            ", user-scalable=no",
+        );
+      }
+    </script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      #openfl-content {
+        background: #000000;
+        width: 100%;
+        height: 100%;
+      }
+      @font-face {
+        font-family: "5by7";
+        src:
+          url("assets/fonts/5by7.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/5by7.woff") format("woff"),
+          url("assets/fonts/5by7.ttf") format("truetype"),
+          url("assets/fonts/5by7.svg#5by7") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "5by7 Bold";
+        src:
+          url("assets/fonts/5by7_b.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/5by7_b.woff") format("woff"),
+          url("assets/fonts/5by7_b.ttf") format("truetype"),
+          url("assets/fonts/5by7_b.svg#5by7%20Bold") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "DS-Digital";
+        src:
+          url("assets/fonts/DS-DIGI.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/DS-DIGI.TTF") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "DS-Digital Bold";
+        src:
+          url("assets/fonts/DS-DIGIB.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/DS-DIGIB.TTF") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "DS-Digital Italic";
+        src:
+          url("assets/fonts/DS-DIGII.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/DS-DIGII.TTF") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "DS-Digital Bold Italic";
+        src:
+          url("assets/fonts/DS-DIGIT.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/DS-DIGIT.TTF") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata Black";
+        src:
+          url("assets/fonts/Inconsolata-Black.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-Black.woff") format("woff"),
+          url("assets/fonts/Inconsolata-Black.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-Black.svg#Inconsolata%20Black")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata Bold";
+        src:
+          url("assets/fonts/Inconsolata-Bold.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-Bold.woff") format("woff"),
+          url("assets/fonts/Inconsolata-Bold.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-Bold.svg#Inconsolata%20Bold")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata ExtraBold";
+        src:
+          url("assets/fonts/Inconsolata-ExtraBold.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-ExtraBold.woff") format("woff"),
+          url("assets/fonts/Inconsolata-ExtraBold.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-ExtraBold.svg#Inconsolata%20ExtraBold")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata ExtraLight";
+        src:
+          url("assets/fonts/Inconsolata-ExtraLight.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-ExtraLight.woff") format("woff"),
+          url("assets/fonts/Inconsolata-ExtraLight.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-ExtraLight.svg#Inconsolata%20ExtraLight")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata Medium";
+        src:
+          url("assets/fonts/Inconsolata-Medium.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-Medium.woff") format("woff"),
+          url("assets/fonts/Inconsolata-Medium.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-Medium.svg#Inconsolata%20Medium")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata Regular";
+        src:
+          url("assets/fonts/Inconsolata-Regular.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-Regular.woff") format("woff"),
+          url("assets/fonts/Inconsolata-Regular.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-Regular.svg#Inconsolata%20Regular")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Inconsolata SemiBold";
+        src:
+          url("assets/fonts/Inconsolata-SemiBold.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Inconsolata-SemiBold.woff") format("woff"),
+          url("assets/fonts/Inconsolata-SemiBold.ttf") format("truetype"),
+          url("assets/fonts/Inconsolata-SemiBold.svg#Inconsolata%20SemiBold")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Pixel Arial 11 Bold";
+        src:
+          url("assets/fonts/pixel.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/pixel.woff") format("woff"),
+          url("assets/fonts/pixel.otf") format("truetype");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Quantico-Bold";
+        src:
+          url("assets/fonts/Quantico-Bold.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Quantico-Bold.woff") format("woff"),
+          url("assets/fonts/Quantico-Bold.ttf") format("truetype"),
+          url("assets/fonts/Quantico-Bold.svg#Quantico-Bold") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Quantico-BoldItalic";
+        src:
+          url("assets/fonts/Quantico-BoldItalic.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Quantico-BoldItalic.woff") format("woff"),
+          url("assets/fonts/Quantico-BoldItalic.ttf") format("truetype"),
+          url("assets/fonts/Quantico-BoldItalic.svg#Quantico-BoldItalic")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Quantico-Italic";
+        src:
+          url("assets/fonts/Quantico-Italic.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Quantico-Italic.woff") format("woff"),
+          url("assets/fonts/Quantico-Italic.ttf") format("truetype"),
+          url("assets/fonts/Quantico-Italic.svg#Quantico-Italic") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Quantico";
+        src:
+          url("assets/fonts/Quantico-Regular.eot?#iefix")
+            format("embedded-opentype"),
+          url("assets/fonts/Quantico-Regular.woff") format("woff"),
+          url("assets/fonts/Quantico-Regular.ttf") format("truetype"),
+          url("assets/fonts/Quantico-Regular.svg#Quantico") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "VCR OSD Mono";
+        src:
+          url("assets/fonts/vcr.eot?#iefix") format("embedded-opentype"),
+          url("assets/fonts/vcr.woff") format("woff"),
+          url("assets/fonts/vcr.ttf") format("truetype"),
+          url("assets/fonts/vcr.svg#VCR%20OSD%20Mono") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Nokia Cellphone FC Small";
+        src:
+          url("flixel/fonts/nokiafc22.eot?#iefix") format("embedded-opentype"),
+          url("flixel/fonts/nokiafc22.woff") format("woff"),
+          url("flixel/fonts/nokiafc22.ttf") format("truetype"),
+          url("flixel/fonts/nokiafc22.svg#Nokia%20Cellphone%20FC%20Small")
+            format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: "Monsterrat";
+        src:
+          url("flixel/fonts/monsterrat.eot?#iefix") format("embedded-opentype"),
+          url("flixel/fonts/monsterrat.woff") format("woff"),
+          url("flixel/fonts/monsterrat.ttf") format("truetype"),
+          url("flixel/fonts/monsterrat.svg#Monsterrat") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript
+      >This webpage makes extensive use of JavaScript. Please enable JavaScript
+      in your web browser to view this page.</noscript
+    >
+
+    <div id="openfl-content"></div>
+
+    <script type="text/javascript">
+      lime.embed("Funkin", "openfl-content", 1280, 720, { parameters: {} });
+    </script>
+  </body>
+</html>
