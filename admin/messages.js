@@ -5,9 +5,19 @@
   const sendButton = document.getElementById('send-message');
   const status = document.getElementById('status');
   const identityDisplay = document.getElementById('admin-identity');
+  const chatEmpty = document.getElementById('admin-chat-empty');
+  const chatBubble = document.getElementById('admin-chat-bubble');
+  const chatSender = document.getElementById('admin-chat-sender');
+  const chatText = document.getElementById('admin-chat-text');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminIdentityStorageKey = 'nimo-games-admin-identity';
+  const adminMessageVisibleDurationMs = 10000;
+  const adminMessagePollIntervalMs = 5000;
   let adminSecret = '';
+  let adminIdentity = '';
+  let latestMessageUpdatedAt = 0;
+  let chatHideTimer = null;
+  let messagePollInProgress = false;
 
   function displayStatus(message, isError = false) {
     status.textContent = message;
@@ -16,6 +26,21 @@
 
   function updateMessageCount() {
     messageCount.textContent = `${messageInput.value.length} / 250`;
+  }
+
+  function showAdminMessage(message, sender, updatedAt) {
+    window.clearTimeout(chatHideTimer);
+    latestMessageUpdatedAt = Math.max(latestMessageUpdatedAt, updatedAt);
+    chatSender.textContent = sender;
+    chatText.textContent = message;
+    chatBubble.dataset.own = String(sender === adminIdentity);
+    chatBubble.hidden = false;
+    chatEmpty.hidden = true;
+    chatHideTimer = window.setTimeout(() => {
+      chatBubble.hidden = true;
+      chatEmpty.hidden = false;
+      chatHideTimer = null;
+    }, adminMessageVisibleDurationMs);
   }
 
   function getRequestError(error) {
@@ -64,7 +89,8 @@
 
   try {
     adminSecret = window.localStorage.getItem(adminSecretStorageKey) || '';
-    identityDisplay.textContent = window.localStorage.getItem(adminIdentityStorageKey) || '';
+    adminIdentity = window.localStorage.getItem(adminIdentityStorageKey) || '';
+    identityDisplay.textContent = adminIdentity;
     if (!adminSecret) {
       displayStatus('La sesión de administrador no está disponible. Vuelve al panel e introduce la clave.', true);
     }
@@ -73,16 +99,28 @@
     displayStatus('No se pudo acceder a la sesión de administrador. Vuelve al panel e introduce la clave.', true);
   }
 
-  async function loadCurrentMessage() {
+  async function refreshAdminChat() {
+    if (!adminSecret || document.hidden || messagePollInProgress) return;
+    messagePollInProgress = true;
     try {
       const response = await fetch('/api/messages', { cache: 'no-store' });
       const result = await readApiResponse(response);
-      messageInput.value = result.message;
-      updateMessageCount();
-      displayStatus(result.message ? 'Mensaje actual cargado.' : 'Todavía no se ha enviado ningún mensaje.');
+      if (typeof result.message !== 'string' || result.message.length > 250 ||
+          !['Arb', 'Miticraft89'].includes(result.sender) ||
+          !Number.isSafeInteger(result.updatedAt) || result.updatedAt < 0) {
+        throw new Error('El servidor devolvió un mensaje con formato no válido.');
+      }
+      if (result.updatedAt > latestMessageUpdatedAt) {
+        if (result.message && Date.now() - result.updatedAt < adminMessageVisibleDurationMs) {
+          showAdminMessage(result.message, result.sender, result.updatedAt);
+        } else {
+          latestMessageUpdatedAt = result.updatedAt;
+        }
+      }
     } catch (error) {
-      console.error('[messages-admin] Failed to load current message.', error);
-      displayStatus(getRequestError(error), true);
+      console.error('[messages-admin] Failed to refresh the live admin chat.', error);
+    } finally {
+      messagePollInProgress = false;
     }
   }
 
@@ -101,11 +139,16 @@
         body: JSON.stringify({ message: messageInput.value })
       });
       const result = await readApiResponse(response);
+      adminIdentity = result.sender;
       identityDisplay.textContent = result.sender;
+      if (typeof result.message !== 'string' || !Number.isSafeInteger(result.updatedAt)) {
+        throw new Error('El servidor devolvió el mensaje enviado con formato no válido.');
+      }
+      showAdminMessage(result.message, result.sender, result.updatedAt);
 
       messageInput.value = '';
       updateMessageCount();
-      displayStatus('Mensaje enviado. Se mostrará una vez por pestaña y caducará a los 10 segundos.');
+      displayStatus('Mensaje enviado. Se mostrará aquí durante 10 segundos.');
     } catch (error) {
       if (error instanceof Error && error.name === 'UnauthorizedError') {
         adminSecret = '';
@@ -123,5 +166,9 @@
     }
   });
 
-  loadCurrentMessage();
+  refreshAdminChat();
+  window.setInterval(refreshAdminChat, adminMessagePollIntervalMs);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshAdminChat();
+  });
 })();

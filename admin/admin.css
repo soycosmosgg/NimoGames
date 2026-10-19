@@ -791,9 +791,50 @@ button, input, textarea { font: inherit; }
   line-height: 1.5;
 }
 
-.admin-compose-grid { width: min(100%, 760px); }
+.admin-compose-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  align-items: stretch;
+  gap: 16px;
+}
 
 .admin-form { display: grid; gap: 18px; padding: 18px; }
+.admin-chat { display: flex; min-height: 340px; flex-direction: column; }
+.admin-chat-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 12px;
+  overflow-y: auto;
+  padding: 18px;
+}
+.admin-chat-empty { margin: auto; color: #a1a1aa; font-size: 11px; line-height: 1.5; text-align: center; }
+.admin-chat-bubble {
+  max-width: min(88%, 420px);
+  align-self: flex-start;
+  padding: 10px 13px;
+  border: 1px solid #3b3e45;
+  border-radius: 12px 12px 12px 3px;
+  background: #191b20;
+  color: #f3f4f6;
+  animation: admin-chat-appear .2s ease-out;
+}
+.admin-chat-bubble[data-own="true"] {
+  align-self: flex-end;
+  border-color: #1d4ed8;
+  border-radius: 12px 12px 3px 12px;
+  background: #1d4ed8;
+}
+.admin-chat-sender { display: block; margin-bottom: 4px; color: #bfdbfe; font-size: 10px; font-weight: 650; }
+.admin-chat-bubble p { margin: 0; overflow-wrap: anywhere; color: inherit; font-size: 12px; line-height: 1.5; white-space: pre-wrap; }
+.admin-chat-bubble[hidden] { display: none; }
+@keyframes admin-chat-appear {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .admin-field { display: grid; gap: 7px; }
 .admin-label { color: #374151; font-size: 11px; font-weight: 600; }
 .admin-help { margin: -2px 0 0; color: #6b7280; font-size: 10px; line-height: 1.5; }
@@ -928,6 +969,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 .admin-shell .admin-input::placeholder { color: #71717a; }
 .admin-shell .admin-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, .18); }
 .admin-shell #status { color: #93c5fd; }
+.admin-shell .admin-chat-empty { color: #a1a1aa; }
 .admin-shell #status[data-error="true"],
 .admin-shell .admin-refresh-status[data-error="true"] { color: #fca5a5; }
 .admin-shell .admin-refresh-status { color: #93c5fd; }
@@ -975,6 +1017,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-stat-label { font-size: 9px; }
   .admin-stat-value { font-size: 11px; }
   .admin-chart-card { padding-inline: 12px; }
+  .admin-compose-grid { grid-template-columns: 1fr; }
   .admin-location-content { grid-template-columns: minmax(110px, .45fr) minmax(0, 1fr); gap: 14px; padding: 14px; }
   .admin-location-donut { width: min(100%, 150px); }
   .admin-location-item { gap: 7px; font-size: 10px; }
