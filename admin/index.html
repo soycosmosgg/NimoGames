@@ -6,9 +6,9 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#282a30">
   <title>Panel de administración | Nimo Games</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-22">
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-23">
   <script src="/assets/js/games.js?v=game-catalog-1" defer></script>
-  <script src="/admin/dashboard.js?v=admin-dashboard-8" defer></script>
+  <script src="/admin/dashboard.js?v=admin-dashboard-10" defer></script>
 </head>
 <body>
   <main class="admin-gate" id="admin-gate">
@@ -98,6 +98,13 @@
           </svg>
           Mensajes
         </a>
+        <a class="admin-nav-link" href="#admin-tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14.5 6.5a4 4 0 0 0-5.7 5.7L3 18v3h3l5.8-5.8a4 4 0 0 0 5.7-5.7L14 13l-3-3z" />
+            <path d="m14 10 3 3" />
+          </svg>
+          Herramientas
+        </a>
       </nav>
     </aside>
 
@@ -152,6 +159,22 @@
           </article>
         </section>
 
+        <section class="admin-card admin-location-card" aria-labelledby="location-title">
+          <header class="admin-card-header">
+            <h2 id="location-title">Ubicación aproximada de visitantes activos</h2>
+            <p>Ciudades estimadas por Cloudflare; no se guardan ni muestran direcciones IP.</p>
+          </header>
+          <div class="admin-location-content">
+            <div class="admin-location-donut" id="location-chart" role="img" aria-label="Distribución de visitantes activos por ubicación">
+              <div class="admin-location-donut-center">
+                <strong id="location-total">—</strong>
+                <span>sesiones</span>
+              </div>
+            </div>
+            <ul class="admin-location-legend" id="location-legend"></ul>
+          </div>
+        </section>
+
         <section class="admin-card admin-analytics" aria-labelledby="chart-title">
           <div class="admin-chart-card">
             <header class="admin-chart-heading">
@@ -196,6 +219,18 @@
             </header>
             <div class="admin-mini-chart" id="mini-views-chart" role="img" aria-label="Juegos abiertos de los últimos siete días"></div>
           </article>
+        </section>
+
+        <section class="admin-tools-section" id="admin-tools" aria-labelledby="tools-title">
+          <div class="admin-section-heading">
+            <div>
+              <p class="admin-eyebrow">Herramientas</p>
+              <h2 id="tools-title">Juegos en curso</h2>
+              <p>Sesiones activas jugando ahora y su proporción sobre todos los visitantes activos.</p>
+            </div>
+            <span class="admin-live-indicator"><span aria-hidden="true"></span>En directo</span>
+          </div>
+          <div class="admin-current-games" id="current-games" aria-live="polite"></div>
         </section>
       </main>
     </div>

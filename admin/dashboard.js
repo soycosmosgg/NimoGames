@@ -19,12 +19,20 @@
   const popularGameTitle = document.getElementById('popular-game-title');
   const popularGameViews = document.getElementById('popular-game-views');
   const miniViewsChart = document.getElementById('mini-views-chart');
+  const locationChart = document.getElementById('location-chart');
+  const locationTotal = document.getElementById('location-total');
+  const locationLegend = document.getElementById('location-legend');
+  const currentGamesDisplay = document.getElementById('current-games');
   const catalogGames = Array.isArray(window.NIMO_GAMES) ? window.NIMO_GAMES : [];
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminIdentityStorageKey = 'nimo-games-admin-identity';
   const adminLanguageStorageKey = 'nimo-games-admin-language';
   const numberFormat = new Intl.NumberFormat('es-ES');
   const dayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'short', timeZone: 'UTC' });
+  const locationColors = [
+    '#60a5fa', '#34d399', '#fbbf24', '#f87171',
+    '#a78bfa', '#22d3ee', '#fb7185', '#a3e635', '#94a3b8'
+  ];
   const translations = {
     es: {
       gateLabel: 'Acceso al panel de administración',
@@ -179,6 +187,19 @@
     if (!stats || !['Arb', 'Miticraft89'].includes(stats.adminIdentity) ||
         !Number.isSafeInteger(stats.activeVisitors) || stats.activeVisitors < 0 ||
         !Number.isSafeInteger(stats.todayPeakVisitors) || stats.todayPeakVisitors < 0 ||
+        !Array.isArray(stats.locations) || stats.locations.length > 8 ||
+        stats.locations.some(location =>
+          !location || typeof location.city !== 'string' || typeof location.country !== 'string' ||
+          !Number.isSafeInteger(location.count) || location.count < 1
+        ) ||
+        !Number.isSafeInteger(stats.otherLocationsCount) || stats.otherLocationsCount < 0 ||
+        stats.locations.reduce((count, location) => count + location.count, stats.otherLocationsCount) !== stats.activeVisitors ||
+        !Array.isArray(stats.activeGames) ||
+        stats.activeGames.some(game =>
+          !game || typeof game.id !== 'string' || !catalogGames.some(item => item.id === game.id) ||
+          !Number.isSafeInteger(game.players) || game.players < 1 || game.players > stats.activeVisitors ||
+          !Number.isFinite(game.percentage) || game.percentage < 0 || game.percentage > 100
+        ) ||
         !Array.isArray(stats.last7Days) || stats.last7Days.length !== 7 ||
         stats.last7Days.some(day =>
           !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
@@ -286,6 +307,123 @@
     popularGameViews.textContent = `${numberFormat.format(popularGame.gameLaunches)} aperturas`;
   }
 
+  function renderLocations(locations, otherLocationsCount, total) {
+    locationTotal.textContent = numberFormat.format(total);
+    locationLegend.replaceChildren();
+    if (total === 0) {
+      locationChart.style.background = 'conic-gradient(#373a41 0deg 360deg)';
+      locationChart.setAttribute('aria-label', 'No hay visitantes activos para mostrar por ubicación.');
+      const emptyState = document.createElement('li');
+      emptyState.className = 'admin-location-empty';
+      emptyState.textContent = 'No hay visitantes activos en este momento.';
+      locationLegend.append(emptyState);
+      return;
+    }
+
+    const rows = locations.map(location => ({
+      name: location.city,
+      country: location.country,
+      count: location.count
+    }));
+    if (otherLocationsCount > 0) {
+      rows.push({
+        name: currentLanguage === 'en' ? 'Other locations' : 'Otras ubicaciones',
+        country: '',
+        count: otherLocationsCount
+      });
+    }
+
+    let offset = 0;
+    const segments = rows.map((row, index) => {
+      const start = offset / total * 360;
+      offset += row.count;
+      const end = offset / total * 360;
+      const color = locationColors[index % locationColors.length];
+      const percent = row.count / total * 100;
+      const countryLabel = row.country ? `, ${row.country}` : '';
+      const item = document.createElement('li');
+      item.className = 'admin-location-item';
+
+      const name = document.createElement('span');
+      name.className = 'admin-location-name';
+      const swatch = document.createElement('span');
+      swatch.className = 'admin-location-swatch';
+      swatch.style.backgroundColor = color;
+      swatch.setAttribute('aria-hidden', 'true');
+      const label = document.createElement('span');
+      label.textContent = `${row.name}${countryLabel}`;
+      name.append(swatch, label);
+
+      const count = document.createElement('span');
+      count.className = 'admin-location-count';
+      count.textContent = numberFormat.format(row.count);
+      const percentage = document.createElement('span');
+      percentage.className = 'admin-location-percent';
+      percentage.textContent = `${new Intl.NumberFormat(currentLanguage, {
+        maximumFractionDigits: 1
+      }).format(percent)}%`;
+      item.append(name, count, percentage);
+      locationLegend.append(item);
+      return `${color} ${start}deg ${end}deg`;
+    });
+    locationChart.style.background = `conic-gradient(${segments.join(', ')})`;
+    locationChart.setAttribute(
+      'aria-label',
+      rows.map(row => `${row.name}: ${numberFormat.format(row.count)} de ${numberFormat.format(total)} sesiones`).join('; ')
+    );
+  }
+
+  function renderCurrentGames(activeGames) {
+    currentGamesDisplay.replaceChildren();
+    if (activeGames.length === 0) {
+      const emptyState = document.createElement('p');
+      emptyState.className = 'admin-current-games-empty';
+      emptyState.textContent = currentLanguage === 'en'
+        ? 'No active sessions are playing a game right now.'
+        : 'No hay sesiones activas jugando en este momento.';
+      currentGamesDisplay.append(emptyState);
+      return;
+    }
+
+    activeGames.forEach(activeGame => {
+      const game = catalogGames.find(item => item.id === activeGame.id);
+      const card = document.createElement('article');
+      card.className = 'admin-current-game';
+
+      const image = document.createElement('img');
+      image.className = 'admin-current-game-image';
+      image.src = game.hero;
+      image.alt = '';
+      image.loading = 'lazy';
+
+      const copy = document.createElement('div');
+      copy.className = 'admin-current-game-copy';
+      const title = document.createElement('h3');
+      title.textContent = game.title;
+      const players = document.createElement('p');
+      const playerLabel = currentLanguage === 'en'
+        ? (activeGame.players === 1 ? 'session' : 'sessions')
+        : (activeGame.players === 1 ? 'sesión' : 'sesiones');
+      players.textContent = `${numberFormat.format(activeGame.players)} ${playerLabel}`;
+      copy.append(title, players);
+
+      const percentage = document.createElement('strong');
+      percentage.className = 'admin-current-game-share';
+      const formattedPercentage = new Intl.NumberFormat(currentLanguage, {
+        maximumFractionDigits: 1
+      }).format(activeGame.percentage);
+      percentage.textContent = `${formattedPercentage}%`;
+      percentage.setAttribute(
+        'aria-label',
+        currentLanguage === 'en'
+          ? `${formattedPercentage}% of active sessions`
+          : `${formattedPercentage}% de las sesiones activas`
+      );
+      card.append(image, copy, percentage);
+      currentGamesDisplay.append(card);
+    });
+  }
+
   function renderStats(stats) {
     validateStats(stats);
     identityDisplay.textContent = stats.adminIdentity;
@@ -296,6 +434,8 @@
     }
     activeVisitorsDisplay.textContent = numberFormat.format(stats.activeVisitors);
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
+    renderLocations(stats.locations, stats.otherLocationsCount, stats.activeVisitors);
+    renderCurrentGames(stats.activeGames);
     renderChart(stats.last7Days);
     renderMiniChart(stats.last7DaysGameLaunches);
     renderPopularGame(stats.popularGame);
@@ -367,7 +507,7 @@
         minute: '2-digit'
       }).format(new Date())}.`, Boolean(storageWarning));
       window.clearInterval(refreshTimer);
-      refreshTimer = window.setInterval(refreshStats, 60000);
+      refreshTimer = window.setInterval(refreshStats, 30000);
     } catch (error) {
       console.error('[admin-dashboard] Could not unlock the admin panel.', error);
       if (error instanceof Error && error.name === 'UnauthorizedError') {
