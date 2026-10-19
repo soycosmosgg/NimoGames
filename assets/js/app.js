@@ -71,6 +71,8 @@
   let gameIsClosing = false;
   let visitorSessionId = null;
   let visitorUpdateInProgress = false;
+  let visitorUpdatePending = false;
+  let activeGameId = null;
   let pendingVersionSelection = null;
   const homeGameLimit = 5;
   const greetingVisibleDurationMs = 30000;
@@ -339,7 +341,10 @@
   }
 
   async function updateVisitorCount(sessionId, pageView = false) {
-    if (visitorUpdateInProgress) return;
+    if (visitorUpdateInProgress) {
+      visitorUpdatePending = true;
+      return;
+    }
     visitorUpdateInProgress = true;
     const launches = Object.fromEntries(pendingGameLaunches);
     pendingGameLaunches.clear();
@@ -348,7 +353,7 @@
       const response = await window.fetch('/api/visitors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, pageView, gameLaunches: launches }),
+        body: JSON.stringify({ sessionId, pageView, gameId: activeGameId, gameLaunches: launches }),
         cache: 'no-store'
       });
       if (!response.ok) {
@@ -368,6 +373,10 @@
       visitorCountDisplay.textContent = '—';
     } finally {
       visitorUpdateInProgress = false;
+      if (visitorUpdatePending) {
+        visitorUpdatePending = false;
+        updateVisitorCount(sessionId);
+      }
     }
   }
 
@@ -376,14 +385,16 @@
   }
 
   function sendPendingGameLaunchesOnPageHide() {
-    if (!visitorSessionId || pendingGameLaunches.size === 0) return;
+    if (!visitorSessionId) return;
     const body = JSON.stringify({
       sessionId: visitorSessionId,
+      gameId: null,
       gameLaunches: Object.fromEntries(pendingGameLaunches)
     });
     const queued = new Blob([body], { type: 'application/json' });
     if (window.navigator.sendBeacon('/api/visitors', queued)) {
       pendingGameLaunches.clear();
+      activeGameId = null;
     }
   }
 
@@ -424,7 +435,9 @@
       return;
     }
     if (selectedVersion) game = { ...game, ...selectedVersion };
+    activeGameId = game.id;
     queueGameLaunch(game.id);
+    if (visitorSessionId) updateVisitorCount(visitorSessionId);
     recentGameIds = [game.id, ...recentGameIds.filter(id => id !== game.id)];
     saveRecentGameIds();
     homeGames = buildHomeGames();
@@ -493,6 +506,8 @@
   function closeGame() {
     if (!gamePlayer.classList.contains('is-open') || gameIsClosing) return;
     gameIsClosing = true;
+    activeGameId = null;
+    if (visitorSessionId) updateVisitorCount(visitorSessionId);
     window.clearTimeout(gameAdminMessageHideTimer);
     hideGameAdminMessage();
     const transitionId = ++gameTransitionId;

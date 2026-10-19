@@ -262,6 +262,69 @@ button, input, textarea { font: inherit; }
   margin-top: 16px;
 }
 .admin-chart-card { padding: 18px 20px 14px; }
+.admin-location-card { margin-top: 16px; }
+.admin-location-content {
+  display: grid;
+  grid-template-columns: minmax(150px, .65fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+  padding: 20px;
+}
+.admin-location-donut {
+  position: relative;
+  display: grid;
+  width: min(100%, 190px);
+  aspect-ratio: 1;
+  justify-self: center;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(#3b82f6 0deg 360deg);
+}
+.admin-location-donut::before {
+  position: absolute;
+  inset: 18%;
+  border-radius: 50%;
+  background: var(--admin-panel);
+  content: "";
+}
+.admin-location-donut-center {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.admin-location-donut-center strong { color: #f3f4f6; font-size: 24px; font-variant-numeric: tabular-nums; }
+.admin-location-donut-center span { color: #a1a1aa; font-size: 10px; }
+.admin-location-legend { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+.admin-location-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; color: #d1d5db; font-size: 11px; }
+.admin-location-name { display: inline-flex; min-width: 0; align-items: center; gap: 8px; overflow-wrap: anywhere; }
+.admin-location-swatch { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 2px; }
+.admin-location-count, .admin-location-percent { color: #a1a1aa; font-variant-numeric: tabular-nums; }
+.admin-location-empty { margin: 0; color: #a1a1aa; font-size: 11px; }
+.admin-tools-section { margin-top: 28px; scroll-margin-top: 18px; }
+.admin-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.admin-section-heading h2 { margin: 0; color: #f3f4f6; font-size: 20px; font-weight: 650; }
+.admin-section-heading p:last-child { margin: 6px 0 0; color: #a1a1aa; font-size: 11px; line-height: 1.5; }
+.admin-live-indicator { display: inline-flex; align-items: center; gap: 7px; color: #a1a1aa; font-size: 10px; }
+.admin-live-indicator span { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, .55); }
+.admin-current-games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.admin-current-game {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-panel);
+}
+.admin-current-game-image { display: block; width: 64px; height: 64px; border-radius: 5px; object-fit: cover; }
+.admin-current-game-copy { min-width: 0; }
+.admin-current-game-copy h3 { margin: 0; overflow-wrap: anywhere; color: #f3f4f6; font-size: 12px; font-weight: 600; }
+.admin-current-game-copy p { margin: 5px 0 0; color: #a1a1aa; font-size: 10px; }
+.admin-current-game-share { color: #93c5fd; font-size: 16px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.admin-current-games-empty { grid-column: 1 / -1; margin: 0; padding: 22px; border: 1px solid var(--admin-border); border-radius: 6px; color: #a1a1aa; font-size: 12px; text-align: center; }
 .admin-insights > .admin-card { min-width: 0; }
 .admin-popular-game .admin-card-header,
 .admin-mini-chart-card .admin-card-header { padding-bottom: 10px; }
@@ -806,15 +869,23 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 .admin-shell .admin-heading h1,
 .admin-shell .admin-chart-heading h2,
 .admin-shell .admin-chart-total,
+.admin-shell .admin-location-donut-center strong,
 .admin-shell .admin-stat-value,
 .admin-shell .admin-card-header h2,
-.admin-shell .admin-tool h3 { color: #f3f4f6; }
+.admin-shell .admin-tool h3,
+.admin-shell .admin-current-game-copy h3,
+.admin-shell .admin-section-heading h2 { color: #f3f4f6; }
 .admin-shell .admin-description,
 .admin-shell .admin-chart-heading p,
 .admin-shell .admin-chart-total-label,
 .admin-shell .admin-stat-label,
 .admin-shell .admin-card-header p,
 .admin-shell .admin-tool p,
+.admin-shell .admin-section-heading p:last-child,
+.admin-shell .admin-location-empty,
+.admin-shell .admin-current-game-copy p,
+.admin-shell .admin-current-games-empty,
+.admin-shell .admin-live-indicator,
 .admin-shell .admin-chart-footnote,
 .admin-shell .admin-note { color: #a1a1aa; }
 .admin-shell .admin-pill,
@@ -825,6 +896,8 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 .admin-shell .admin-tool-icon { border-color: #3b3e45; background: var(--admin-bg); color: #c4c7ce; }
 .admin-shell .admin-card-header { border-color: var(--admin-border); }
 .admin-shell .admin-chart { border-color: var(--admin-border); background: var(--admin-bg); }
+.admin-shell .admin-location-donut::before { background: var(--admin-panel); }
+.admin-shell .admin-current-game { border-color: var(--admin-border); background: var(--admin-panel); }
 .admin-shell .admin-chart-value,
 .admin-shell .admin-chart-label { color: #a1a1aa; }
 .admin-shell .admin-chart-day[data-today="true"] .admin-chart-label { color: #93c5fd; }
@@ -902,6 +975,10 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-stat-label { font-size: 9px; }
   .admin-stat-value { font-size: 11px; }
   .admin-chart-card { padding-inline: 12px; }
+  .admin-location-content { grid-template-columns: minmax(110px, .45fr) minmax(0, 1fr); gap: 14px; padding: 14px; }
+  .admin-location-donut { width: min(100%, 150px); }
+  .admin-location-item { gap: 7px; font-size: 10px; }
+  .admin-current-games { grid-template-columns: 1fr; }
   .admin-chart { gap: 4px; }
   .admin-popular-game-body { gap: 12px; }
   .admin-popular-game-image { width: 72px; height: 72px; }
@@ -921,6 +998,9 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-chart-heading { align-items: flex-start; }
   .admin-chart-total { font-size: 16px; }
   .admin-input-meta { align-items: flex-start; }
+  .admin-location-content { grid-template-columns: 1fr; }
+  .admin-location-donut { width: 150px; }
+  .admin-section-heading { align-items: flex-start; flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {

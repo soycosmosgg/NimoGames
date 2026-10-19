@@ -32,12 +32,14 @@ When running the site from a plain static server locally, live messages are unav
 
 ## Configure the live visitor counter
 
-The header counter reports active browser sessions using a Cloudflare Pages Function and D1. It does not identify people: each browser tab gets a random session ID, and a session is considered active for 120 seconds after its last heartbeat. Heartbeats run every 60 seconds; daily analytics are only written when a page view occurs or a new visitor peak is reached. Game launches are queued and sent with the next heartbeat (or on page close), avoiding a separate API request for every launch. The admin dashboard refreshes every 60 seconds and shows active sessions, the day's peak, and page loads reported by the home page after migration `0004`. It also counts game launches after migration `0005` and uses those counts for the most-opened game and weekly game-launch chart. Neither metric backfills historical data.
+The header counter reports active browser sessions using a Cloudflare Pages Function and D1. Each browser tab gets a random session ID, and a session is considered active for 120 seconds after its last heartbeat. Heartbeats run every 60 seconds; daily analytics are only written when a page view occurs or a new visitor peak is reached. Game launches are queued and sent with the next heartbeat (or on page close), avoiding a separate API request for every launch. Cloudflare's approximate city and country, plus the currently open game ID, are stored per active session; raw IP addresses are not stored. The admin dashboard refreshes every 30 seconds and shows active sessions, today's peak, approximate city distribution, and games currently open with player counts and percentages of all active sessions. Historical page views after migration `0004` and game launches after migration `0005` also appear in the weekly charts. Neither metric backfills historical data.
 
 1. Create a D1 database in the same Cloudflare account as the Pages project.
-2. Run the SQL in `migrations/0001_create_active_visitors.sql`, `migrations/0004_create_site_analytics.sql`, `migrations/0005_create_game_analytics.sql`, and `migrations/0006_create_admin_login_attempts.sql` in the D1 Console.
+2. Run the SQL in `migrations/0001_create_active_visitors.sql`, `migrations/0004_create_site_analytics.sql`, `migrations/0005_create_game_analytics.sql`, `migrations/0006_create_admin_login_attempts.sql`, and `migrations/0008_add_live_visitor_details.sql` in the D1 Console. Apply `0008` after `0001`; if the database already has the active visitor table, run only `0008` to add city, country, and current-game fields.
 3. In the Pages project settings, add a D1 database binding under **Settings → Functions → D1 database bindings** with the variable name `VISITORS_DB`, selecting the database you created.
 4. Deploy the Pages project with Functions enabled. The endpoint is `/api/visitors`.
+
+The city chart uses approximate Cloudflare location data and aggregates active sessions by city and country. It does not show or store visitor IP addresses. Live game counts are based on active browser sessions that report a game open; they update on game open/close and with the 60-second heartbeat.
 
 Until the D1 binding and table are configured, the counter shows `—`; it does not display a fabricated number.
 

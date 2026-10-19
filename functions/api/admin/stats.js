@@ -1,6 +1,11 @@
 import { authorizeAdminRequest } from '../../_utils/admin-lockout.js';
 
 const ACTIVE_VISITOR_TTL_SECONDS = 120;
+const GAME_IDS = new Set([
+  '945360', '285900', '3527290', '2835570', '367520', '322170', '98266', '12100',
+  '1388880', '319510', '332800', '354140', '388090', '871720', '758260', '302895',
+  '9734614', '493632', '3314790'
+]);
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -43,7 +48,7 @@ export async function onRequestPost({ request, env }) {
   const weekStart = new Date((now - 6 * 24 * 60 * 60) * 1000).toISOString().slice(0, 10);
 
   try {
-    const [activeResult, dailyRows, gameDailyRows] = await Promise.all([
+    const [activeResult, dailyRows, gameDailyRows, locationRows, activeGameRows] = await Promise.all([
       env.VISITORS_DB.prepare(
         'SELECT COUNT(*) AS count FROM active_visitors WHERE last_seen >= ?'
       ).bind(cutoff).first(),
@@ -57,7 +62,22 @@ export async function onRequestPost({ request, env }) {
         SELECT day, game_id, game_launches
         FROM game_analytics_daily
         WHERE day >= ? AND day <= ?
-      `).bind(weekStart, today).all()
+      `).bind(weekStart, today).all(),
+      env.VISITORS_DB.prepare(`
+        SELECT city, country, COUNT(*) AS count
+        FROM active_visitors
+        WHERE last_seen >= ?
+        GROUP BY city, country
+        ORDER BY count DESC, city ASC, country ASC
+        LIMIT 8
+      `).bind(cutoff).all(),
+      env.VISITORS_DB.prepare(`
+        SELECT game_id, COUNT(*) AS players
+        FROM active_visitors
+        WHERE last_seen >= ? AND game_id IS NOT NULL
+        GROUP BY game_id
+        ORDER BY players DESC, game_id ASC
+      `).bind(cutoff).all()
     ]);
 
     if (!activeResult || !Number.isSafeInteger(activeResult.count) || activeResult.count < 0) {
@@ -84,10 +104,35 @@ export async function onRequestPost({ request, env }) {
         popularGame = { id: row.game_id, gameLaunches: row.game_launches };
       }
     });
+    const locations = (locationRows.results || []).map(row => {
+      if (typeof row.city !== 'string' || typeof row.country !== 'string' ||
+          !Number.isSafeInteger(row.count) || row.count < 1) {
+        throw new Error('D1 returned invalid visitor location data.');
+      }
+      return { city: row.city || 'Ubicación desconocida', country: row.country, count: row.count };
+    });
+    const activeGames = (activeGameRows.results || []).map(row => {
+      if (typeof row.game_id !== 'string' || !GAME_IDS.has(row.game_id) ||
+          !Number.isSafeInteger(row.players) || row.players < 1 || row.players > activeResult.count) {
+        throw new Error('D1 returned invalid live game data.');
+      }
+      return {
+        id: row.game_id,
+        players: row.players,
+        percentage: activeResult.count === 0 ? 0 : Math.round(row.players / activeResult.count * 1000) / 10
+      };
+    });
+    const locationCount = locations.reduce((total, location) => total + location.count, 0);
+    if (locationCount > activeResult.count) {
+      throw new Error('D1 returned more visitor locations than active sessions.');
+    }
 
     return jsonResponse({
       adminIdentity,
       activeVisitors: activeResult.count,
+      locations,
+      otherLocationsCount: activeResult.count - locationCount,
+      activeGames,
       todayPeakVisitors: days.get(today)?.peakVisitors || 0,
       popularGame,
       last7Days: Array.from({ length: 7 }, (_, index) => {

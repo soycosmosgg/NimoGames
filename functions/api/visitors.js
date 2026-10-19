@@ -49,6 +49,11 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ error: 'pageView must be a boolean.' }, 400);
   }
 
+  const gameId = payload.gameId === undefined ? null : payload.gameId;
+  if (gameId !== null && (typeof gameId !== 'string' || !GAME_IDS.has(gameId))) {
+    return jsonResponse({ error: 'gameId must be a valid game ID or null.' }, 400);
+  }
+
   const gameLaunches = payload.gameLaunches === undefined ? {} : payload.gameLaunches;
   if (!gameLaunches || typeof gameLaunches !== 'object' || Array.isArray(gameLaunches)) {
     return jsonResponse({ error: 'gameLaunches must be an object.' }, 400);
@@ -63,6 +68,10 @@ export async function onRequestPost({ request, env }) {
   const now = Math.floor(Date.now() / 1000);
   const cutoff = now - ACTIVE_VISITOR_TTL_SECONDS;
   const today = new Date(now * 1000).toISOString().slice(0, 10);
+  const city = typeof request.cf?.city === 'string' ? request.cf.city.trim().slice(0, 100) : '';
+  const country = typeof request.cf?.country === 'string' && /^[A-Za-z]{2}$/.test(request.cf.country)
+    ? request.cf.country.toUpperCase()
+    : '';
 
   try {
     if (payload.pageView === true) {
@@ -72,10 +81,14 @@ export async function onRequestPost({ request, env }) {
     }
 
     await env.VISITORS_DB.prepare(`
-      INSERT INTO active_visitors (session_id, last_seen)
-      VALUES (?, ?)
-      ON CONFLICT (session_id) DO UPDATE SET last_seen = excluded.last_seen
-    `).bind(payload.sessionId, now).run();
+      INSERT INTO active_visitors (session_id, last_seen, city, country, game_id)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT (session_id) DO UPDATE SET
+        last_seen = excluded.last_seen,
+        city = excluded.city,
+        country = excluded.country,
+        game_id = excluded.game_id
+    `).bind(payload.sessionId, now, city, country, gameId).run();
 
     const result = await env.VISITORS_DB.prepare(
       'SELECT COUNT(*) AS count FROM active_visitors WHERE last_seen >= ?'
