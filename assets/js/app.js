@@ -7,7 +7,9 @@
   const gamePlayer = document.getElementById('game-player');
   const gameFrame = document.getElementById('game-frame');
   const gameAdminMessage = document.getElementById('game-admin-message');
+  const gameAdminAvatar = document.getElementById('game-admin-avatar');
   const gameAdminMessageText = document.getElementById('game-admin-message-text');
+  const siteAvatarImage = document.getElementById('site-avatar-image');
   const closeGameButton = document.getElementById('game-player-close');
   const gameVersionPicker = document.getElementById('game-version-picker');
   const gameVersionCancelButton = document.getElementById('game-version-cancel');
@@ -29,7 +31,7 @@
   const libraryFilterButtons = document.querySelectorAll('.library-filter');
 
   if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame ||
-      !gameAdminMessage || !gameAdminMessageText || !closeGameButton ||
+      !gameAdminMessage || !gameAdminAvatar || !gameAdminMessageText || !siteAvatarImage || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
       !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
       !libraryGameGrid || !avatarMessage || !avatarMessageAnnouncement) {
@@ -73,6 +75,10 @@
   const homeGameLimit = 5;
   const greetingVisibleDurationMs = 30000;
   const liveMessageVisibleDurationMs = 10000;
+  const adminAvatars = {
+    Arb: 'https://avatars.githubusercontent.com/u/233341890?v=4',
+    Miticraft89: 'https://avatars.githubusercontent.com/u/120197668?v=4'
+  };
   const defaultGreetingMessages = {
     firstVisit: [
       'Hi! I hope you like the page!',
@@ -158,6 +164,8 @@
   function hideAvatarMessage() {
     avatarMessage.classList.remove('is-visible');
     avatarMessage.setAttribute('aria-hidden', 'true');
+    avatarMessage.removeAttribute('data-sender');
+    siteAvatarImage.src = adminAvatars.Arb;
     messageHideTimer = null;
   }
 
@@ -167,17 +175,22 @@
     gameAdminMessageHideTimer = null;
   }
 
-  function renderGameAdminMessage(message) {
+  function renderGameAdminMessage(message, sender) {
     window.clearTimeout(gameAdminMessageHideTimer);
+    gameAdminMessage.dataset.sender = sender;
+    gameAdminAvatar.src = adminAvatars[sender];
+    gameAdminAvatar.alt = `Avatar de ${sender}`;
     gameAdminMessageText.textContent = message;
     gameAdminMessage.setAttribute('aria-hidden', 'false');
     gameAdminMessage.classList.add('is-visible');
     gameAdminMessageHideTimer = window.setTimeout(hideGameAdminMessage, liveMessageVisibleDurationMs);
   }
 
-  function renderAvatarMessage(message, visibleDurationMs = greetingVisibleDurationMs) {
+  function renderAvatarMessage(message, visibleDurationMs = greetingVisibleDurationMs, sender = 'Arb') {
     window.clearInterval(messageTypingTimer);
     window.clearTimeout(messageHideTimer);
+    avatarMessage.dataset.sender = sender;
+    siteAvatarImage.src = adminAvatars[sender];
     avatarMessageAnnouncement.textContent = message;
     avatarMessage.textContent = '';
 
@@ -223,6 +236,7 @@
         throw new Error(payload.error || `Request failed with status ${response.status}.`);
       }
       if (typeof payload.message !== 'string' || payload.message.length > 250 ||
+          !['Arb', 'Miticraft89'].includes(payload.sender) ||
           !Number.isSafeInteger(payload.updatedAt) || payload.updatedAt < 0) {
         throw new Error('The live message response has an invalid format.');
       }
@@ -233,9 +247,9 @@
         if (payload.message && !hasSeenLiveMessage(payload.updatedAt)) {
           rememberLiveMessage(payload.updatedAt);
           if (gamePlayer.classList.contains('is-open')) {
-            renderGameAdminMessage(payload.message);
+            renderGameAdminMessage(payload.message, payload.sender);
           } else {
-            renderAvatarMessage(payload.message, liveMessageVisibleDurationMs);
+            renderAvatarMessage(payload.message, liveMessageVisibleDurationMs, payload.sender);
           }
         }
       }

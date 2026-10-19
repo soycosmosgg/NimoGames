@@ -27,9 +27,11 @@ export async function onRequestPost({ request, env }) {
   const suppliedSecret = authorization.length <= 512 && authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : '';
+  let adminIdentity;
   try {
     const authorizationResult = await authorizeAdminRequest(request, env, suppliedSecret);
     if (!authorizationResult.authorized) return authorizationResult.response;
+    adminIdentity = authorizationResult.identity;
   } catch (error) {
     console.error('[admin-stats] Failed to verify admin access.', error);
     return jsonResponse({ error: 'Unable to verify admin access.' }, 500);
@@ -84,6 +86,7 @@ export async function onRequestPost({ request, env }) {
     });
 
     return jsonResponse({
+      adminIdentity,
       activeVisitors: activeResult.count,
       todayPeakVisitors: days.get(today)?.peakVisitors || 0,
       popularGame,

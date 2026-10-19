@@ -21,11 +21,13 @@ export async function onRequestGet({ env }) {
 
   try {
     const row = await env.VISITORS_DB.prepare(
-      'SELECT message, updated_at FROM site_messages WHERE id = 1'
+      'SELECT message, sender, updated_at FROM site_messages WHERE id = 1'
     ).first();
-    if (!row) return jsonResponse({ message: '', updatedAt: 0 });
+    if (!row) return jsonResponse({ message: '', sender: 'Arb', updatedAt: 0 });
     if (typeof row.message !== 'string') throw new Error('The saved message has an invalid format.');
-    if (row.message.length > MAX_MESSAGE_LENGTH || !Number.isSafeInteger(row.updated_at)) {
+    if (row.message.length > MAX_MESSAGE_LENGTH ||
+        !['Arb', 'Miticraft89'].includes(row.sender) ||
+        !Number.isSafeInteger(row.updated_at)) {
       throw new Error('The saved message has an invalid format.');
     }
 
@@ -33,10 +35,10 @@ export async function onRequestGet({ env }) {
       await env.VISITORS_DB.prepare(
         'DELETE FROM site_messages WHERE id = 1 AND updated_at = ?'
       ).bind(row.updated_at).run();
-      return jsonResponse({ message: '', updatedAt: 0 });
+      return jsonResponse({ message: '', sender: 'Arb', updatedAt: 0 });
     }
 
-    return jsonResponse({ message: row.message, updatedAt: row.updated_at });
+    return jsonResponse({ message: row.message, sender: row.sender, updatedAt: row.updated_at });
   } catch (error) {
     console.error('[messages] Failed to read the current message.', error);
     return jsonResponse({ error: 'Unable to read the current message.' }, 500);
@@ -58,8 +60,9 @@ export async function onRequestPost({ request, env }) {
   const suppliedSecret = authorization.length <= 512 && authorization.startsWith('Bearer ')
     ? authorization.slice('Bearer '.length)
     : '';
+  let authorizationResult;
   try {
-    const authorizationResult = await authorizeAdminRequest(request, env, suppliedSecret);
+    authorizationResult = await authorizeAdminRequest(request, env, suppliedSecret);
     if (!authorizationResult.authorized) return authorizationResult.response;
   } catch (error) {
     console.error('[messages] Failed to verify admin access.', error);
@@ -104,14 +107,15 @@ export async function onRequestPost({ request, env }) {
   const updatedAt = Date.now();
   try {
     await env.VISITORS_DB.prepare(`
-      INSERT INTO site_messages (id, message, updated_at)
-      VALUES (1, ?, ?)
+      INSERT INTO site_messages (id, message, sender, updated_at)
+      VALUES (1, ?, ?, ?)
       ON CONFLICT (id) DO UPDATE SET
         message = excluded.message,
+        sender = excluded.sender,
         updated_at = excluded.updated_at
-    `).bind(message, updatedAt).run();
+    `).bind(message, authorizationResult.identity, updatedAt).run();
 
-    return jsonResponse({ message, updatedAt });
+    return jsonResponse({ message, sender: authorizationResult.identity, updatedAt });
   } catch (error) {
     console.error('[messages] Failed to save the current message.', error);
     return jsonResponse({ error: 'Unable to save the current message.' }, 500);

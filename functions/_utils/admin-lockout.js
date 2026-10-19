@@ -60,13 +60,21 @@ export async function authorizeAdminRequest(request, env, suppliedSecret) {
     };
   }
 
+  let identity = null;
   if (await matchesAdminSecret(suppliedSecret, env.ADMIN_SECRET)) {
+    identity = 'Arb';
+  } else if (env.ADMIN_SECRET_MITICRAFT89 &&
+      await matchesAdminSecret(suppliedSecret, env.ADMIN_SECRET_MITICRAFT89)) {
+    identity = 'Miticraft89';
+  }
+
+  if (identity) {
     if (attempt) {
       await env.VISITORS_DB.prepare(
         'DELETE FROM admin_login_attempts WHERE client_id = ? AND locked_until <= ?'
       ).bind(clientId, now).run();
     }
-    return { authorized: true };
+    return { authorized: true, identity };
   }
 
   const lockLevel = attempt?.lock_level || 0;

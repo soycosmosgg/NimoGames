@@ -4,7 +4,9 @@
   const messageCount = document.getElementById('message-count');
   const sendButton = document.getElementById('send-message');
   const status = document.getElementById('status');
+  const identityDisplay = document.getElementById('admin-identity');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
+  const adminIdentityStorageKey = 'nimo-games-admin-identity';
   let adminSecret = '';
 
   function displayStatus(message, isError = false) {
@@ -62,6 +64,7 @@
 
   try {
     adminSecret = window.localStorage.getItem(adminSecretStorageKey) || '';
+    identityDisplay.textContent = window.localStorage.getItem(adminIdentityStorageKey) || '';
     if (!adminSecret) {
       displayStatus('La sesión de administrador no está disponible. Vuelve al panel e introduce la clave.', true);
     }
@@ -97,7 +100,8 @@
         },
         body: JSON.stringify({ message: messageInput.value })
       });
-      await readApiResponse(response);
+      const result = await readApiResponse(response);
+      identityDisplay.textContent = result.sender;
 
       messageInput.value = '';
       updateMessageCount();
@@ -107,6 +111,7 @@
         adminSecret = '';
         try {
           window.localStorage.removeItem(adminSecretStorageKey);
+          window.localStorage.removeItem(adminIdentityStorageKey);
         } catch (storageError) {
           console.error('[messages-admin] Could not remove the rejected admin secret.', storageError);
         }

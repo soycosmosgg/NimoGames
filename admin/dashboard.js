@@ -8,6 +8,7 @@
   const gate = document.getElementById('admin-gate');
   const dashboard = document.getElementById('admin-dashboard');
   const logoutButton = document.getElementById('admin-logout');
+  const identityDisplay = document.getElementById('admin-identity');
   const activeVisitorsDisplay = document.getElementById('active-visitors');
   const todayPeakDisplay = document.getElementById('today-peak');
   const weeklyViewsDisplay = document.getElementById('weekly-views');
@@ -20,6 +21,7 @@
   const miniViewsChart = document.getElementById('mini-views-chart');
   const catalogGames = Array.isArray(window.NIMO_GAMES) ? window.NIMO_GAMES : [];
   const adminSecretStorageKey = 'nimo-games-admin-secret';
+  const adminIdentityStorageKey = 'nimo-games-admin-identity';
   const adminLanguageStorageKey = 'nimo-games-admin-language';
   const numberFormat = new Intl.NumberFormat('es-ES');
   const dayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'short', timeZone: 'UTC' });
@@ -30,7 +32,7 @@
       brandLabel: 'Nimo Games',
       eyebrow: 'Administración',
       title: 'Iniciar sesión',
-      description: 'Introduce tu clave para continuar.',
+      description: 'Introduce la clave de Arb o Miticraft89 para continuar.',
       secretLabel: 'Clave de administrador',
       showSecret: 'Mostrar clave',
       hideSecret: 'Ocultar clave',
@@ -56,7 +58,7 @@
       brandLabel: 'Nimo Games',
       eyebrow: 'Administration',
       title: 'Sign in',
-      description: 'Enter your key to continue.',
+      description: 'Enter Arb or Miticraft89’s key to continue.',
       secretLabel: 'Admin key',
       showSecret: 'Show key',
       hideSecret: 'Hide key',
@@ -174,7 +176,8 @@
   }
 
   function validateStats(stats) {
-    if (!stats || !Number.isSafeInteger(stats.activeVisitors) || stats.activeVisitors < 0 ||
+    if (!stats || !['Arb', 'Miticraft89'].includes(stats.adminIdentity) ||
+        !Number.isSafeInteger(stats.activeVisitors) || stats.activeVisitors < 0 ||
         !Number.isSafeInteger(stats.todayPeakVisitors) || stats.todayPeakVisitors < 0 ||
         !Array.isArray(stats.last7Days) || stats.last7Days.length !== 7 ||
         stats.last7Days.some(day =>
@@ -285,6 +288,12 @@
 
   function renderStats(stats) {
     validateStats(stats);
+    identityDisplay.textContent = stats.adminIdentity;
+    try {
+      window.localStorage.setItem(adminIdentityStorageKey, stats.adminIdentity);
+    } catch (error) {
+      console.error('[admin-dashboard] Could not save the admin identity in this browser.', error);
+    }
     activeVisitorsDisplay.textContent = numberFormat.format(stats.activeVisitors);
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
     renderChart(stats.last7Days);
@@ -298,6 +307,7 @@
     activeSecret = '';
     try {
       window.localStorage.removeItem(adminSecretStorageKey);
+      window.localStorage.removeItem(adminIdentityStorageKey);
     } catch (error) {
       console.error('[admin-dashboard] Could not remove the saved admin secret.', error);
       message = `${message}${message ? ' ' : ''}No se pudo borrar la clave guardada en este navegador.`;
@@ -363,6 +373,7 @@
       if (error instanceof Error && error.name === 'UnauthorizedError') {
         try {
           window.localStorage.removeItem(adminSecretStorageKey);
+          window.localStorage.removeItem(adminIdentityStorageKey);
         } catch (storageError) {
           console.error('[admin-dashboard] Could not remove the rejected admin secret.', storageError);
         }

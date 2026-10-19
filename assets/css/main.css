@@ -260,6 +260,14 @@ button {
   transform: translateY(0);
 }
 
+.avatar-message[data-sender="Miticraft89"] {
+  position: fixed;
+  top: 82px;
+  right: 24px;
+  left: auto;
+  transform-origin: top right;
+}
+
 .avatar-message-announcement {
   position: absolute;
   width: 1px;
@@ -544,6 +552,15 @@ button {
   transform: translateX(0);
 }
 
+.game-admin-message[data-sender="Miticraft89"] {
+  right: 24px;
+  left: auto;
+  align-items: flex-end;
+  transform: translateX(10px);
+}
+
+.game-admin-message[data-sender="Miticraft89"].is-visible { transform: translateX(0); }
+
 .game-admin-avatar {
   width: 52px;
   height: 52px;
@@ -593,6 +610,19 @@ button {
   border-bottom: 9px solid #fff;
   border-left-width: 6px;
 }
+
+.game-admin-message[data-sender="Miticraft89"] .game-admin-message-text {
+  align-self: flex-end;
+  margin: 10px 18px 0 0;
+}
+
+.game-admin-message[data-sender="Miticraft89"] .game-admin-message-text::before,
+.game-admin-message[data-sender="Miticraft89"] .game-admin-message-text::after {
+  right: 14px;
+  left: auto;
+}
+
+.game-admin-message[data-sender="Miticraft89"] .game-admin-message-text::after { right: 15px; }
 
 .game-player.is-playing iframe {
   opacity: 1;
@@ -1027,6 +1057,7 @@ button {
   .divider { height: 16px; }
   .game-admin-message { left: 12px; max-width: calc(100vw - 24px); }
   .game-admin-message-text { max-width: calc(100vw - 52px); }
+  .game-admin-message[data-sender="Miticraft89"] { right: 12px; left: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

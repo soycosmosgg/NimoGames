@@ -549,6 +549,7 @@ button, input, textarea { font: inherit; }
 }
 
 .admin-site-status-dot { width: 7px; height: 7px; border-radius: 50%; background: #16a34a; }
+.admin-identity { color: #20252b; font-size: 12px; font-weight: 650; }
 
 .admin-content {
   width: min(100%, 1120px);
@@ -788,6 +789,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 .admin-note svg { width: 14px; height: 14px; flex: 0 0 auto; margin-top: 1px; color: #4b5563; }
 
 .admin-shell { color-scheme: dark; color: #f3f4f6; }
+.admin-shell .admin-identity { color: #f3f4f6; }
 .admin-shell .admin-sidebar { border-color: var(--admin-border); background: var(--admin-sidebar); }
 .admin-shell .admin-brand .admin-logo { filter: brightness(0) invert(1) opacity(.88); }
 .admin-shell .admin-nav-label { color: #9ca3af; }
