@@ -49,6 +49,7 @@
   const recentGamesStorageKey = 'nimo-games-recently-played';
   const avatarGreetingStorageKey = 'nimo-games-visited';
   const seenLiveMessageStorageKey = 'nimo-games-seen-live-message';
+  const seenAbuseEventStorageKey = 'nimo-games-seen-abuse-event';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
   const pendingGameLaunches = new Map();
   let currentMessageUpdatedAt = null;
@@ -57,6 +58,9 @@
   let gameAdminMessageHideTimer = null;
   let messageRefreshInProgress = false;
   let messageLoadErrorReported = false;
+  let currentAbuseEventId = null;
+  let abuseEventOverlay = null;
+  let abuseEventTimer = null;
   let armedGameId = null;
   let recentGameIds = loadRecentGameIds();
   let homeGames = [];
@@ -245,6 +249,26 @@
       }
 
       messageLoadErrorReported = false;
+      if (payload.event !== null && payload.event !== undefined) {
+        const event = payload.event;
+        if (!['number-rain', 'taco-event'].includes(event.eventType) ||
+            !['Arb', 'Miticraft89'].includes(event.sender) ||
+            !Number.isSafeInteger(event.createdAt) || event.createdAt < 0 ||
+            (event.eventType === 'taco-event' &&
+              (typeof event.gameId !== 'string' || !catalogGames.some(game => game.id === event.gameId)))) {
+          throw new Error('The live event response has an invalid format.');
+        }
+        if (event.createdAt > currentAbuseEventId &&
+            Date.now() - event.createdAt < liveMessageVisibleDurationMs * 6 &&
+            !hasSeenAbuseEvent(event.createdAt)) {
+          currentAbuseEventId = event.createdAt;
+          rememberAbuseEvent(event.createdAt);
+          showAbuseEvent(event);
+        } else {
+          currentAbuseEventId = Math.max(currentAbuseEventId || 0, event.createdAt);
+        }
+      }
+
       if (payload.updatedAt !== currentMessageUpdatedAt) {
         currentMessageUpdatedAt = payload.updatedAt;
         if (payload.message && !hasSeenLiveMessage(payload.updatedAt)) {
@@ -281,6 +305,128 @@
     } catch (error) {
       console.error('Could not remember that this tab showed the live message.', error);
     }
+  }
+
+  function hasSeenAbuseEvent(createdAt) {
+    try {
+      return window.sessionStorage.getItem(seenAbuseEventStorageKey) === String(createdAt);
+    } catch (error) {
+      console.error('Could not check whether this tab has shown the live event.', error);
+      return false;
+    }
+  }
+
+  function rememberAbuseEvent(createdAt) {
+    try {
+      window.sessionStorage.setItem(seenAbuseEventStorageKey, String(createdAt));
+    } catch (error) {
+      console.error('Could not remember that this tab showed the live event.', error);
+    }
+  }
+
+  function hideAbuseEvent() {
+    window.clearTimeout(abuseEventTimer);
+    abuseEventTimer = null;
+    abuseEventOverlay?.remove();
+    abuseEventOverlay = null;
+  }
+
+  function showAbuseEvent(event) {
+    hideAbuseEvent();
+    const overlay = document.createElement('div');
+    overlay.className = 'abuse-event-rain';
+    overlay.setAttribute('aria-hidden', 'true');
+    const symbol = event.eventType === 'number-rain' ? '67' : '🌮';
+    for (let index = 0; index < 42; index += 1) {
+      const item = document.createElement('span');
+      item.className = 'abuse-event-rain-item';
+      item.textContent = symbol;
+      item.style.left = `${5 + Math.random() * 85}%`;
+      item.style.setProperty('--bounce-x-one', `${(Math.random() * 2 - 1) * 24}vw`);
+      item.style.setProperty('--bounce-x-two', `${(Math.random() * 2 - 1) * 28}vw`);
+      item.style.setProperty('--bounce-x-three', `${(Math.random() * 2 - 1) * 22}vw`);
+      item.style.animationDelay = `${-Math.random() * 8}s`;
+      item.style.animationDuration = `${8 + Math.random() * 2}s`;
+      overlay.appendChild(item);
+    }
+    document.body.appendChild(overlay);
+    abuseEventOverlay = overlay;
+    abuseEventTimer = window.setTimeout(() => {
+      overlay.remove();
+      abuseEventOverlay = null;
+      abuseEventTimer = null;
+      if (event.eventType === 'taco-event') {
+        showOptionalGameInvitation(event.gameId);
+      }
+    }, liveMessageVisibleDurationMs);
+  }
+
+  function showOptionalGameInvitation(gameId) {
+    const game = catalogGames.find(entry => entry.id === gameId);
+    if (!game) return;
+
+    const dialog = document.createElement('section');
+    dialog.className = 'abuse-event-invitation';
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-labelledby', 'abuse-event-title');
+    const heading = document.createElement('h2');
+    heading.id = 'abuse-event-title';
+    heading.textContent = '¡Evento de tacos!';
+    const description = document.createElement('p');
+    description.textContent = `¿Te apetece unirte a una partida de ${game.title}? Tú decides.`;
+    const previouslyFocused = document.activeElement;
+    const actions = document.createElement('div');
+    actions.className = 'abuse-event-actions';
+    const joinButton = document.createElement('button');
+    joinButton.type = 'button';
+    joinButton.className = 'abuse-event-join';
+    joinButton.textContent = `Jugar a ${game.title}`;
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'abuse-event-dismiss';
+    dismissButton.textContent = 'No, gracias';
+    actions.append(joinButton, dismissButton);
+    dialog.append(heading, description, actions);
+    document.body.appendChild(dialog);
+    abuseEventOverlay = dialog;
+
+    const dismiss = () => {
+      hideAbuseEvent();
+      if (previouslyFocused instanceof HTMLElement && previouslyFocused.isConnected) {
+        previouslyFocused.focus();
+      }
+      document.removeEventListener('keydown', handleInvitationKeydown);
+    };
+    const handleInvitationKeydown = event => {
+      if (event.key === 'Escape') dismiss();
+      if (event.key === 'Tab') {
+        const focusable = [joinButton, dismissButton];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    dismissButton.addEventListener('click', dismiss, { once: true });
+    document.addEventListener('keydown', handleInvitationKeydown);
+    joinButton.addEventListener('click', () => {
+      document.removeEventListener('keydown', handleInvitationKeydown);
+      hideAbuseEvent();
+      if (gamePlayer.classList.contains('is-open')) {
+        closeGame();
+        window.setTimeout(() => openGame(game), 600);
+      } else {
+        openGame(game);
+      }
+    }, { once: true });
+    abuseEventTimer = window.setTimeout(dismiss, 15000);
+    joinButton.focus();
   }
 
   function initializeAvatarMessages() {

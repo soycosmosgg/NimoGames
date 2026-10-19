@@ -998,6 +998,79 @@ button {
   text-decoration: none;
 }
 
+.abuse-event-rain {
+  position: fixed;
+  z-index: 100000;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.abuse-event-rain-item {
+  position: absolute;
+  top: -12vh;
+  color: #fbbf24;
+  font-size: clamp(24px, 4vw, 54px);
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 3px 12px rgba(0, 0, 0, .6);
+  animation: abuse-event-bounce 10s cubic-bezier(.36, 0, .64, 1) infinite;
+  will-change: transform;
+}
+
+.abuse-event-rain-item:nth-child(3n) { color: #f87171; }
+.abuse-event-rain-item:nth-child(3n + 1) { color: #67e8f9; }
+
+@keyframes abuse-event-bounce {
+  0% { transform: translate3d(0, -15vh, 0) rotate(0deg); }
+  14% { transform: translate3d(var(--bounce-x-one), 20vh, 0) rotate(135deg); }
+  25% { transform: translate3d(var(--bounce-x-one), 5vh, 0) rotate(225deg); }
+  42% { transform: translate3d(var(--bounce-x-two), 72vh, 0) rotate(390deg); }
+  53% { transform: translate3d(var(--bounce-x-two), 48vh, 0) rotate(500deg); }
+  70% { transform: translate3d(var(--bounce-x-three), 112vh, 0) rotate(680deg); }
+  81% { transform: translate3d(var(--bounce-x-three), 82vh, 0) rotate(790deg); }
+  100% { transform: translate3d(var(--bounce-x-one), 130vh, 0) rotate(1080deg); }
+}
+
+.abuse-event-invitation {
+  position: fixed;
+  z-index: 100001;
+  top: 50%;
+  left: 50%;
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 16px;
+  background: rgba(10, 20, 30, .97);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, .65);
+  color: #edf7ff;
+  text-align: center;
+}
+
+.abuse-event-invitation h2 { margin-bottom: 8px; font-size: 22px; }
+.abuse-event-invitation p { color: #c6d3df; font-size: 14px; line-height: 1.5; }
+.abuse-event-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.abuse-event-actions button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #526174;
+  border-radius: 8px;
+  background: #172434;
+  color: #edf7ff;
+  cursor: pointer;
+}
+.abuse-event-actions .abuse-event-join { border-color: #2563eb; background: #2563eb; }
+.abuse-event-actions button:hover { filter: brightness(1.15); }
+.abuse-event-actions button:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .abuse-event-rain-item {
+    top: 20%;
+    animation-name: none;
+  }
+}
+
 .footer-right a:hover,
 .footer-right a:focus-visible {
   color: #fff;

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#1e2025">
+  <title>Abuse | Administración de Nimo Games</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-26">
+  <script src="/assets/js/games.js?v=game-catalog-2" defer></script>
+  <script src="/admin/abuse.js?v=admin-abuse-1" defer></script>
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/admin/" aria-label="Nimo Games, volver al panel">
+        <img class="admin-logo" src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+      </a>
+      <p class="admin-nav-label">General</p>
+      <nav class="admin-nav" aria-label="Navegación de administración">
+        <a class="admin-nav-link" href="/admin/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+            <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+            <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+            <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+          </svg>
+          Resumen
+        </a>
+        <a class="admin-nav-link" href="/admin/messages.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5h-7L5 21v-4.8a2.5 2.5 0 0 1-1-1.7z" />
+            <path d="M8 9h8M8 13h5" />
+          </svg>
+          Mensajes
+        </a>
+        <a class="admin-nav-link" href="/admin/abuse.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3 3.8 7v5.2c0 4.3 3.5 7.2 8.2 8.8 4.7-1.6 8.2-4.5 8.2-8.8V7z" />
+            <path d="M9 12h6M12 9v6" />
+          </svg>
+          Abuse
+        </a>
+      </nav>
+    </aside>
+
+    <div class="admin-workspace">
+      <header class="admin-topbar">
+        <span class="admin-topbar-context">Eventos</span>
+        <div class="admin-topbar-actions">
+          <span class="admin-identity" id="admin-identity" aria-live="polite"></span>
+          <span class="admin-site-status"><span class="admin-site-status-dot" aria-hidden="true"></span>Panel privado</span>
+        </div>
+      </header>
+      <main class="admin-content">
+        <nav class="admin-breadcrumb" aria-label="Ruta de navegación">
+          <a href="/admin/">Administración</a>
+          <span class="admin-breadcrumb-separator" aria-hidden="true">/</span>
+          <span aria-current="page">Abuse</span>
+        </nav>
+        <section class="admin-heading" aria-labelledby="page-title">
+          <div>
+            <p class="admin-eyebrow">Eventos para visitantes</p>
+            <h1 id="page-title">Abuse</h1>
+            <p class="admin-description">Lanza bromas visuales breves y una invitación opcional a jugar.</p>
+          </div>
+        </section>
+
+        <div class="admin-abuse-grid">
+          <section class="admin-card admin-abuse-card" aria-labelledby="numbers-title">
+            <span class="admin-abuse-icon" aria-hidden="true">67</span>
+            <h2 id="numbers-title">Lluvia de 67</h2>
+            <p>Hace caer números por la pantalla durante 10 segundos. No bloquea los controles ni cambia de página.</p>
+            <button class="admin-button admin-submit" id="start-number-rain" type="button">Iniciar lluvia</button>
+          </section>
+          <section class="admin-card admin-abuse-card" aria-labelledby="tacos-title">
+            <span class="admin-abuse-icon" aria-hidden="true">🌮</span>
+            <h2 id="tacos-title">Evento de tacos</h2>
+            <p>Los tacos caen durante 10 segundos; después, el visitante puede aceptar o rechazar la invitación al juego elegido.</p>
+            <label class="admin-label" for="event-game">Juego del evento</label>
+            <select class="admin-input" id="event-game"></select>
+            <button class="admin-button admin-submit" id="start-taco-event" type="button">Lanzar evento opcional</button>
+          </section>
+        </div>
+        <p class="admin-abuse-notice" id="abuse-status" role="status" aria-live="polite"></p>
+        <aside class="admin-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 11v5M12 8h.01" />
+          </svg>
+          <span>Los eventos son temporales y visibles en las páginas abiertas. No se fuerza ninguna redirección: cada visitante decide si participa.</span>
+        </aside>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

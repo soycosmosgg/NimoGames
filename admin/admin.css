@@ -877,6 +877,29 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
 
 .admin-submit:disabled { cursor: wait; opacity: .65; }
 
+.admin-abuse-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.admin-abuse-card { display: grid; align-content: start; justify-items: start; gap: 12px; padding: 20px; }
+.admin-abuse-card h2 { margin: 0; color: #f3f4f6; font-size: 16px; }
+.admin-abuse-card p { margin: 0 0 4px; color: #b6bac2; font-size: 12px; line-height: 1.6; }
+.admin-abuse-card .admin-label { margin-top: 2px; }
+.admin-abuse-card .admin-input { color-scheme: dark; }
+.admin-abuse-card .admin-input option { background: #26282e; color: #f3f4f6; }
+.admin-abuse-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid #373a41;
+  border-radius: 12px;
+  background: #191b20;
+  color: #fbbf24;
+  font-size: 20px;
+  font-weight: 800;
+}
+.admin-abuse-notice { min-height: 1.5em; margin: 12px 0 0; color: #93c5fd; font-size: 11px; line-height: 1.5; }
+.admin-abuse-notice[data-error="true"] { color: #fca5a5; }
+.admin-abuse-card .admin-submit:disabled { cursor: wait; opacity: .65; }
+
 #status { min-height: 1.5em; margin: 0; color: #1d4ed8; font-size: 11px; line-height: 1.5; }
 #status[data-error="true"] { color: #b42318; }
 
@@ -1019,6 +1042,7 @@ textarea.admin-input { min-height: 150px; resize: vertical; line-height: 1.55; }
   .admin-chart-card { padding-inline: 12px; }
 <<<<<<< HEAD
   .admin-compose-grid { grid-template-columns: 1fr; }
+  .admin-abuse-grid { grid-template-columns: 1fr; }
 =======
 >>>>>>> afa67396be2894fa1ca9c08966ca93e2f84a32ef
   .admin-location-content { grid-template-columns: minmax(110px, .45fr) minmax(0, 1fr); gap: 14px; padding: 14px; }

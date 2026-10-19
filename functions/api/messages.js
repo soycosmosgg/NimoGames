@@ -3,6 +3,7 @@ import { authorizeAdminRequest } from '../_utils/admin-lockout.js';
 const MAX_REQUEST_LENGTH = 8192;
 const MAX_MESSAGE_LENGTH = 250;
 const MESSAGE_TTL_MS = 60000;
+const LIVE_EVENT_TTL_MS = 60000;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -20,25 +21,55 @@ export async function onRequestGet({ env }) {
   }
 
   try {
-    const row = await env.VISITORS_DB.prepare(
-      'SELECT message, sender, updated_at FROM site_messages WHERE id = 1'
-    ).first();
-    if (!row) return jsonResponse({ message: '', sender: 'Arb', updatedAt: 0 });
-    if (typeof row.message !== 'string') throw new Error('The saved message has an invalid format.');
-    if (row.message.length > MAX_MESSAGE_LENGTH ||
-        !['Arb', 'Miticraft89'].includes(row.sender) ||
-        !Number.isSafeInteger(row.updated_at)) {
-      throw new Error('The saved message has an invalid format.');
+    const [row, eventRow] = await Promise.all([
+      env.VISITORS_DB.prepare(
+        'SELECT message, sender, updated_at FROM site_messages WHERE id = 1'
+      ).first(),
+      env.VISITORS_DB.prepare(
+        'SELECT event_type, game_id, sender, created_at FROM live_abuse_events WHERE id = 1'
+      ).first()
+    ]);
+    let message = '';
+    let sender = 'Arb';
+    let updatedAt = 0;
+    if (row) {
+      if (typeof row.message !== 'string' || row.message.length > MAX_MESSAGE_LENGTH ||
+          !['Arb', 'Miticraft89'].includes(row.sender) ||
+          !Number.isSafeInteger(row.updated_at)) {
+        throw new Error('The saved message has an invalid format.');
+      }
+      if (row.message && Date.now() - row.updated_at < MESSAGE_TTL_MS) {
+        message = row.message;
+        sender = row.sender;
+        updatedAt = row.updated_at;
+      } else if (row.message) {
+        await env.VISITORS_DB.prepare(
+          'DELETE FROM site_messages WHERE id = 1 AND updated_at = ?'
+        ).bind(row.updated_at).run();
+      }
     }
 
-    if (row.message && Date.now() - row.updated_at >= MESSAGE_TTL_MS) {
-      await env.VISITORS_DB.prepare(
-        'DELETE FROM site_messages WHERE id = 1 AND updated_at = ?'
-      ).bind(row.updated_at).run();
-      return jsonResponse({ message: '', sender: 'Arb', updatedAt: 0 });
+    let event = null;
+    if (eventRow) {
+      if (!['number-rain', 'taco-event'].includes(eventRow.event_type) ||
+          !['Arb', 'Miticraft89'].includes(eventRow.sender) ||
+          !Number.isSafeInteger(eventRow.created_at) ||
+          eventRow.created_at < 0 || eventRow.created_at > Date.now() ||
+          (eventRow.event_type === 'taco-event' &&
+            (typeof eventRow.game_id !== 'string' || !/^\d{1,10}$/.test(eventRow.game_id)))) {
+        throw new Error('The saved live event has an invalid format.');
+      }
+      if (Date.now() - eventRow.created_at < LIVE_EVENT_TTL_MS) {
+        event = {
+          eventType: eventRow.event_type,
+          gameId: eventRow.game_id,
+          sender: eventRow.sender,
+          createdAt: eventRow.created_at
+        };
+      }
     }
 
-    return jsonResponse({ message: row.message, sender: row.sender, updatedAt: row.updated_at });
+    return jsonResponse({ message, sender, updatedAt, event });
   } catch (error) {
     console.error('[messages] Failed to read the current message.', error);
     return jsonResponse({ error: 'Unable to read the current message.' }, 500);
