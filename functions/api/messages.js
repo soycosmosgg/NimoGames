@@ -2,7 +2,7 @@ import { authorizeAdminRequest } from '../_utils/admin-lockout.js';
 
 const MAX_REQUEST_LENGTH = 8192;
 const MAX_MESSAGE_LENGTH = 250;
-const MESSAGE_TTL_MS = 10000;
+const MESSAGE_TTL_MS = 60000;
 
 function jsonResponse(body, status = 200) {
   return new Response(JSON.stringify(body), {

@@ -75,6 +75,7 @@
   const homeGameLimit = 5;
   const greetingVisibleDurationMs = 30000;
   const liveMessageVisibleDurationMs = 10000;
+  const liveMessageRefreshIntervalMs = 30000;
   const adminAvatars = {
     Arb: 'https://avatars.githubusercontent.com/u/233341890?v=4',
     Miticraft89: 'https://avatars.githubusercontent.com/u/120197668?v=4'
@@ -227,7 +228,7 @@
   }
 
   async function refreshAvatarMessage() {
-    if (messageRefreshInProgress) return;
+    if (document.hidden || messageRefreshInProgress) return;
     messageRefreshInProgress = true;
     try {
       const response = await fetch('/api/messages', { cache: 'no-store' });
@@ -283,7 +284,10 @@
   function initializeAvatarMessages() {
     showEntryGreeting();
     refreshAvatarMessage();
-    window.setInterval(refreshAvatarMessage, 3000);
+    window.setInterval(refreshAvatarMessage, liveMessageRefreshIntervalMs);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshAvatarMessage();
+    });
   }
 
   function updateConnectionStatus() {
