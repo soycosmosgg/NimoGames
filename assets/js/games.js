@@ -54,47 +54,10 @@ window.NIMO_GAMES = [
     title: 'Doki Doki Literature Club!'
   },
   {
-    id: '8944',
-    title: 'Clustertruck',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/Clustertruck-Port@main/',
-    cdnProbe: 'Build/ClusterTruckWEB.loader.js',
-    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
-  },
-  {
     id: '103012',
     title: "Friday Night Funkin'",
     cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fridayfunk@65da3b8e88b909a8e27f8d750533a758d8dc54f3/',
     cdnProbe: 'Funkin.js'
-  },
-  {
-    id: '319510',
-    title: "Five Nights at Freddy's",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/1/',
-    cdnProbe: 'favicon.ico'
-  },
-  {
-    id: '332800',
-    title: "Five Nights at Freddy's 2",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/2/',
-    cdnProbe: 'favicon.ico'
-  },
-  {
-    id: '354140',
-    title: "Five Nights at Freddy's 3",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/3/',
-    cdnProbe: 'favicon.ico'
-  },
-  {
-    id: '388090',
-    title: "Five Nights at Freddy's 4",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/4/',
-    cdnProbe: 'favicon.ico'
-  },
-  {
-    id: '871720',
-    title: "Freddy Fazbear's Ultimate Custom Night",
-    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/ucn/',
-    cdnProbe: 'favicon.ico'
   },
   {
     id: '758260',
@@ -155,8 +118,44 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/',
     cdnProbe: 'Brotato.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
+    id: '319510',
+    title: "Five Nights at Freddy's",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/1/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
+    id: '332800',
+    title: "Five Nights at Freddy's 2",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/2/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
+    id: '354140',
+    title: "Five Nights at Freddy's 3",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/3/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
+    id: '388090',
+    title: "Five Nights at Freddy's 4",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/4/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
+    id: '871720',
+    title: "Freddy Fazbear's Ultimate Custom Night",
+    cdnBase: 'https://cdn.jsdelivr.net/gh/bubblfan/fnaf@latest/ucn/',
+    cdnProbe: 'favicon.ico'
+  },
+  {
+    id: '8944',
+    title: 'Clustertruck',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/Clustertruck-Port@main/',
+    cdnProbe: 'Build/ClusterTruckWEB.loader.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
   }
-
 ].map(game => {
   const artworkBase = `https://cdn-ngames.pages.dev/images/${game.id}`;
   return {
