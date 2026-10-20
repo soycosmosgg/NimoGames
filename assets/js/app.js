@@ -258,7 +258,9 @@
               (typeof event.gameId !== 'string' || !catalogGames.some(game => game.id === event.gameId)))) {
           throw new Error('The live event response has an invalid format.');
         }
-        if (event.createdAt > currentAbuseEventId &&
+        if (currentAbuseEventId === null) {
+          currentAbuseEventId = event.createdAt;
+        } else if (event.createdAt > currentAbuseEventId &&
             Date.now() - event.createdAt < liveMessageVisibleDurationMs * 6 &&
             !hasSeenAbuseEvent(event.createdAt)) {
           currentAbuseEventId = event.createdAt;
@@ -394,7 +396,7 @@
     abuseEventOverlay = overlay;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const duration = prefersReducedMotion ? 8000 : 14000;
+    const duration = prefersReducedMotion ? 6000 : 11000;
     abuseEventTimer = window.setTimeout(() => {
       overlay.remove();
       abuseEventOverlay = null;
