@@ -1,5 +1,12 @@
 window.NIMO_GAMES = [
   {
+    id: '1307',
+    title: 'The Binding of Isaac: Repentance',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/chiikabu/the-browsing-of-isaac@main/',
+    cdnProbe: 'index.html',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '945360',
     title: 'Among Us',
     cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/AmongUsPort@7b6881186a73a3165ad7274b5e5dd31e3290cbfc/',
@@ -155,6 +162,14 @@ window.NIMO_GAMES = [
     cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/Clustertruck-Port@main/',
     cdnProbe: 'Build/ClusterTruckWEB.loader.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
+    id: '5255287',
+    title: 'ULTRAKILL',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/ChickenStrips05/Ultrakill-web@main/',
+    cdnProbe: 'Build/ultrakill.loader.js',
+    cdnProviders: ['rawcdn'],
+    cdnProvidersExact: true
   },
   {
     id: '796817',
