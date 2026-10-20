@@ -1061,20 +1061,20 @@ button {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: min(76vw, 440px);
-  max-height: 72vh;
+  width: min(94vw, 900px);
+  max-height: 92vh;
   object-fit: contain;
   opacity: 0;
-  transform: translate(-50%, -110vh);
-  animation: abuse-event-jumpscare 6s ease-in-out 1 both;
+  transform: translate(-50%, -130vh);
+  animation: abuse-event-jumpscare 14s ease-in-out 1 both;
   will-change: transform, opacity;
 }
 
 @keyframes abuse-event-jumpscare {
-  0% { opacity: 0; transform: translate(-50%, -110vh); }
-  16% { opacity: 1; transform: translate(-50%, 0); }
-  84% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, 110vh); }
+  0% { opacity: 0; transform: translate(-50%, -130vh); }
+  20% { opacity: 1; transform: translate(-50%, 0); }
+  85% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 130vh); }
 }
 
 .abuse-event-invitation h2 { margin-bottom: 8px; font-size: 22px; }

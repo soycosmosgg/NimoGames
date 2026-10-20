@@ -394,7 +394,7 @@
     abuseEventOverlay = overlay;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const duration = prefersReducedMotion ? 4000 : 6000;
+    const duration = prefersReducedMotion ? 8000 : 14000;
     abuseEventTimer = window.setTimeout(() => {
       overlay.remove();
       abuseEventOverlay = null;
