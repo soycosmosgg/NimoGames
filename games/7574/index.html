@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <meta name="description" content="Juega 60 Seconds! en Nimo Games. Reúne suministros y ayuda a la familia a sobrevivir tras un apocalipsis nuclear en esta aventura de supervivencia.">
+    <meta property="og:title" content="60 Seconds! | Nimo Games">
+    <meta property="og:description" content="Juega 60 Seconds! en Nimo Games. Reúne suministros y ayuda a la familia a sobrevivir tras un apocalipsis nuclear en esta aventura de supervivencia.">
+    <meta property="og:url" content="https://nimogames.qzz.io/games/7574/index.html">
+    <title>60 Seconds! | Nimo Games</title>
+    <link rel="canonical" href="https://nimogames.qzz.io/games/7574/index.html">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/usheje883-maker/60-Seconds-Webport@4a1ebbeb5d93e269e12530cd6f56fae314cea8f0/"
+            data-probe="Build/Build.loader.js"
+            data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+            data-game-id="7574"
+            data-loading="true"></script>
+    <link rel="shortcut icon" href="Image.png">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script>
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var baseUrl = window.NIMO_CDN_BASE ||
+        "https://cdn.jsdelivr.net/gh/usheje883-maker/60-Seconds-Webport@4a1ebbeb5d93e269e12530cd6f56fae314cea8f0/";
+      var buildUrl = baseUrl + "Build";
+      var loaderUrl = buildUrl + "/Build.loader.js";
+      loadingBar.style.display = "block";
+
+      var dataFiles = ["Build.data.unityweb.0","Build.data.unityweb.1","Build.data.unityweb.2","Build.data.unityweb.3","Build.data.unityweb.4","Build.data.unityweb.5"];
+
+      Promise.all(dataFiles.map(function(f) {
+        return fetch(buildUrl + "/" + f).then(function(r) { if (!r.ok) throw Error("Failed "+f); return r.arrayBuffer(); });
+      })).then(function(parts){
+        var total = parts.reduce(function(s, b) { return s + b.byteLength; }, 0);
+        var combined = new Uint8Array(total);
+        var off = 0;
+        parts.forEach(function(buf) { combined.set(new Uint8Array(buf), off); off += buf.byteLength; });
+        var dataBlob = URL.createObjectURL(new Blob([combined]));
+
+        var config = {
+          dataUrl: dataBlob,
+          frameworkUrl: buildUrl + "/Build.framework.js.unityweb",
+          codeUrl: buildUrl + "/Build.wasm.unityweb",
+          streamingAssetsUrl: baseUrl + "StreamingAssets",
+          companyName: "Robot Gentleman",
+          productName: "60 Seconds",
+          productVersion: "1.0",
+          showBanner: unityShowBanner,
+        };
+
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+          container.className = "unity-mobile";
+          config.devicePixelRatio = 1;
+          unityShowBanner('WebGL builds are not supported on mobile devices.');
+        }
+
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = function(){
+          createUnityInstance(canvas, config, function(progress){
+            progressBarFull.style.width = 100 * progress + "%";
+          }).then(function(unityInstance){
+            loadingBar.style.display = "none";
+          }).catch(function(message){
+            alert(message);
+          });
+        };
+        document.body.appendChild(script);
+      });
+    </script>
+  </body>
+</html>

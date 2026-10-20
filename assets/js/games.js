@@ -172,6 +172,13 @@ window.NIMO_GAMES = [
     cdnProvidersExact: true
   },
   {
+    id: '7574',
+    title: '60 Seconds!',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/usheje883-maker/60-Seconds-Webport@4a1ebbeb5d93e269e12530cd6f56fae314cea8f0/',
+    cdnProbe: 'Build/Build.loader.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '796817',
     title: 'Blackjack'
   }
