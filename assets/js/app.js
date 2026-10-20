@@ -387,11 +387,13 @@
     const overlay = document.createElement('div');
     overlay.className = 'abuse-event-jumpscare';
     overlay.setAttribute('aria-hidden', 'true');
+    const backdrop = document.createElement('div');
+    backdrop.className = 'abuse-event-jumpscare-backdrop';
     const image = document.createElement('img');
     image.className = 'abuse-event-jumpscare-image';
     image.src = 'https://cdn-ngames.pages.dev/images/app/jumpscare.webp';
     image.alt = '';
-    overlay.appendChild(image);
+    overlay.append(backdrop, image);
     document.body.appendChild(overlay);
     abuseEventOverlay = overlay;
 

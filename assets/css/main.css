@@ -1057,8 +1057,18 @@ button {
   pointer-events: none;
 }
 
+.abuse-event-jumpscare-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background: rgba(0, 0, 0, .72);
+  opacity: 0;
+  animation: abuse-event-jumpscare-darken 11s ease-in-out 1 both;
+}
+
 .abuse-event-jumpscare-image {
   position: absolute;
+  z-index: 1;
   bottom: 0;
   left: 50%;
   width: min(94vw, 900px);
@@ -1075,6 +1085,12 @@ button {
   25% { opacity: 1; transform: translate(-50%, 0); }
   80% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, 130vh); }
+}
+
+@keyframes abuse-event-jumpscare-darken {
+  0%, 10% { opacity: 0; }
+  22%, 78% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .abuse-event-invitation h2 { margin-bottom: 8px; font-size: 22px; }
@@ -1104,6 +1120,10 @@ button {
   .abuse-event-jumpscare-image {
     opacity: 1;
     transform: translate(-50%, 0);
+    animation: none !important;
+  }
+  .abuse-event-jumpscare-backdrop {
+    opacity: 1;
     animation: none !important;
   }
 }
