@@ -157,6 +157,14 @@ window.NIMO_GAMES = [
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
   },
   {
+    id: '5255287',
+    title: 'ULTRAKILL',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/ChickenStrips05/Ultrakill-web@main/',
+    cdnProbe: 'Build/ultrakill.loader.js',
+    cdnProviders: ['rawcdn'],
+    cdnProvidersExact: true
+  },
+  {
     id: '796817',
     title: 'Blackjack'
   }
