@@ -1,5 +1,12 @@
 window.NIMO_GAMES = [
   {
+    id: '1307',
+    title: 'The Binding of Isaac: Repentance',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/chiikabu/the-browsing-of-isaac@main/',
+    cdnProbe: 'index.html',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '945360',
     title: 'Among Us',
     cdnBase: 'https://cdn.jsdelivr.net/gh/wasmdotrip/AmongUsPort@7b6881186a73a3165ad7274b5e5dd31e3290cbfc/',
