@@ -1061,9 +1061,9 @@ button {
   position: absolute;
   z-index: 0;
   inset: 0;
-  background: rgba(0, 0, 0, .72);
+  background: rgba(0, 0, 0, .88);
   opacity: 0;
-  animation: abuse-event-jumpscare-darken 11s ease-in-out 1 both;
+  animation: abuse-event-jumpscare-darken 8s ease-in-out 1 both;
 }
 
 .abuse-event-jumpscare-image {
@@ -1076,20 +1076,20 @@ button {
   object-fit: contain;
   opacity: 0;
   transform: translate(-50%, -130vh);
-  animation: abuse-event-jumpscare 11s ease-in-out 1 both;
+  animation: abuse-event-jumpscare 8s ease-in-out 1 both;
   will-change: transform, opacity;
 }
 
 @keyframes abuse-event-jumpscare {
   0% { opacity: 0; transform: translate(-50%, -130vh); }
-  25% { opacity: 1; transform: translate(-50%, 0); }
-  80% { opacity: 1; transform: translate(-50%, 0); }
+  30% { opacity: 1; transform: translate(-50%, 0); }
+  70% { opacity: 1; transform: translate(-50%, 0); }
   100% { opacity: 0; transform: translate(-50%, 130vh); }
 }
 
 @keyframes abuse-event-jumpscare-darken {
   0%, 10% { opacity: 0; }
-  22%, 78% { opacity: 1; }
+  27%, 68% { opacity: 1; }
   100% { opacity: 0; }
 }
 
