@@ -251,7 +251,7 @@
       messageLoadErrorReported = false;
       if (payload.event !== null && payload.event !== undefined) {
         const event = payload.event;
-        if (!['number-rain', 'game-invite'].includes(event.eventType) ||
+        if (!['number-rain', 'game-invite', 'jumpscare'].includes(event.eventType) ||
             !['Arb', 'Miticraft89'].includes(event.sender) ||
             !Number.isSafeInteger(event.createdAt) || event.createdAt < 0 ||
             (event.eventType === 'game-invite' &&
@@ -338,6 +338,11 @@
     }
 
     hideAbuseEvent();
+    if (event.eventType === 'jumpscare') {
+      showJumpscare();
+      return;
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'abuse-event-rain';
     overlay.setAttribute('aria-hidden', 'true');
@@ -374,6 +379,27 @@
       abuseEventOverlay = null;
       abuseEventTimer = null;
     }, liveMessageVisibleDurationMs);
+  }
+
+  function showJumpscare() {
+    const overlay = document.createElement('div');
+    overlay.className = 'abuse-event-jumpscare';
+    overlay.setAttribute('aria-hidden', 'true');
+    const image = document.createElement('img');
+    image.className = 'abuse-event-jumpscare-image';
+    image.src = 'https://cdn-ngames.pages.dev/images/app/jumpscare.webp';
+    image.alt = '';
+    overlay.appendChild(image);
+    document.body.appendChild(overlay);
+    abuseEventOverlay = overlay;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = prefersReducedMotion ? 4000 : 6000;
+    abuseEventTimer = window.setTimeout(() => {
+      overlay.remove();
+      abuseEventOverlay = null;
+      abuseEventTimer = null;
+    }, duration);
   }
 
   function showOptionalGameInvitation(gameId) {

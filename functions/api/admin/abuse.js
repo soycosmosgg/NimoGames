@@ -67,7 +67,7 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse({ error: 'Invalid JSON request body.' }, 400);
   }
 
-  if (!payload || !['number-rain', 'game-invite'].includes(payload.eventType)) {
+  if (!payload || !['number-rain', 'game-invite', 'jumpscare'].includes(payload.eventType)) {
     return jsonResponse({ error: 'Choose a supported event.' }, 400);
   }
   const gameId = payload.eventType === 'game-invite' ? payload.gameId : null;

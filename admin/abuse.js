@@ -3,6 +3,7 @@
   const status = document.getElementById('abuse-status');
   const numberRainButton = document.getElementById('start-number-rain');
   const gameInviteButton = document.getElementById('send-game-invite');
+  const jumpscareButton = document.getElementById('start-jumpscare');
   const gameSelect = document.getElementById('event-game');
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminIdentityStorageKey = 'nimo-games-admin-identity';
@@ -50,6 +51,7 @@
     }
     numberRainButton.disabled = true;
     gameInviteButton.disabled = true;
+    jumpscareButton.disabled = true;
     showStatus('Publicando evento…');
     try {
       const response = await fetch('/api/admin/abuse', {
@@ -82,7 +84,9 @@
       showStatus(
         eventType === 'number-rain'
           ? 'Lluvia de 67 publicada. Los visitantes la verán durante 10 segundos.'
-          : 'Invitación publicada. Cada visitante puede abrir el juego o rechazarla.'
+          : eventType === 'jumpscare'
+            ? 'Jumpscare publicado. Los visitantes lo verán durante 4 segundos.'
+            : 'Invitación publicada. Cada visitante puede abrir el juego o rechazarla.'
       );
     } catch (error) {
       console.error('[admin-abuse] Failed to publish a live event.', error);
@@ -90,6 +94,7 @@
     } finally {
       numberRainButton.disabled = false;
       gameInviteButton.disabled = false;
+      jumpscareButton.disabled = false;
     }
   }
 
@@ -97,6 +102,7 @@
   gameInviteButton.addEventListener('click', () =>
     publishEvent('game-invite', gameSelect.value)
   );
+  jumpscareButton.addEventListener('click', () => publishEvent('jumpscare'));
   populateGames();
   readSavedSession();
 })();

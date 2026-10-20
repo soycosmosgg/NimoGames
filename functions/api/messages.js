@@ -51,7 +51,7 @@ export async function onRequestGet({ env }) {
 
     let event = null;
     if (eventRow) {
-      if (!['number-rain', 'game-invite'].includes(eventRow.event_type) ||
+      if (!['number-rain', 'game-invite', 'jumpscare'].includes(eventRow.event_type) ||
           !['Arb', 'Miticraft89'].includes(eventRow.sender) ||
           !Number.isSafeInteger(eventRow.created_at) ||
           eventRow.created_at < 0 || eventRow.created_at > Date.now() ||

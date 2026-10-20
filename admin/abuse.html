@@ -6,9 +6,9 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#1e2025">
   <title>Abuse | Administración de Nimo Games</title>
-  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-26">
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-27">
   <script src="/assets/js/games.js?v=game-catalog-2" defer></script>
-  <script src="/admin/abuse.js?v=admin-abuse-2" defer></script>
+  <script src="/admin/abuse.js?v=admin-abuse-3" defer></script>
 </head>
 <body>
   <div class="admin-shell">
@@ -62,7 +62,7 @@
           <div>
             <p class="admin-eyebrow">Eventos para visitantes</p>
             <h1 id="page-title">Abuse</h1>
-            <p class="admin-description">Lanza una lluvia breve de 67 o invita a los visitantes a abrir otro juego.</p>
+            <p class="admin-description">Lanza efectos visuales para los visitantes o invítalos a abrir otro juego.</p>
           </div>
         </section>
 
@@ -81,6 +81,12 @@
             <select class="admin-input" id="event-game"></select>
             <button class="admin-button admin-submit" id="send-game-invite" type="button">Enviar invitación</button>
           </section>
+          <section class="admin-card admin-abuse-card" aria-labelledby="jumpscare-title">
+            <span class="admin-abuse-icon" aria-hidden="true">!</span>
+            <h2 id="jumpscare-title">Jumpscare</h2>
+            <p>Muestra la imagen desde la parte superior hasta el borde inferior, la mantiene 4 segundos y luego la retira.</p>
+            <button class="admin-button admin-submit" id="start-jumpscare" type="button">Lanzar jumpscare</button>
+          </section>
         </div>
         <p class="admin-abuse-notice" id="abuse-status" role="status" aria-live="polite"></p>
         <aside class="admin-note">
@@ -88,7 +94,7 @@
             <circle cx="12" cy="12" r="9" />
             <path d="M12 11v5M12 8h.01" />
           </svg>
-          <span>La lluvia de 67 dura 10 segundos. Las invitaciones no redirigen ni cambian de juego sin que el visitante pulse «Jugar».</span>
+          <span>La lluvia de 67 dura 10 segundos. El jumpscare permanece 4 segundos en la parte inferior. Las invitaciones no redirigen ni cambian de juego sin que el visitante pulse «Jugar».</span>
         </aside>
       </main>
     </div>

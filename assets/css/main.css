@@ -1049,6 +1049,34 @@ button {
   text-align: center;
 }
 
+.abuse-event-jumpscare {
+  position: fixed;
+  z-index: 100002;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.abuse-event-jumpscare-image {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: min(76vw, 440px);
+  max-height: 72vh;
+  object-fit: contain;
+  opacity: 0;
+  transform: translate(-50%, -110vh);
+  animation: abuse-event-jumpscare 6s ease-in-out 1 both;
+  will-change: transform, opacity;
+}
+
+@keyframes abuse-event-jumpscare {
+  0% { opacity: 0; transform: translate(-50%, -110vh); }
+  16% { opacity: 1; transform: translate(-50%, 0); }
+  84% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 110vh); }
+}
+
 .abuse-event-invitation h2 { margin-bottom: 8px; font-size: 22px; }
 .abuse-event-invitation p { color: #c6d3df; font-size: 14px; line-height: 1.5; }
 .abuse-event-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
@@ -1072,6 +1100,11 @@ button {
     animation-iteration-count: 1 !important;
     animation-timing-function: linear !important;
     animation-fill-mode: both !important;
+  }
+  .abuse-event-jumpscare-image {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    animation: none !important;
   }
 }
 
