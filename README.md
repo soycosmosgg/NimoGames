@@ -1,10 +1,10 @@
-# Nimo Games
+# Nimo Games — Free Online Browser Games
 
-[![Website](https://img.shields.io/badge/Website-Play_Now-1f8f5f?style=for-the-badge)](https://nimogames.qzz.io)
+[![Play free online browser games on Nimo Games](https://img.shields.io/badge/Website-Play_Now-1f8f5f?style=for-the-badge)](https://nimogames.qzz.io/)
 [![Discord](https://img.shields.io/badge/Discord-Join_Community-5865F2?logo=discord&logoColor=white&style=for-the-badge)](https://dsc.gg/nimo)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/agpl-3.0)
 
-Nimo Games is a browser-based game hub. Browse the game library, search by title, launch a game, and return to recently played titles from the home screen. The interface is available in Spanish and games are opened in an in-page player.
+Nimo Games is a free online game library for playing in your browser. [Play free browser games on Nimo Games](https://nimogames.qzz.io/) without downloads or registration. Browse the library, search by title, launch a game, and return to recently played titles from the home screen. The interface is available in Spanish and games are opened in an in-page player.
 
 ## Features
 
@@ -79,7 +79,7 @@ Edit `window.NIMO_GAMES` in `assets/js/games.js`. Each entry needs an `id` and t
 
 ## Links
 
-- Website: <https://nimogames.qzz.io>
+- Play free online browser games: <https://nimogames.qzz.io/>
 - Discord: <https://dsc.gg/nimo>
 - GitHub: <https://github.com/soycosmosgg/NimoGames>
 - Terms of service: <https://nimogames.qzz.io/tos.html>
