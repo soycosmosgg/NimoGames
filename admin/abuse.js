@@ -10,6 +10,13 @@
   const games = Array.isArray(window.NIMO_GAMES) ? window.NIMO_GAMES : [];
   let adminSecret = '';
 
+  try {
+    window.localStorage.removeItem(adminSecretStorageKey);
+    window.localStorage.removeItem(adminIdentityStorageKey);
+  } catch (error) {
+    console.error('[admin-abuse] Could not clear the legacy admin session.', error);
+  }
+
   function showStatus(message, isError = false) {
     status.textContent = message;
     status.dataset.error = String(isError);
@@ -17,8 +24,8 @@
 
   function readSavedSession() {
     try {
-      adminSecret = window.localStorage.getItem(adminSecretStorageKey) || '';
-      identityDisplay.textContent = window.localStorage.getItem(adminIdentityStorageKey) || '';
+      adminSecret = window.sessionStorage.getItem(adminSecretStorageKey) || '';
+      identityDisplay.textContent = window.sessionStorage.getItem(adminIdentityStorageKey) || '';
       if (!adminSecret) {
         showStatus('La sesión de administrador no está disponible. Vuelve al panel e introduce la clave.', true);
       }
@@ -68,6 +75,8 @@
         if (response.status === 401) {
           adminSecret = '';
           try {
+            window.sessionStorage.removeItem(adminSecretStorageKey);
+            window.sessionStorage.removeItem(adminIdentityStorageKey);
             window.localStorage.removeItem(adminSecretStorageKey);
             window.localStorage.removeItem(adminIdentityStorageKey);
           } catch (storageError) {

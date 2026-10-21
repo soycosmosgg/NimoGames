@@ -80,7 +80,8 @@ window.NIMO_GAMES = [
     id: '9734614',
     title: "Polytrack",
     cdnBase: 'https://cdn.jsdelivr.net/gh/Hikidsmmmm/Polytrack-0.6.0@main/',
-    cdnProbe: 'simulation_worker.bundle.js'
+    cdnProbe: 'simulation_worker.bundle.js',
+    sandbox: ['allow-scripts', 'allow-forms', 'allow-pointer-lock', 'allow-downloads']
   },
   /* {
     id: '493632',

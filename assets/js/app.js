@@ -60,6 +60,12 @@
   const seenAbuseEventStorageKey = 'nimo-games-seen-abuse-event';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
   const camouflageStorageKey = 'nimo-games-camouflage-settings';
+  try {
+    window.localStorage.removeItem('nimo-games-admin-secret');
+    window.localStorage.removeItem('nimo-games-admin-identity');
+  } catch (error) {
+    console.error('[admin-session] Could not clear the legacy admin session.', error);
+  }
   const pendingGameLaunches = new Map();
   let currentMessageUpdatedAt = null;
   let messageTypingTimer = null;
@@ -771,6 +777,11 @@
     libraryLaunchGameId = fromLibrary ? game.id : null;
     const transitionId = ++gameTransitionId;
     gameFrame.title = game.title;
+    if (Array.isArray(game.sandbox) && game.sandbox.length > 0) {
+      gameFrame.setAttribute('sandbox', game.sandbox.join(' '));
+    } else {
+      gameFrame.removeAttribute('sandbox');
+    }
     gamePlayer.setAttribute('aria-label', game.title);
     gamePlayer.setAttribute('aria-hidden', 'false');
     gamePlayer.classList.add('is-open');

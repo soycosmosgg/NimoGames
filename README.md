@@ -16,7 +16,7 @@ Nimo is a web platform that offers online games without ads, downloads, or inter
 - Access the project, Discord community, and terms of service from the site.
 - Installable web app metadata and favicon assets.
 
-Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers.
+Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers. Polytrack is sandboxed in the player and receives a Content Security Policy sandbox header on Cloudflare Pages, without same-origin access.
 
 ## Send live messages
 
@@ -29,7 +29,7 @@ The first visit and returning-visitor avatar greetings are randomly selected on 
 
 The **Abuse** section can publish a 10-second visual rain of `67`, a large jumpscare that enters from the top, rests at the bottom for about 3 seconds, then exits, or invite visitors to open a selected game. The initial schema creates the table required by these events. Events are delivered through the existing live-message poll only to pages already open when the admin publishes them; newly opened pages ignore the last stored event. Visitors can dismiss an invitation, and the site never changes games without their explicit choice.
 
-The public endpoint only returns an unexpired message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. After three incorrect attempts from the same IP, access is blocked for five minutes; subsequent lockouts increase to 20 minutes, one hour, then double up to 24 hours. A successful authentication resets the lockout level. The dashboard remembers the secret in that browser after a successful unlock or send. Visible pages that are already open display a new message within 30 seconds, or immediately when returning to the tab.
+The public endpoint only returns an unexpired message. Sending requires `ADMIN_SECRET` in an authorization header and a same-origin request. After three incorrect attempts from the same IP, access is blocked for five minutes; subsequent lockouts increase to 20 minutes, one hour, then double up to 24 hours. A successful authentication resets the lockout level. Admin tools keep the session key in the current tab's session storage so it can be used when navigating between tools; it is not retained in persistent local storage. Visible pages that are already open display a new message within 30 seconds, or immediately when returning to the tab.
 
 When running the site from a plain static server locally, live messages are unavailable because Pages Functions and D1 are not available.
 

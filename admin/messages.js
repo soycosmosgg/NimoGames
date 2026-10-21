@@ -19,6 +19,13 @@
   let chatHideTimer = null;
   let messagePollInProgress = false;
 
+  try {
+    window.localStorage.removeItem(adminSecretStorageKey);
+    window.localStorage.removeItem(adminIdentityStorageKey);
+  } catch (error) {
+    console.error('[messages-admin] Could not clear the legacy admin session.', error);
+  }
+
   function displayStatus(message, isError = false) {
     status.textContent = message;
     status.dataset.error = String(isError);
@@ -88,8 +95,8 @@
   updateMessageCount();
 
   try {
-    adminSecret = window.localStorage.getItem(adminSecretStorageKey) || '';
-    adminIdentity = window.localStorage.getItem(adminIdentityStorageKey) || '';
+    adminSecret = window.sessionStorage.getItem(adminSecretStorageKey) || '';
+    adminIdentity = window.sessionStorage.getItem(adminIdentityStorageKey) || '';
     identityDisplay.textContent = adminIdentity;
     if (!adminSecret) {
       displayStatus('La sesión de administrador no está disponible. Vuelve al panel e introduce la clave.', true);
@@ -153,6 +160,8 @@
       if (error instanceof Error && error.name === 'UnauthorizedError') {
         adminSecret = '';
         try {
+          window.sessionStorage.removeItem(adminSecretStorageKey);
+          window.sessionStorage.removeItem(adminIdentityStorageKey);
           window.localStorage.removeItem(adminSecretStorageKey);
           window.localStorage.removeItem(adminIdentityStorageKey);
         } catch (storageError) {

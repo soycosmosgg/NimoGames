@@ -101,6 +101,13 @@
       noDimensionData: 'There is no data to display yet.'
     }
   };
+
+  try {
+    window.localStorage.removeItem(adminSecretStorageKey);
+    window.localStorage.removeItem(adminIdentityStorageKey);
+  } catch (error) {
+    console.error('[admin-dashboard] Could not clear the legacy admin session.', error);
+  }
   let currentLanguage = 'es';
   let lastLoginMessage = '';
   let refreshTimer = null;
@@ -594,9 +601,9 @@
     validateStats(stats);
     identityDisplay.textContent = stats.adminIdentity;
     try {
-      window.localStorage.setItem(adminIdentityStorageKey, stats.adminIdentity);
+      window.sessionStorage.setItem(adminIdentityStorageKey, stats.adminIdentity);
     } catch (error) {
-      console.error('[admin-dashboard] Could not save the admin identity in this browser.', error);
+      console.error('[admin-dashboard] Could not save the admin identity in this tab.', error);
     }
     activeVisitorsDisplay.textContent = numberFormat.format(stats.activeVisitors);
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
@@ -615,11 +622,13 @@
     refreshTimer = null;
     activeSecret = '';
     try {
+      window.sessionStorage.removeItem(adminSecretStorageKey);
+      window.sessionStorage.removeItem(adminIdentityStorageKey);
       window.localStorage.removeItem(adminSecretStorageKey);
       window.localStorage.removeItem(adminIdentityStorageKey);
     } catch (error) {
-      console.error('[admin-dashboard] Could not remove the saved admin secret.', error);
-      message = `${message}${message ? ' ' : ''}No se pudo borrar la clave guardada en este navegador.`;
+      console.error('[admin-dashboard] Could not remove the saved admin session.', error);
+      message = `${message}${message ? ' ' : ''}No se pudo borrar la sesión guardada en esta pestaña.`;
     }
     dashboard.hidden = true;
     gate.hidden = false;
@@ -665,10 +674,10 @@
 
       let storageWarning = '';
       try {
-        window.localStorage.setItem(adminSecretStorageKey, secret);
+        window.sessionStorage.setItem(adminSecretStorageKey, secret);
       } catch (error) {
-        console.error('[admin-dashboard] Could not save the admin secret in this browser.', error);
-        storageWarning = 'Panel desbloqueado. No se pudo recordar la clave en este navegador.';
+        console.error('[admin-dashboard] Could not save the admin secret in this tab.', error);
+        storageWarning = 'Panel desbloqueado. No se pudo conservar la sesión en esta pestaña.';
       }
 
       showStatsStatus(storageWarning || `Actualizado a las ${new Intl.DateTimeFormat('es-ES', {
@@ -681,6 +690,8 @@
       console.error('[admin-dashboard] Could not unlock the admin panel.', error);
       if (error instanceof Error && error.name === 'UnauthorizedError') {
         try {
+          window.sessionStorage.removeItem(adminSecretStorageKey);
+          window.sessionStorage.removeItem(adminIdentityStorageKey);
           window.localStorage.removeItem(adminSecretStorageKey);
           window.localStorage.removeItem(adminIdentityStorageKey);
         } catch (storageError) {
@@ -724,10 +735,10 @@
   });
 
   try {
-    secretInput.value = window.localStorage.getItem(adminSecretStorageKey) || '';
+    secretInput.value = window.sessionStorage.getItem(adminSecretStorageKey) || '';
   } catch (error) {
-    console.error('[admin-dashboard] Could not load the saved admin secret.', error);
-    setLoginStatus('No se pudo acceder a la clave guardada. Introdúcela para desbloquear el panel.');
+    console.error('[admin-dashboard] Could not load the saved admin session.', error);
+    setLoginStatus('No se pudo acceder a la sesión guardada. Introdúcela para desbloquear el panel.');
   }
   try {
     const savedLanguage = window.localStorage.getItem(adminLanguageStorageKey);
