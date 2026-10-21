@@ -15,6 +15,12 @@
   const gameVersionCancelButton = document.getElementById('game-version-cancel');
   const gameVersionButtons = document.querySelectorAll('[data-game-version]');
   const openLibraryButton = document.getElementById('open-library-button');
+  const settingsButton = document.getElementById('settings-button');
+  const settingsPanel = document.getElementById('settings-panel');
+  const camouflageEnabledInput = document.getElementById('camouflage-enabled');
+  const camouflageOptions = document.getElementById('camouflage-options');
+  const camouflageTitleInput = document.getElementById('camouflage-title');
+  const camouflageIconInput = document.getElementById('camouflage-icon');
   const connectionStatusButton = document.getElementById('connection-status-button');
   const libraryView = document.getElementById('library-view');
   const librarySearchInput = document.getElementById('library-search-input');
@@ -33,7 +39,9 @@
   if (!Array.isArray(games) || !visitorCountDisplay || !recentRow || !clockDisplay || !gamePlayer || !gameFrame ||
       !gameAdminMessage || !gameAdminAvatar || !gameAdminMessageText || !siteAvatarImage || !closeGameButton ||
       !gameVersionPicker || !gameVersionCancelButton || gameVersionButtons.length === 0 ||
-      !openLibraryButton || !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
+      !openLibraryButton || !settingsButton || !settingsPanel || !camouflageEnabledInput ||
+      !camouflageOptions || !camouflageTitleInput || !camouflageIconInput ||
+      !connectionStatusButton || !libraryView || !librarySearchInput || !closeLibraryButton ||
       !libraryGameGrid || !avatarMessage || !avatarMessageAnnouncement) {
     console.error('No se pudo inicializar Nimo Games: faltan datos o elementos requeridos.');
     return;
@@ -51,6 +59,7 @@
   const seenLiveMessageStorageKey = 'nimo-games-seen-live-message';
   const seenAbuseEventStorageKey = 'nimo-games-seen-abuse-event';
   const visitorSessionStorageKey = 'nimo-games-visitor-session-id';
+  const camouflageStorageKey = 'nimo-games-camouflage-settings';
   const pendingGameLaunches = new Map();
   let currentMessageUpdatedAt = null;
   let messageTypingTimer = null;
@@ -103,6 +112,129 @@
     ]
   };
   const networkConnection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  const originalPageTitle = document.title;
+  const originalFaviconLinks = Array.from(
+    document.querySelectorAll('link[rel~="icon"], link[rel="shortcut icon"]'),
+    link => ({ link, href: link.getAttribute('href') })
+  );
+  const defaultCamouflageTitle = 'Inicio - Classroom';
+  const defaultCamouflageIconUrl = 'https://ssl.gstatic.com/classroom/favicon.png';
+  let camouflageSettings = loadCamouflageSettings();
+
+  function loadCamouflageSettings() {
+    try {
+      const storedSettings = window.localStorage.getItem(camouflageStorageKey);
+      if (!storedSettings) return { enabled: false, title: '', iconUrl: '' };
+
+      const parsedSettings = JSON.parse(storedSettings);
+      if (!parsedSettings || typeof parsedSettings !== 'object' ||
+          typeof parsedSettings.enabled !== 'boolean' ||
+          typeof parsedSettings.title !== 'string' ||
+          typeof parsedSettings.iconUrl !== 'string') {
+        throw new TypeError('La configuración de camuflaje guardada no tiene el formato esperado.');
+      }
+      return {
+        enabled: parsedSettings.enabled,
+        title: parsedSettings.title.slice(0, 80),
+        iconUrl: isAllowedIconUrl(parsedSettings.iconUrl) ? parsedSettings.iconUrl : ''
+      };
+    } catch (error) {
+      console.error('No se pudo cargar la configuración de camuflaje.', error);
+      return { enabled: false, title: '', iconUrl: '' };
+    }
+  }
+
+  function isAllowedIconUrl(value) {
+    if (!value) return true;
+    try {
+      const url = new URL(value, window.location.href);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  function saveCamouflageSettings() {
+    try {
+      window.localStorage.setItem(camouflageStorageKey, JSON.stringify(camouflageSettings));
+    } catch (error) {
+      console.error('No se pudo guardar la configuración de camuflaje.', error);
+    }
+  }
+
+  function syncCamouflageControls() {
+    camouflageEnabledInput.checked = camouflageSettings.enabled;
+    camouflageTitleInput.value = camouflageSettings.title;
+    camouflageIconInput.value = camouflageSettings.iconUrl;
+    camouflageTitleInput.disabled = !camouflageSettings.enabled;
+    camouflageIconInput.disabled = !camouflageSettings.enabled;
+    camouflageOptions.classList.toggle('is-enabled', camouflageSettings.enabled);
+    camouflageOptions.setAttribute('aria-hidden', String(!camouflageSettings.enabled));
+  }
+
+  function setCamouflagedIdentity(camouflaged) {
+    if (camouflaged && camouflageSettings.enabled) {
+      document.title = camouflageSettings.title.trim() || originalPageTitle;
+      if (camouflageSettings.iconUrl) {
+        originalFaviconLinks.forEach(({ link }) => {
+          link.href = camouflageSettings.iconUrl;
+        });
+      }
+      return;
+    }
+
+    document.title = originalPageTitle;
+    originalFaviconLinks.forEach(({ link, href }) => {
+      if (href === null) link.removeAttribute('href');
+      else link.setAttribute('href', href);
+    });
+  }
+
+  function setSettingsPanelOpen(open) {
+    settingsPanel.classList.toggle('is-open', open);
+    settingsPanel.setAttribute('aria-hidden', String(!open));
+    settingsButton.setAttribute('aria-expanded', String(open));
+  }
+
+  settingsButton.addEventListener('click', () => {
+    setSettingsPanelOpen(!settingsPanel.classList.contains('is-open'));
+  });
+  document.addEventListener('click', event => {
+    if (!settingsPanel.classList.contains('is-open') ||
+        settingsPanel.contains(event.target) || settingsButton.contains(event.target)) return;
+    setSettingsPanelOpen(false);
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !settingsPanel.classList.contains('is-open')) return;
+    setSettingsPanelOpen(false);
+    settingsButton.focus();
+  });
+  camouflageEnabledInput.addEventListener('change', () => {
+    if (camouflageEnabledInput.checked) {
+      if (!camouflageSettings.title.trim()) camouflageSettings.title = defaultCamouflageTitle;
+      if (!camouflageSettings.iconUrl) camouflageSettings.iconUrl = defaultCamouflageIconUrl;
+    }
+    camouflageSettings.enabled = camouflageEnabledInput.checked;
+    saveCamouflageSettings();
+    syncCamouflageControls();
+  });
+  camouflageTitleInput.addEventListener('input', () => {
+    camouflageSettings.title = camouflageTitleInput.value.slice(0, 80);
+    saveCamouflageSettings();
+  });
+  camouflageIconInput.addEventListener('input', () => {
+    const value = camouflageIconInput.value.trim();
+    const valid = isAllowedIconUrl(value);
+    camouflageIconInput.setCustomValidity(valid ? '' : 'Introduce una URL de icono HTTP o HTTPS válida.');
+    if (!valid) return;
+    camouflageSettings.iconUrl = value;
+    saveCamouflageSettings();
+  });
+  document.addEventListener('visibilitychange', () => {
+    setCamouflagedIdentity(document.hidden);
+  });
+  window.addEventListener('pageshow', () => setCamouflagedIdentity(false));
+  syncCamouflageControls();
 
   function loadRecentGameIds() {
     try {

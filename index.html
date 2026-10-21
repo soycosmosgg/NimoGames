@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/main.css?v=abuse-events-12">
+  <link rel="stylesheet" href="assets/css/main.css?v=camouflage-1">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -78,7 +78,7 @@
   </script>
   <script src="assets/js/games.js?v=game-catalog-3" defer></script>
   <script src="assets/js/nimo-sdk.js" defer></script>
-  <script src="assets/js/app.js?v=abuse-events-13" defer></script>
+  <script src="assets/js/app.js?v=camouflage-2" defer></script>
 </head>
 <body>
   <div class="app">
@@ -150,9 +150,30 @@
         <button id="open-library-button" class="icon-btn" type="button" aria-label="Buscar juegos">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
         </button>
-        <button class="icon-btn" type="button" aria-label="Configuración">
-          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
-        </button>
+        <div class="settings-control">
+          <button id="settings-button" class="icon-btn" type="button" aria-label="Configuración" aria-expanded="false" aria-controls="settings-panel">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          </button>
+          <section id="settings-panel" class="settings-panel" aria-label="Configuración" aria-hidden="true">
+            <label class="camouflage-toggle">
+              <input id="camouflage-enabled" type="checkbox">
+              <span class="camouflage-checkbox" aria-hidden="true"></span>
+              <span>Camuflaje</span>
+            </label>
+            <div id="camouflage-options" class="camouflage-options" aria-hidden="true">
+              <div class="camouflage-fields">
+                <label class="settings-field">
+                  <span>Nombre de ventana</span>
+                  <input id="camouflage-title" type="text" maxlength="80" autocomplete="off" placeholder="Nombre de la pestaña">
+                </label>
+                <label class="settings-field">
+                  <span>URL de icono</span>
+                  <input id="camouflage-icon" type="url" inputmode="url" autocomplete="url" placeholder="https://ejemplo.com/icono.png">
+                </label>
+              </div>
+            </div>
+          </section>
+        </div>
         <button id="connection-status-button" class="icon-btn" type="button" aria-label="Comprobando conexión" title="Comprobando conexión">
           <svg class="connection-icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle class="connection-dot" cx="2" cy="22" r="1.6"></circle>

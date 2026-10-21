@@ -12,6 +12,7 @@ Nimo is a web platform that offers online games without ads, downloads, or inter
 - Launch games in the built-in player, with keyboard and controller support where the game supports it.
 - Keep a recently played list in browser local storage.
 - View a live clock and browser connection status.
+- Configure the optional Camouflage setting to show a custom tab title and favicon while the page is in the background.
 - Access the project, Discord community, and terms of service from the site.
 - Installable web app metadata and favicon assets.
 
