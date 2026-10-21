@@ -1399,6 +1399,7 @@ button {
   background: #252b32;
   color: #fff;
   cursor: pointer;
+  text-decoration: none;
   text-align: left;
   transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
 }

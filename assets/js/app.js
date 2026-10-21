@@ -755,8 +755,8 @@
     libraryEmptyState.hidden = filteredGames.length !== 0;
 
     filteredGames.forEach(game => {
-      const card = document.createElement('button');
-      card.type = 'button';
+      const card = document.createElement('a');
+      card.href = `/games/${encodeURIComponent(game.id)}/index.html`;
       card.className = 'library-game-card';
       card.dataset.gameId = game.id;
       card.setAttribute('aria-label', `Jugar ${game.title}`);
@@ -764,7 +764,7 @@
       const art = document.createElement('img');
       art.className = 'library-game-art';
       art.src = game.portrait;
-      art.alt = '';
+      art.alt = game.title;
       art.loading = 'lazy';
       art.onerror = () => {
         if (art.dataset.triedHero) {
@@ -780,9 +780,17 @@
       title.textContent = String(libraryGameNumbers.get(game.id));
       card.append(art, title);
 
-      card.addEventListener('click', () => {
+      card.addEventListener('click', event => {
+        if (event.defaultPrevented || event.button !== 0 ||
+            event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
         closeLibrary(false);
         openGame(game, true);
+      });
+      card.addEventListener('keydown', event => {
+        if (event.key !== ' ') return;
+        event.preventDefault();
+        card.click();
       });
       libraryGameGrid.append(card);
     });
@@ -1032,6 +1040,7 @@
   updateConnectionStatus();
   initializeAvatarMessages();
   window.setInterval(updateClock, 30000);
+  renderLibrary();
   renderFeaturedGames();
   homeGames = buildHomeGames();
   recentGamesCount.textContent = String(recentGameIds.length);

@@ -2,11 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://nimogames.qzz.io/</loc>
-    <lastmod>2026-10-17</lastmod>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/tos.html</loc>
     <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/1307/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/945360/index.html</loc>
@@ -30,7 +34,7 @@
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/322170/index.html</loc>
-    <lastmod>2026-10-14</lastmod>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/98266/index.html</loc>
@@ -45,16 +49,32 @@
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
-    <loc>https://nimogames.qzz.io/games/758260/index.html</loc>
-    <lastmod>2026-10-14</lastmod>
-  </url>
-  <url>
     <loc>https://nimogames.qzz.io/games/302895/index.html</loc>
     <lastmod>2026-10-14</lastmod>
   </url>
   <url>
+    <loc>https://nimogames.qzz.io/games/103012/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
     <loc>https://nimogames.qzz.io/games/9734614/index.html</loc>
     <lastmod>2026-10-14</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/198666/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/142609/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/5493605/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/616603/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/3314790/index.html</loc>
@@ -62,11 +82,36 @@
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/11913/index.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/5326261/index.html</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/319510/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/332800/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/354140/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/388090/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/871720/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/8944/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/5255287/index.html</loc>
+  </url>
+  <url>
+    <loc>https://nimogames.qzz.io/games/796817/index.html</loc>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://nimogames.qzz.io/games/7574/index.html</loc>
