@@ -1,5 +1,12 @@
 window.NIMO_GAMES = [
   {
+    id: '023978',
+    title: 'Blacktop Police Chase',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/slytegg/UGS-Files@main/023978/',
+    cdnProbe: 'Build/Build.loader.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '1307',
     title: 'The Binding of Isaac: Repentance',
     cdnBase: 'https://cdn.jsdelivr.net/gh/chiikabu/the-browsing-of-isaac@main/',
