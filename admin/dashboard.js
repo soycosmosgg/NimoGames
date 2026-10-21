@@ -23,6 +23,8 @@
   const locationTotal = document.getElementById('location-total');
   const locationLegend = document.getElementById('location-legend');
   const currentGamesDisplay = document.getElementById('current-games');
+  const browserStatsChart = document.getElementById('browser-stats-chart');
+  const deviceStatsChart = document.getElementById('device-stats-chart');
   const catalogGames = Array.isArray(window.NIMO_GAMES) ? window.NIMO_GAMES : [];
   const adminSecretStorageKey = 'nimo-games-admin-secret';
   const adminIdentityStorageKey = 'nimo-games-admin-identity';
@@ -58,7 +60,12 @@
       invalidStats: 'El servidor devolvió estadísticas con un formato no válido.',
       rateLimited: 'Has alcanzado el límite de intentos. Inténtalo de nuevo en',
       expiredSecret: 'La clave dejó de ser válida. Desbloquea el panel de nuevo.',
-      verifyFailed: 'No se pudo verificar la clave.'
+      verifyFailed: 'No se pudo verificar la clave.',
+      sessionDetails: 'Sesiones anónimas activas',
+      noSessionDetails: 'No hay detalles disponibles.',
+      unknownLocation: 'Ubicación desconocida',
+      unknownCountry: 'País desconocido',
+      noDimensionData: 'Aún no hay datos para mostrar.'
     },
     en: {
       gateLabel: 'Admin panel sign in',
@@ -84,7 +91,12 @@
       invalidStats: 'The server returned statistics in an invalid format.',
       rateLimited: 'Too many attempts. Try again in',
       expiredSecret: 'The key is no longer valid. Sign in again.',
-      verifyFailed: 'Could not verify the key.'
+      verifyFailed: 'Could not verify the key.',
+      sessionDetails: 'Anonymous active sessions',
+      noSessionDetails: 'No details available.',
+      unknownLocation: 'Unknown location',
+      unknownCountry: 'Unknown country',
+      noDimensionData: 'There is no data to display yet.'
     }
   };
   let currentLanguage = 'es';
@@ -118,7 +130,7 @@
     currentLanguage = translations[language] ? language : 'es';
     const text = translations[currentLanguage];
     document.documentElement.lang = currentLanguage;
-    document.title = currentLanguage === 'en' ? 'Admin panel | Nimo Games' : 'Panel de administración | Nimo Games';
+    document.title = 'Analytics | Nimo Games';
     document.querySelectorAll('[data-i18n]').forEach(element => {
       element.textContent = text[element.dataset.i18n];
     });
@@ -198,7 +210,18 @@
         stats.activeGames.some(game =>
           !game || typeof game.id !== 'string' || !catalogGames.some(item => item.id === game.id) ||
           !Number.isSafeInteger(game.players) || game.players < 1 || game.players > stats.activeVisitors ||
-          !Number.isFinite(game.percentage) || game.percentage < 0 || game.percentage > 100
+          !Number.isFinite(game.percentage) || game.percentage < 0 || game.percentage > 100 ||
+          !Array.isArray(game.sessions) || game.sessions.length !== game.players ||
+          game.sessions.some(session =>
+            !session || typeof session.city !== 'string' || typeof session.country !== 'string' ||
+            typeof session.browser !== 'string' || typeof session.device !== 'string'
+          )
+        ) ||
+        !Array.isArray(stats.browserStats) || stats.browserStats.some(item =>
+          !item || typeof item.name !== 'string' || !Number.isSafeInteger(item.pageViews) || item.pageViews < 0
+        ) ||
+        !Array.isArray(stats.deviceStats) || stats.deviceStats.some(item =>
+          !item || typeof item.name !== 'string' || !Number.isSafeInteger(item.pageViews) || item.pageViews < 0
         ) ||
         !Array.isArray(stats.last7Days) || stats.last7Days.length !== 7 ||
         stats.last7Days.some(day =>
@@ -223,35 +246,93 @@
     const maximum = Math.max(1, ...days.map(day => day.pageViews));
     const total = days.reduce((sum, day) => sum + day.pageViews, 0);
     chart.replaceChildren();
+    const namespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(namespace, 'svg');
+    const left = 12;
+    const right = 660;
+    const top = 12;
+    const bottom = 164;
+    const axisMaximum = Math.max(4, Math.ceil(maximum / 4) * 4);
+    const points = days.map((day, index) => ({
+      x: left + index * (right - left) / Math.max(1, days.length - 1),
+      y: bottom - day.pageViews / axisMaximum * (bottom - top)
+    }));
+    svg.setAttribute('viewBox', '0 0 720 204');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
 
-    days.forEach(day => {
-      const date = new Date(`${day.day}T00:00:00Z`);
-      const column = document.createElement('div');
-      column.className = 'admin-chart-day';
-      column.dataset.today = String(day.day === days[days.length - 1].day);
-      column.setAttribute('aria-label', `${dayFormat.format(date)}: ${numberFormat.format(day.pageViews)} visualizaciones`);
+    const definitions = document.createElementNS(namespace, 'defs');
+    const gradient = document.createElementNS(namespace, 'linearGradient');
+    gradient.id = 'analytics-area-gradient';
+    gradient.setAttribute('x1', '0');
+    gradient.setAttribute('y1', '0');
+    gradient.setAttribute('x2', '0');
+    gradient.setAttribute('y2', '1');
+    const topStop = document.createElementNS(namespace, 'stop');
+    topStop.setAttribute('offset', '0%');
+    topStop.setAttribute('stop-color', '#60a5fa');
+    topStop.setAttribute('stop-opacity', '.22');
+    const bottomStop = document.createElementNS(namespace, 'stop');
+    bottomStop.setAttribute('offset', '100%');
+    bottomStop.setAttribute('stop-color', '#60a5fa');
+    bottomStop.setAttribute('stop-opacity', '0');
+    gradient.append(topStop, bottomStop);
+    definitions.append(gradient);
+    svg.append(definitions);
 
-      const value = document.createElement('span');
-      value.className = 'admin-chart-value';
-      value.textContent = numberFormat.format(day.pageViews);
+    for (let index = 0; index <= 4; index += 1) {
+      const y = top + index * (bottom - top) / 4;
+      const value = axisMaximum * (4 - index) / 4;
+      const line = document.createElementNS(namespace, 'line');
+      line.setAttribute('x1', String(left));
+      line.setAttribute('x2', String(right));
+      line.setAttribute('y1', String(y));
+      line.setAttribute('y2', String(y));
+      line.setAttribute('class', 'admin-chart-gridline');
+      svg.append(line);
 
-      const track = document.createElement('div');
-      track.className = 'admin-chart-track';
-      track.setAttribute('aria-hidden', 'true');
+      const label = document.createElementNS(namespace, 'text');
+      label.setAttribute('x', '672');
+      label.setAttribute('y', String(y + 3));
+      label.setAttribute('class', 'admin-chart-axis-label');
+      label.textContent = numberFormat.format(value);
+      svg.append(label);
+    }
 
-      const bar = document.createElement('div');
-      bar.className = 'admin-chart-bar';
-      bar.style.setProperty('--bar-height', `${Math.max(day.pageViews === 0 ? 2 : 8, day.pageViews / maximum * 100)}%`);
-      track.append(bar);
+    const linePath = points.map((point, index) =>
+      `${index === 0 ? 'M' : 'L'}${point.x.toFixed(2)} ${point.y.toFixed(2)}`
+    ).join(' ');
+    const area = document.createElementNS(namespace, 'path');
+    area.setAttribute('d', `${linePath} L${right} ${bottom} L${left} ${bottom} Z`);
+    area.setAttribute('class', 'admin-chart-area');
+    svg.append(area);
+    const line = document.createElementNS(namespace, 'path');
+    line.setAttribute('d', linePath);
+    line.setAttribute('class', 'admin-chart-line');
+    svg.append(line);
 
-      const label = document.createElement('span');
-      label.className = 'admin-chart-label';
+    points.forEach((point, index) => {
+      const dot = document.createElementNS(namespace, 'circle');
+      dot.setAttribute('cx', String(point.x));
+      dot.setAttribute('cy', String(point.y));
+      dot.setAttribute('r', '3');
+      dot.setAttribute('class', 'admin-chart-point');
+      const title = document.createElementNS(namespace, 'title');
+      const date = new Date(`${days[index].day}T00:00:00Z`);
+      title.textContent = `${dayFormat.format(date)}: ${numberFormat.format(days[index].pageViews)}`;
+      dot.append(title);
+      svg.append(dot);
+
+      const label = document.createElementNS(namespace, 'text');
+      label.setAttribute('x', String(point.x));
+      label.setAttribute('y', '192');
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('class', 'admin-chart-day-label');
       label.textContent = dayFormat.format(date).replace('.', '');
-
-      column.append(value, track, label);
-      chart.append(column);
+      svg.append(label);
     });
-
+    chart.append(svg);
     chart.setAttribute('aria-label', `Visualizaciones de los últimos siete días: ${numberFormat.format(total)} en total.`);
     chartTotalDisplay.textContent = numberFormat.format(total);
     weeklyViewsDisplay.textContent = numberFormat.format(total);
@@ -387,9 +468,10 @@
 
     activeGames.forEach(activeGame => {
       const game = catalogGames.find(item => item.id === activeGame.id);
-      const card = document.createElement('article');
+      const card = document.createElement('details');
       card.className = 'admin-current-game';
 
+      const summary = document.createElement('summary');
       const image = document.createElement('img');
       image.className = 'admin-current-game-image';
       image.src = game.hero;
@@ -419,8 +501,67 @@
           ? `${formattedPercentage}% of active sessions`
           : `${formattedPercentage}% de las sesiones activas`
       );
-      card.append(image, copy, percentage);
+      summary.append(image, copy, percentage);
+      card.append(summary);
+
+      const sessionSection = document.createElement('div');
+      sessionSection.className = 'admin-game-sessions';
+      const sessionHeading = document.createElement('h4');
+      sessionHeading.textContent = `${translations[currentLanguage].sessionDetails} (${numberFormat.format(activeGame.sessions.length)})`;
+      sessionSection.append(sessionHeading);
+      if (activeGame.sessions.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = translations[currentLanguage].noSessionDetails;
+        sessionSection.append(empty);
+      } else {
+        const sessionList = document.createElement('ul');
+        activeGame.sessions.forEach((session, index) => {
+          const item = document.createElement('li');
+          const location = session.city || translations[currentLanguage].unknownLocation;
+          const country = session.country || translations[currentLanguage].unknownCountry;
+          const sessionLabel = currentLanguage === 'en' ? 'Session' : 'Sesión';
+          item.textContent = `${sessionLabel} ${index + 1} · ${location}, ${country} · ${session.device} · ${session.browser}`;
+          sessionList.append(item);
+        });
+        sessionSection.append(sessionList);
+      }
+      card.append(sessionSection);
       currentGamesDisplay.append(card);
+    });
+  }
+
+  function renderDimensionChart(element, rows) {
+    if (!element) return;
+    element.replaceChildren();
+    const total = rows.reduce((sum, row) => sum + row.pageViews, 0);
+    if (total === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'admin-breakdown-empty';
+      empty.textContent = translations[currentLanguage].noDimensionData;
+      element.append(empty);
+      return;
+    }
+
+    const maximum = Math.max(...rows.map(row => row.pageViews));
+    rows.forEach(row => {
+      const item = document.createElement('div');
+      item.className = 'admin-breakdown-row';
+      const heading = document.createElement('div');
+      heading.className = 'admin-breakdown-heading';
+      const name = document.createElement('span');
+      name.textContent = row.name;
+      const value = document.createElement('span');
+      const percentage = new Intl.NumberFormat(currentLanguage, { maximumFractionDigits: 1 })
+        .format(row.pageViews / total * 100);
+      value.textContent = `${numberFormat.format(row.pageViews)} · ${percentage}%`;
+      heading.append(name, value);
+      const track = document.createElement('div');
+      track.className = 'admin-breakdown-track';
+      const bar = document.createElement('span');
+      bar.style.width = `${row.pageViews / maximum * 100}%`;
+      track.append(bar);
+      item.append(heading, track);
+      element.append(item);
     });
   }
 
@@ -436,6 +577,8 @@
     todayPeakDisplay.textContent = numberFormat.format(stats.todayPeakVisitors);
     renderLocations(stats.locations, stats.otherLocationsCount, stats.activeVisitors);
     renderCurrentGames(stats.activeGames);
+    renderDimensionChart(browserStatsChart, stats.browserStats);
+    renderDimensionChart(deviceStatsChart, stats.deviceStats);
     renderChart(stats.last7Days);
     renderMiniChart(stats.last7DaysGameLaunches);
     renderPopularGame(stats.popularGame);

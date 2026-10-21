@@ -17,6 +17,26 @@ function jsonResponse(body, status = 200) {
   });
 }
 
+function getBrowser(userAgent) {
+  if (/bot|crawler|spider/i.test(userAgent)) return 'Bot';
+  if (/Edg(?:e|A|iOS)?\//i.test(userAgent)) return 'Edge';
+  if (/OPR\//i.test(userAgent)) return 'Opera';
+  if (/SamsungBrowser\//i.test(userAgent)) return 'Samsung Internet';
+  if (/FxiOS\/|Firefox\//i.test(userAgent)) return 'Firefox';
+  if (/CriOS\/|Chrome\//i.test(userAgent)) return 'Chrome';
+  if (/Chromium\//i.test(userAgent)) return 'Chromium';
+  if (/Safari\//i.test(userAgent)) return 'Safari';
+  return 'Other';
+}
+
+function getDevice(userAgent) {
+  if (/bot|crawler|spider/i.test(userAgent)) return 'Bot';
+  if (/iPad|Tablet|PlayBook|Silk|Android(?!.*Mobile)/i.test(userAgent)) return 'Tablet';
+  if (/Mobile|Android|iPhone|iPod|IEMobile|Windows Phone/i.test(userAgent)) return 'Mobile';
+  if (userAgent) return 'Desktop';
+  return 'Unknown';
+}
+
 export async function onRequestPost({ request, env }) {
   if (!env.VISITORS_DB) {
     return jsonResponse({ error: 'Visitor counter is not configured.' }, 503);
@@ -73,6 +93,9 @@ export async function onRequestPost({ request, env }) {
   const country = typeof request.cf?.country === 'string' && /^[A-Za-z]{2}$/.test(request.cf.country)
     ? request.cf.country.toUpperCase()
     : '';
+  const userAgent = request.headers.get('user-agent') || '';
+  const browser = getBrowser(userAgent);
+  const device = getDevice(userAgent);
 
   try {
     if (payload.pageView === true) {
@@ -82,14 +105,16 @@ export async function onRequestPost({ request, env }) {
     }
 
     await env.VISITORS_DB.prepare(`
-      INSERT INTO active_visitors (session_id, last_seen, city, country, game_id)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO active_visitors (session_id, last_seen, city, country, game_id, browser, device)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (session_id) DO UPDATE SET
         last_seen = excluded.last_seen,
         city = excluded.city,
         country = excluded.country,
-        game_id = excluded.game_id
-    `).bind(payload.sessionId, now, city, country, gameId).run();
+        game_id = excluded.game_id,
+        browser = excluded.browser,
+        device = excluded.device
+    `).bind(payload.sessionId, now, city, country, gameId, browser, device).run();
 
     const result = await env.VISITORS_DB.prepare(
       'SELECT COUNT(*) AS count FROM active_visitors WHERE last_seen >= ?'
@@ -107,6 +132,15 @@ export async function onRequestPost({ request, env }) {
         peak_visitors = MAX(peak_visitors, excluded.peak_visitors)
       WHERE excluded.page_views > 0 OR excluded.peak_visitors > peak_visitors
     `).bind(today, payload.pageView === true ? 1 : 0, result.count).run();
+
+    if (payload.pageView === true) {
+      await env.VISITORS_DB.prepare(`
+        INSERT INTO visitor_analytics_daily (day, dimension, value, page_views)
+        VALUES (?, 'browser', ?, 1), (?, 'device', ?, 1)
+        ON CONFLICT (day, dimension, value) DO UPDATE SET
+          page_views = page_views + excluded.page_views
+      `).bind(today, browser, today, device).run();
+    }
 
     if (launchEntries.length > 0) {
       const values = launchEntries.map(() => '(?, ?, ?)').join(', ');

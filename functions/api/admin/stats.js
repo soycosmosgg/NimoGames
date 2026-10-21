@@ -49,7 +49,7 @@ export async function onRequestPost({ request, env }) {
   const weekStart = new Date((now - 6 * 24 * 60 * 60) * 1000).toISOString().slice(0, 10);
 
   try {
-    const [activeResult, dailyRows, gameDailyRows, locationRows, activeGameRows] = await Promise.all([
+    const [activeResult, dailyRows, gameDailyRows, locationRows, activePlayerRows, visitorDimensionRows] = await Promise.all([
       env.VISITORS_DB.prepare(
         'SELECT COUNT(*) AS count FROM active_visitors WHERE last_seen >= ?'
       ).bind(cutoff).first(),
@@ -73,12 +73,18 @@ export async function onRequestPost({ request, env }) {
         LIMIT 8
       `).bind(cutoff).all(),
       env.VISITORS_DB.prepare(`
-        SELECT game_id, COUNT(*) AS players
+        SELECT game_id, city, country, browser, device
         FROM active_visitors
         WHERE last_seen >= ? AND game_id IS NOT NULL
-        GROUP BY game_id
-        ORDER BY players DESC, game_id ASC
-      `).bind(cutoff).all()
+        ORDER BY game_id ASC, country ASC, city ASC
+      `).bind(cutoff).all(),
+      env.VISITORS_DB.prepare(`
+        SELECT dimension, value, SUM(page_views) AS page_views
+        FROM visitor_analytics_daily
+        WHERE day >= ? AND day <= ?
+        GROUP BY dimension, value
+        ORDER BY dimension ASC, page_views DESC, value ASC
+      `).bind(weekStart, today).all()
     ]);
 
     if (!activeResult || !Number.isSafeInteger(activeResult.count) || activeResult.count < 0) {
@@ -112,16 +118,35 @@ export async function onRequestPost({ request, env }) {
       }
       return { city: row.city || 'Ubicación desconocida', country: row.country, count: row.count };
     });
-    const activeGames = (activeGameRows.results || []).map(row => {
+    const activePlayersByGame = new Map();
+    (activePlayerRows.results || []).forEach(row => {
       if (typeof row.game_id !== 'string' || !GAME_IDS.has(row.game_id) ||
-          !Number.isSafeInteger(row.players) || row.players < 1 || row.players > activeResult.count) {
-        throw new Error('D1 returned invalid live game data.');
+          typeof row.city !== 'string' || typeof row.country !== 'string' ||
+          typeof row.browser !== 'string' || typeof row.device !== 'string') {
+        throw new Error('D1 returned invalid active player details.');
       }
-      return {
-        id: row.game_id,
-        players: row.players,
-        percentage: activeResult.count === 0 ? 0 : Math.round(row.players / activeResult.count * 1000) / 10
-      };
+      const players = activePlayersByGame.get(row.game_id) || [];
+      players.push({
+        city: row.city || 'Ubicación desconocida',
+        country: row.country,
+        browser: row.browser,
+        device: row.device
+      });
+      activePlayersByGame.set(row.game_id, players);
+    });
+    const activeGames = Array.from(activePlayersByGame, ([gameId, sessions]) => ({
+      id: gameId,
+      players: sessions.length,
+      percentage: activeResult.count === 0 ? 0 : Math.round(sessions.length / activeResult.count * 1000) / 10,
+      sessions
+    })).sort((first, second) => second.players - first.players || first.id.localeCompare(second.id));
+    const visitorDimensions = { browser: [], device: [] };
+    (visitorDimensionRows.results || []).forEach(row => {
+      if (!['browser', 'device'].includes(row.dimension) || typeof row.value !== 'string' ||
+          !Number.isSafeInteger(row.page_views) || row.page_views < 0) {
+        throw new Error('D1 returned invalid browser or device analytics.');
+      }
+      visitorDimensions[row.dimension].push({ name: row.value, pageViews: row.page_views });
     });
     const locationCount = locations.reduce((total, location) => total + location.count, 0);
     if (locationCount > activeResult.count) {
@@ -134,6 +159,8 @@ export async function onRequestPost({ request, env }) {
       locations,
       otherLocationsCount: activeResult.count - locationCount,
       activeGames,
+      browserStats: visitorDimensions.browser,
+      deviceStats: visitorDimensions.device,
       todayPeakVisitors: days.get(today)?.peakVisitors || 0,
       popularGame,
       last7Days: Array.from({ length: 7 }, (_, index) => {

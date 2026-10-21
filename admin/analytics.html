@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0f14">
+  <title>Analytics | Nimo Games</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-29">
+  <script src="/assets/js/games.js?v=game-catalog-3" defer></script>
+  <script src="/admin/dashboard.js?v=admin-dashboard-13" defer></script>
+</head>
+<body>
+  <main class="admin-gate" id="admin-gate">
+    <section class="admin-gate-main" aria-label="Acceso al panel de administración" data-i18n-aria-label="gateLabel">
+      <a class="admin-gate-brand" href="/" aria-label="Nimo Games, página principal" data-i18n-aria-label="homeLabel">
+        <img class="admin-logo" src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+      </a>
+      <label class="admin-gate-language" aria-label="Seleccionar idioma">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" />
+        </svg>
+        <select id="admin-language" aria-label="Seleccionar idioma">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+        <svg class="admin-gate-language-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m7 10 5 5 5-5" />
+        </svg>
+      </label>
+      <div class="admin-gate-card">
+        <div class="admin-gate-heading">
+          <p class="admin-eyebrow" data-i18n="eyebrow">Administración</p>
+          <h1 id="unlock-title">Iniciar sesión</h1>
+          <p class="admin-gate-description" data-i18n="description">Introduce la clave de Arb o Miticraft89 para continuar.</p>
+        </div>
+        <form class="admin-gate-form" id="admin-login-form" aria-labelledby="unlock-title">
+          <div class="admin-field">
+            <label class="admin-label" for="admin-secret" data-i18n="secretLabel">Clave de administrador</label>
+            <div class="admin-gate-password">
+              <input class="admin-input" id="admin-secret" type="password" autocomplete="current-password" required autofocus>
+              <button class="admin-gate-password-toggle" id="admin-secret-toggle" type="button" aria-label="Mostrar clave" aria-pressed="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z" />
+                  <circle cx="12" cy="12" r="2.5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="admin-button admin-gate-submit" id="admin-unlock" type="submit">
+            <span data-i18n="submit">Acceder al panel</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </button>
+          <p class="admin-gate-error" id="admin-login-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+    <aside class="admin-gate-aside" aria-label="Nimo Games" data-i18n-aria-label="brandLabel">
+      <div class="admin-gate-games" aria-hidden="true">
+        <img src="https://cdn-ngames.pages.dev/images/945360/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/285900/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/3527290/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/367520/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/98266/hero.webp" alt="">
+        <img src="https://cdn-ngames.pages.dev/images/302895/hero.webp" alt="">
+      </div>
+      <div class="admin-gate-aside-copy">
+        <p class="admin-gate-aside-kicker" data-i18n="asideKicker">NIMO GAMES · ADMIN</p>
+        <h2 id="admin-aside-title">Todo el control.<br>En un solo lugar.</h2>
+        <p data-i18n="asideDescription">Gestiona la actividad y las herramientas de tu sitio.</p>
+      </div>
+    </aside>
+  </main>
+
+  <div class="admin-shell" id="admin-dashboard" hidden>
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/admin/" aria-label="Nimo Games, panel de administración">
+        <img class="admin-logo" src="https://cdn-ngames.pages.dev/images/app/logo.webp" alt="Nimo Games">
+      </a>
+      <p class="admin-nav-label">General</p>
+      <nav class="admin-nav" aria-label="Navegación de administración">
+        <a class="admin-nav-link" href="/admin/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5" />
+            <path d="M5.5 9.5v11h13v-11M9 20.5v-7h6v7" />
+          </svg>
+          Inicio
+        </a>
+        <a class="admin-nav-link" href="/admin/analytics.html" aria-current="page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3.5" y="3.5" width="7" height="7" rx="1.5" />
+            <rect x="13.5" y="3.5" width="7" height="7" rx="1.5" />
+            <rect x="3.5" y="13.5" width="7" height="7" rx="1.5" />
+            <rect x="13.5" y="13.5" width="7" height="7" rx="1.5" />
+          </svg>
+          Analytics
+        </a>
+        <a class="admin-nav-link" href="/admin/messages.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8a2.5 2.5 0 0 1-2.5 2.5h-7L5 21v-4.8a2.5 2.5 0 0 1-1-1.7z" />
+            <path d="M8 9h8M8 13h5" />
+          </svg>
+          Mensajes
+        </a>
+        <a class="admin-nav-link" href="#admin-tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14.5 6.5a4 4 0 0 0-5.7 5.7L3 18v3h3l5.8-5.8a4 4 0 0 0 5.7-5.7L14 13l-3-3z" />
+            <path d="m14 10 3 3" />
+          </svg>
+          Herramientas
+        </a>
+        <a class="admin-nav-link" href="/admin/abuse.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3 3.8 7v5.2c0 4.3 3.5 7.2 8.2 8.8 4.7-1.6 8.2-4.5 8.2-8.8V7z" />
+            <path d="M9 12h6M12 9v6" />
+          </svg>
+          Abuse
+        </a>
+      </nav>
+    </aside>
+
+    <div class="admin-workspace">
+      <header class="admin-topbar">
+        <span class="admin-topbar-context">Espacio de trabajo</span>
+        <div class="admin-topbar-actions">
+          <span class="admin-identity" id="admin-identity" aria-live="polite"></span>
+          <span class="admin-site-status"><span class="admin-site-status-dot" aria-hidden="true"></span>Panel privado</span>
+          <button class="admin-logout" id="admin-logout" type="button">Bloquear panel</button>
+        </div>
+      </header>
+      <main class="admin-content">
+        <nav class="admin-breadcrumb" aria-label="Ruta de navegación">
+          <span>Administración</span>
+        </nav>
+        <section class="admin-heading" aria-labelledby="page-title">
+          <div>
+            <p class="admin-eyebrow">Analytics</p>
+            <h1 id="page-title">Analytics</h1>
+            <p class="admin-description">Actividad, audiencia y uso de Nimo Games en un solo lugar.</p>
+          </div>
+          <span class="admin-pill"><span class="admin-pill-dot" aria-hidden="true"></span>Datos en tiempo real</span>
+        </section>
+
+        <section class="admin-overview" aria-label="Estadísticas de hoy">
+          <article class="admin-stat">
+            <span class="admin-stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5 20v-1.5a7 7 0 0 1 14 0V20M19 5.5a3.5 3.5 0 0 1 0 6.8M21 19v-1a6 6 0 0 0-2-4.5" />
+              </svg>
+            </span>
+            <div><p class="admin-stat-label">Sesiones activas ahora</p><p class="admin-stat-value" id="active-visitors">—</p></div>
+          </article>
+          <article class="admin-stat">
+            <span class="admin-stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19V5M4 19h17M7 15l4-4 3 2 6-7" />
+                <path d="M16 6h4v4" />
+              </svg>
+            </span>
+            <div><p class="admin-stat-label">Máximo de sesiones hoy</p><p class="admin-stat-value" id="today-peak">—</p></div>
+          </article>
+          <article class="admin-stat">
+            <span class="admin-stat-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 4h18v16H3zM7 15l3-4 3 2 4-5" />
+              </svg>
+            </span>
+            <div><p class="admin-stat-label">Visualizaciones · 7 días</p><p class="admin-stat-value" id="weekly-views">—</p></div>
+          </article>
+        </section>
+
+        <section class="admin-card admin-location-card" aria-labelledby="location-title">
+          <header class="admin-card-header">
+            <h2 id="location-title">Ubicación aproximada de visitantes activos</h2>
+            <p>Ciudades estimadas por Cloudflare; no se guardan ni muestran direcciones IP.</p>
+          </header>
+          <div class="admin-location-content">
+            <div class="admin-location-donut" id="location-chart" role="img" aria-label="Distribución de visitantes activos por ubicación">
+              <div class="admin-location-donut-center">
+                <strong id="location-total">—</strong>
+                <span>sesiones</span>
+              </div>
+            </div>
+            <ul class="admin-location-legend" id="location-legend"></ul>
+          </div>
+        </section>
+
+        <section class="admin-insights admin-audience-insights" aria-label="Estadísticas de navegadores y dispositivos">
+          <article class="admin-card admin-breakdown-card">
+            <header class="admin-card-header">
+              <h2 id="browser-stats-title">Navegadores más populares</h2>
+              <p>Visualizaciones de los últimos 7 días; categorías estimadas sin guardar el agente de usuario completo</p>
+            </header>
+            <div class="admin-breakdown-chart" id="browser-stats-chart" role="img" aria-labelledby="browser-stats-title"></div>
+          </article>
+          <article class="admin-card admin-breakdown-card">
+            <header class="admin-card-header">
+              <h2 id="device-stats-title">Dispositivos</h2>
+              <p>Visualizaciones de los últimos 7 días; categorías estimadas sin guardar el agente de usuario completo</p>
+            </header>
+            <div class="admin-breakdown-chart" id="device-stats-chart" role="img" aria-labelledby="device-stats-title"></div>
+          </article>
+        </section>
+
+        <section class="admin-card admin-analytics" aria-labelledby="chart-title">
+          <div class="admin-chart-card">
+            <header class="admin-chart-heading">
+              <div>
+                <h2 id="chart-title">Visualizaciones de la página principal</h2>
+                <p>Cargas registradas cada día durante la última semana</p>
+              </div>
+              <div>
+                <div class="admin-chart-total" id="chart-total">—</div>
+                <div class="admin-chart-total-label">últimos 7 días</div>
+              </div>
+            </header>
+            <div class="admin-chart" id="views-chart" role="img" aria-label="Gráfico de visualizaciones de los últimos siete días"></div>
+            <p class="admin-chart-footnote">Se cuentan las cargas de la página principal. El registro comienza al aplicar la migración; no hay datos históricos anteriores.</p>
+            <p class="admin-refresh-status" id="stats-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="admin-insights" aria-label="Actividad destacada">
+          <article class="admin-card admin-popular-game">
+            <header class="admin-card-header">
+              <h2>Juego más abierto hoy</h2>
+              <p>Aperturas registradas desde que se activó esta estadística</p>
+            </header>
+            <div class="admin-popular-game-body">
+              <img id="popular-game-image" class="admin-popular-game-image" alt="" hidden>
+              <div class="admin-popular-game-copy">
+                <p class="admin-popular-game-tag">Top del día</p>
+                <h3 id="popular-game-title">Sin datos de hoy</h3>
+                <div class="admin-popular-game-meta">
+                  <span id="popular-game-views">Todavía no hay aperturas registradas</span>
+                  <span>hoy</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="admin-card admin-mini-chart-card">
+            <header class="admin-card-header">
+              <h2>Juegos abiertos</h2>
+              <p>Últimos 7 días</p>
+            </header>
+            <div class="admin-mini-chart" id="mini-views-chart" role="img" aria-label="Juegos abiertos de los últimos siete días"></div>
+          </article>
+        </section>
+
+        <section class="admin-tools-section" id="admin-tools" aria-labelledby="tools-title">
+          <div class="admin-section-heading">
+            <div>
+              <p class="admin-eyebrow">Herramientas</p>
+              <h2 id="tools-title">Juegos en curso</h2>
+              <p>Sesiones activas jugando ahora y su proporción sobre todos los visitantes activos.</p>
+            </div>
+            <span class="admin-live-indicator"><span aria-hidden="true"></span>En directo</span>
+          </div>
+          <div class="admin-current-games" id="current-games" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>
