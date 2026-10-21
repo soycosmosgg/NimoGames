@@ -8,7 +8,7 @@
   <title>Analytics | Nimo Games</title>
   <link rel="stylesheet" href="/admin/admin.css?v=admin-dashboard-29">
   <script src="/assets/js/games.js?v=game-catalog-3" defer></script>
-  <script src="/admin/dashboard.js?v=admin-dashboard-13" defer></script>
+  <script src="/admin/dashboard.js?v=admin-dashboard-14" defer></script>
 </head>
 <body>
   <main class="admin-gate" id="admin-gate">
@@ -221,6 +221,23 @@
             <div class="admin-chart" id="views-chart" role="img" aria-label="Gráfico de visualizaciones de los últimos siete días"></div>
             <p class="admin-chart-footnote">Se cuentan las cargas de la página principal. El registro comienza al aplicar la migración; no hay datos históricos anteriores.</p>
             <p class="admin-refresh-status" id="stats-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="admin-card admin-analytics" aria-labelledby="peak-chart-title">
+          <div class="admin-chart-card">
+            <header class="admin-chart-heading">
+              <div>
+                <h2 id="peak-chart-title">Pico diario de sesiones simultáneas</h2>
+                <p>Máximo de sesiones activas al mismo tiempo, cada día durante los últimos 7 días</p>
+              </div>
+              <div>
+                <div class="admin-chart-total" id="peak-chart-total">—</div>
+                <div class="admin-chart-total-label">pico de hoy</div>
+              </div>
+            </header>
+            <div class="admin-chart" id="peak-visitors-chart" role="img" aria-label="Pico diario de sesiones simultáneas de los últimos siete días"></div>
+            <p class="admin-chart-footnote">Este gráfico muestra concurrencia máxima diaria, no el total de visualizaciones. El registro comienza al aplicar la migración.</p>
           </div>
         </section>
 

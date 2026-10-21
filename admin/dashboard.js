@@ -13,7 +13,9 @@
   const todayPeakDisplay = document.getElementById('today-peak');
   const weeklyViewsDisplay = document.getElementById('weekly-views');
   const chartTotalDisplay = document.getElementById('chart-total');
+  const peakChartTotalDisplay = document.getElementById('peak-chart-total');
   const chart = document.getElementById('views-chart');
+  const peakChart = document.getElementById('peak-visitors-chart');
   const statsStatus = document.getElementById('stats-status');
   const popularGameImage = document.getElementById('popular-game-image');
   const popularGameTitle = document.getElementById('popular-game-title');
@@ -228,6 +230,11 @@
           !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
           !Number.isSafeInteger(day.pageViews) || day.pageViews < 0
         ) ||
+        !Array.isArray(stats.last7DaysPeakVisitors) || stats.last7DaysPeakVisitors.length !== 7 ||
+        stats.last7DaysPeakVisitors.some(day =>
+          !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
+          !Number.isSafeInteger(day.peakVisitors) || day.peakVisitors < 0
+        ) ||
         !Array.isArray(stats.last7DaysGameLaunches) || stats.last7DaysGameLaunches.length !== 7 ||
         stats.last7DaysGameLaunches.some(day =>
           !day || typeof day.day !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(day.day) ||
@@ -242,20 +249,21 @@
     }
   }
 
-  function renderChart(days) {
-    const maximum = Math.max(1, ...days.map(day => day.pageViews));
-    const total = days.reduce((sum, day) => sum + day.pageViews, 0);
-    chart.replaceChildren();
+  function renderChart(days, chartElement, valueKey, gradientId) {
+    const values = days.map(day => day[valueKey]);
+    const maximum = Math.max(...values);
+    const scaleMaximum = Math.max(1, maximum);
+    chartElement.replaceChildren();
     const namespace = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(namespace, 'svg');
     const left = 12;
     const right = 660;
     const top = 12;
     const bottom = 164;
-    const axisMaximum = Math.max(4, Math.ceil(maximum / 4) * 4);
+    const axisMaximum = Math.max(4, Math.ceil(scaleMaximum / 4) * 4);
     const points = days.map((day, index) => ({
       x: left + index * (right - left) / Math.max(1, days.length - 1),
-      y: bottom - day.pageViews / axisMaximum * (bottom - top)
+      y: bottom - day[valueKey] / axisMaximum * (bottom - top)
     }));
     svg.setAttribute('viewBox', '0 0 720 204');
     svg.setAttribute('preserveAspectRatio', 'none');
@@ -264,7 +272,7 @@
 
     const definitions = document.createElementNS(namespace, 'defs');
     const gradient = document.createElementNS(namespace, 'linearGradient');
-    gradient.id = 'analytics-area-gradient';
+    gradient.id = gradientId;
     gradient.setAttribute('x1', '0');
     gradient.setAttribute('y1', '0');
     gradient.setAttribute('x2', '0');
@@ -306,6 +314,7 @@
     const area = document.createElementNS(namespace, 'path');
     area.setAttribute('d', `${linePath} L${right} ${bottom} L${left} ${bottom} Z`);
     area.setAttribute('class', 'admin-chart-area');
+    area.style.fill = `url(#${gradientId})`;
     svg.append(area);
     const line = document.createElementNS(namespace, 'path');
     line.setAttribute('d', linePath);
@@ -320,7 +329,7 @@
       dot.setAttribute('class', 'admin-chart-point');
       const title = document.createElementNS(namespace, 'title');
       const date = new Date(`${days[index].day}T00:00:00Z`);
-      title.textContent = `${dayFormat.format(date)}: ${numberFormat.format(days[index].pageViews)}`;
+      title.textContent = `${dayFormat.format(date)}: ${numberFormat.format(days[index][valueKey])}`;
       dot.append(title);
       svg.append(dot);
 
@@ -332,10 +341,26 @@
       label.textContent = dayFormat.format(date).replace('.', '');
       svg.append(label);
     });
-    chart.append(svg);
+    chartElement.append(svg);
+    return maximum;
+  }
+
+  function renderViewsChart(days) {
+    const total = days.reduce((sum, day) => sum + day.pageViews, 0);
+    renderChart(days, chart, 'pageViews', 'analytics-area-gradient-views');
     chart.setAttribute('aria-label', `Visualizaciones de los últimos siete días: ${numberFormat.format(total)} en total.`);
     chartTotalDisplay.textContent = numberFormat.format(total);
     weeklyViewsDisplay.textContent = numberFormat.format(total);
+  }
+
+  function renderPeakVisitorsChart(days) {
+    renderChart(days, peakChart, 'peakVisitors', 'analytics-area-gradient-peak');
+    const todayPeak = days[days.length - 1].peakVisitors;
+    peakChart.setAttribute(
+      'aria-label',
+      `Pico diario de sesiones simultáneas de los últimos siete días. Hoy: ${numberFormat.format(todayPeak)}.`
+    );
+    peakChartTotalDisplay.textContent = numberFormat.format(todayPeak);
   }
 
   function renderMiniChart(days) {
@@ -579,7 +604,8 @@
     renderCurrentGames(stats.activeGames);
     renderDimensionChart(browserStatsChart, stats.browserStats);
     renderDimensionChart(deviceStatsChart, stats.deviceStats);
-    renderChart(stats.last7Days);
+    renderViewsChart(stats.last7Days);
+    renderPeakVisitorsChart(stats.last7DaysPeakVisitors);
     renderMiniChart(stats.last7DaysGameLaunches);
     renderPopularGame(stats.popularGame);
   }

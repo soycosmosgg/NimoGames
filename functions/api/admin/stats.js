@@ -168,6 +168,11 @@ export async function onRequestPost({ request, env }) {
         const day = date.toISOString().slice(0, 10);
         return { day, pageViews: days.get(day)?.pageViews || 0 };
       }),
+      last7DaysPeakVisitors: Array.from({ length: 7 }, (_, index) => {
+        const date = new Date((now - (6 - index) * 24 * 60 * 60) * 1000);
+        const day = date.toISOString().slice(0, 10);
+        return { day, peakVisitors: days.get(day)?.peakVisitors || 0 };
+      }),
       last7DaysGameLaunches: Array.from({ length: 7 }, (_, index) => {
         const date = new Date((now - (6 - index) * 24 * 60 * 60) * 1000);
         const day = date.toISOString().slice(0, 10);
