@@ -16,7 +16,7 @@ Nimo is a web platform that offers online games without ads, downloads, or inter
 - Access the project, Discord community, and terms of service from the site.
 - Installable web app metadata and favicon assets.
 
-Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers. Polytrack is sandboxed in the player and receives a Content Security Policy sandbox header on Cloudflare Pages, without same-origin access.
+Games and some artwork are provided by third-party sources. Availability, controls, and data practices may differ between games and their providers. Polytrack runs in the same origin to support its browser features. Its third-party scripts can therefore access the game's page context and same-origin browser data; using an isolated origin is required to prevent that.
 
 ## Send live messages
 
