@@ -63,6 +63,18 @@
   }
 
   async function loadGame() {
+    const gameStylesheet = document.createElement('link');
+    gameStylesheet.rel = 'stylesheet';
+    gameStylesheet.crossOrigin = 'anonymous';
+    gameStylesheet.href = new URL('assets/index-CQGgxoQI.css?v=2', base).href;
+    await new Promise((resolve, reject) => {
+      gameStylesheet.addEventListener('load', resolve, { once: true });
+      gameStylesheet.addEventListener('error', () => {
+        reject(new Error(`VC Web stylesheet failed to load from ${gameStylesheet.href}`));
+      }, { once: true });
+      document.head.appendChild(gameStylesheet);
+    });
+
     const themeUrl = new URL('assets/home-theme.css?v=8', base);
     const themeResponse = await originalFetch.call(window, themeUrl);
     if (!themeResponse.ok) {
