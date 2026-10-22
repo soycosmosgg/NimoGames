@@ -206,39 +206,44 @@
       controllers.forEach(controller => controller.abort());
     }, PROBE_TIMEOUT_MS);
 
-    try {
-      const results = await Promise.allSettled(probeUrls.map((probe, index) =>
-        measureCdnProbe(probe.url, probe.provider, controllers[index].signal)
-      ));
-      const successfulProbes = results
-        .filter(result => result.status === 'fulfilled')
-        .map(result => result.value);
-      const failedProbeStatuses = new Map();
-      results.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          failedProbeStatuses.set(
-            probeUrls[index].provider,
-            result.reason && result.reason.name === 'AbortError' ? 'timed out' : 'unavailable'
-          );
-        }
-      });
-      if (successfulProbes.length === 0) {
-        throw new AggregateError(
-          results.map(result => result.reason),
-          'All CDN speed tests failed'
-        );
-      }
+    const probes = probeUrls.map((probe, index) =>
+      measureCdnProbe(probe.url, probe.provider, controllers[index].signal)
+    );
+    const comparison = Promise.allSettled(probes);
 
-      successfulProbes.sort((a, b) => b.megabitsPerSecond - a.megabitsPerSecond);
-      const winner = successfulProbes[0];
-      launchUrl.searchParams.set('nimoCdn', winner.provider);
-      const failures = Object.fromEntries(failedProbeStatuses);
-      writeCachedResult(game, winner.provider, successfulProbes, failures);
-      logCdnReport(game, winner.provider, successfulProbes, failures);
+    try {
+      const firstAvailable = await Promise.any(probes);
+      launchUrl.searchParams.set('nimoCdn', firstAvailable.provider);
+
+      comparison.then(results => {
+        const successfulProbes = results
+          .filter(result => result.status === 'fulfilled')
+          .map(result => result.value);
+        const failedProbeStatuses = new Map();
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            failedProbeStatuses.set(
+              probeUrls[index].provider,
+              result.reason && result.reason.name === 'AbortError' ? 'timed out' : 'unavailable'
+            );
+          }
+        });
+
+        successfulProbes.sort((a, b) => b.megabitsPerSecond - a.megabitsPerSecond);
+        const fastest = successfulProbes[0];
+        const failures = Object.fromEntries(failedProbeStatuses);
+        writeCachedResult(game, fastest.provider, successfulProbes, failures);
+        logCdnReport(game, fastest.provider, successfulProbes, failures);
+      }).catch(error => {
+        console.error(`[Nimo SDK] Could not finish the CDN comparison for ${game.title}.`, error);
+      }).finally(() => {
+        window.clearTimeout(timeout);
+        controllers.forEach(controller => controller.abort());
+      });
+      return launchUrl.href;
     } catch (error) {
       console.error(`[Nimo SDK] CDN comparison failed for ${game.title}; using jsDelivr.`, error);
       launchUrl.searchParams.set('nimoCdn', 'jsdelivr');
-    } finally {
       window.clearTimeout(timeout);
       controllers.forEach(controller => controller.abort());
     }

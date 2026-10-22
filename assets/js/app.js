@@ -909,6 +909,8 @@
       art.src = game.portrait;
       art.alt = game.title;
       art.loading = 'lazy';
+      art.decoding = 'async';
+      art.fetchPriority = 'low';
       art.onerror = () => {
         if (art.dataset.triedHero) {
           art.removeAttribute('src');
@@ -951,9 +953,14 @@
       const title = card.querySelector('.news-body h2');
       if (!title) return;
       title.textContent = game.title;
-      card.style.backgroundImage = `linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .35)), url("${game.hero || game.portrait}")`;
-      card.style.backgroundPosition = 'center';
-      card.style.backgroundSize = 'cover';
+      const art = document.createElement('img');
+      art.className = 'featured-game-art';
+      art.src = game.hero || game.portrait;
+      art.alt = '';
+      art.loading = 'lazy';
+      art.decoding = 'async';
+      art.fetchPriority = 'low';
+      card.prepend(art);
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', `Jugar ${game.title}`);
@@ -1015,9 +1022,12 @@
         const group = document.createElement('div');
         group.className = 'hero-card-group';
 
-        const art = document.createElement('div');
+        const art = document.createElement('img');
         art.className = 'hero-art';
-        art.style.backgroundImage = `url("${game.hero}")`;
+        art.src = game.hero;
+        art.alt = '';
+        art.fetchPriority = 'high';
+        art.decoding = 'async';
         card.append(art);
 
         const gradient = document.createElement('span');
@@ -1029,6 +1039,7 @@
           logo.className = 'hero-logo';
           logo.src = game.logo;
           logo.alt = '';
+          logo.decoding = 'async';
           logo.onerror = () => {
             logo.remove();
             if (!card.querySelector('.hero-meta.game-name')) {
@@ -1064,9 +1075,13 @@
         group.append(card, details);
         recentRow.append(group);
       } else {
-        const art = document.createElement('div');
+        const art = document.createElement('img');
         art.className = 'mini-art';
-        art.style.backgroundImage = `url("${game.portrait}")`;
+        art.src = game.portrait;
+        art.alt = '';
+        art.loading = 'lazy';
+        art.fetchPriority = 'low';
+        art.decoding = 'async';
         card.append(art);
         recentRow.append(card);
       }
@@ -1183,7 +1198,6 @@
   updateConnectionStatus();
   initializeAvatarMessages();
   window.setInterval(updateClock, 30000);
-  renderLibrary();
   renderFeaturedGames();
   homeGames = buildHomeGames();
   recentGamesCount.textContent = String(recentGameIds.length);
