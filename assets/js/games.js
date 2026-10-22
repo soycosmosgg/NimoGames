@@ -184,6 +184,13 @@ window.NIMO_GAMES = [
     title: 'Blackjack'
   },
   {
+    id: '628348',
+    title: 'Monkey Mart',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/xabo1986/MonkeyMart@d520fd891c41312e171a8dd8b32b71f41dce1566/',
+    cdnProbe: 'dmloader.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '023978',
     title: 'Blacktop Police Chase',
     cdnBase: 'https://cdn.jsdelivr.net/gh/slytegg/UGS-Files@main/023978/',
