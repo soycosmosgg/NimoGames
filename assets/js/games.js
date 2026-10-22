@@ -64,6 +64,14 @@ window.NIMO_GAMES = [
     cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
   },
   {
+    id: '1351',
+    title: 'Grand Theft Auto: Vice City',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@03212c1336c1c91323f47fd7a5e1790a42429c86/vcweb/',
+    cdnProbe: 'assets/index-DRp2kxJe.js',
+    cdnProviders: ['jsdelivr-fastly', 'jsdelivr-gcore'],
+    cdnProvidersExact: true
+  },
+  {
     id: '1388880',
     title: 'Doki Doki Literature Club!'
   },
