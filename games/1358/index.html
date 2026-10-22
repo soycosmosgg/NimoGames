@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="https://rawcdn.githack.com/M1sterMo/gta2/main/">
+  <title>Grand Theft Auto 2 | Nimo Games</title>
+  <meta name="description" content="Play Grand Theft Auto 2 in your browser on Nimo Games. Explore its retro open-world streets and bring the classic action game to life.">
+  <link rel="canonical" href="https://nimogames.qzz.io/games/1358/index.html">
+  <script src="/assets/js/nimo-sdk.js"
+          data-base="https://cdn.jsdelivr.net/gh/M1sterMo/gta2@main/"
+          data-probe="shell.js"
+          data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+          data-game-id="1358"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; --bg: #0b0b0d; --fg: #e8e6e3; --muted: #9a978f; --accent: #e63946; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { height: 100%; display: flex; flex-direction: column; }
+    #picker { margin: auto; max-width: 34rem; padding: 2rem 1rem; }
+    #picker h1 { margin: 0 0 .5rem; font-size: 1.6rem; }
+    #picker p { color: var(--muted); }
+    label.button { display: inline-block; margin-top: .5rem; padding: .6rem 1.1rem; border-radius: 6px;
+      background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+    label.button input { display: none; }
+    #game { flex: 1; min-height: 0; display: flex; }
+    #screen { flex: 1; width: 100%; height: 100%; display: block; outline: none; image-rendering: pixelated; }
+    #status { position: fixed; left: 1rem; bottom: 2.2rem; margin: 0; color: var(--muted); }
+    #status.error { color: #ff8a8a; }
+    #state-toast { position: fixed; left: 50%; bottom: 18%; transform: translateX(-50%); z-index: 30; pointer-events: none;
+      padding: .5rem 1rem; border-radius: 6px; background: rgba(0, 0, 0, .78); color: #fff; font-weight: 600; }
+    #state-toast.error { color: #ff8a8a; }
+    .continue { display: flex; gap: .8rem; align-items: center; margin-top: 1rem; padding: .6rem; border-radius: 8px;
+      background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); text-align: left; cursor: pointer;
+      color: inherit; font: inherit; width: 100%; }
+    .continue:hover { border-color: #f5c518; }
+    .continue img { width: 120px; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 5px; flex: none; }
+    .continue span { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+    .continue b { color: #f5c518; }
+    .continue small { color: #9aa0aa; }
+    #saves-screen { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+      padding: 16px; background: rgba(0, 0, 0, .72); }
+    #saves-screen[hidden] { display: none; }
+    #controls-screen { position: fixed; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+      padding: 16px; background: rgba(0, 0, 0, .72); }
+    #controls-screen[hidden] { display: none; }
+    .controls-panel { width: min(560px, 100%); }
+    .controls-list { display: grid; gap: .35rem; }
+    .controls-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .3rem .5rem;
+      border-radius: 6px; background: #1d2027; }
+    .controls-row button, .controls-actions button { min-width: 8.5rem; padding: .4rem .7rem; border-radius: 5px;
+      border: 1px solid #3a3f4b; background: #262a33; color: #e8e8e8; cursor: pointer; font: inherit; font-size: .9rem; }
+    .controls-row button.waiting { border-color: #f5c518; color: #f5c518; }
+    .controls-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+    .controls-actions button.primary { background: #f5c518; border-color: #f5c518; color: #111; font-weight: 600; }
+    .saves-panel { width: min(980px, 100%); max-height: 100%; overflow: auto; padding: 1.2rem 1.4rem; border-radius: 10px;
+      background: #15171c; border: 1px solid #2a2e37; color: #e8e8e8; }
+    .saves-head { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: .8rem; }
+    .saves-head h2 { margin: 0; font-size: 1.4rem; color: #f5c518; }
+    .saves-keys { color: #8b919c; font-size: .85rem; flex: 1; }
+    .saves-close { background: none; border: 0; color: #c9c9c9; font-size: 1.2rem; cursor: pointer; }
+    .saves-note { color: #8b919c; font-size: .85rem; margin: .6rem 0; }
+    .saves-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .8rem; }
+    .save-card { display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: #1d2027;
+      border: 1px solid #2a2e37; }
+    .save-card img, .save-blank { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0c0d10; }
+    .save-blank { display: flex; align-items: center; justify-content: center; color: #5d636e; font-size: .9rem; }
+    .save-text { display: flex; flex-direction: column; gap: .15rem; padding: .55rem .7rem 0; min-height: 3.6rem; }
+    .save-slot { color: #f5c518; font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+    .save-text strong { font-size: .95rem; }
+    .save-text small { color: #9aa0aa; }
+    .save-actions { display: flex; gap: .4rem; padding: .6rem .7rem .7rem; margin-top: auto; }
+    .save-actions button { flex: 1; padding: .4rem .5rem; white-space: nowrap; border-radius: 5px; border: 1px solid #3a3f4b; background: #262a33;
+      color: #e8e8e8; cursor: pointer; font: inherit; font-size: .85rem; }
+    .save-actions button.primary { background: #f5c518; border-color: #f5c518; color: #111; font-weight: 600; }
+    .save-actions button.quiet { flex: 0 0 auto; color: #9aa0aa; }
+    .save-actions button.armed { background: #b3261e; border-color: #b3261e; color: #fff; }
+    .save-actions:has(.armed) button:not(.armed) { display: none; } /* the question gets the whole row */
+    .save-actions button:disabled { opacity: .45; cursor: default; }
+    #coop-banner { position: fixed; left: 50%; top: 4.5rem; transform: translateX(-50%); z-index: 4; margin: 0;
+      padding: .5rem 1rem; border-radius: 6px; background: rgba(8,9,12,.85); color: #ffd23f; font-weight: 600;
+      max-width: min(90vw, 40rem); text-align: center; pointer-events: none; }
+    #coop-banner.error { color: #ff8a8a; }
+    #chat-log { position: fixed; left: 1rem; bottom: 4.6rem; z-index: 4; width: min(28rem, 60vw); pointer-events: none;
+      display: flex; flex-direction: column; gap: .15rem; }
+    #chat-log p { margin: 0; padding: .15rem .5rem; border-radius: 4px; background: rgba(0,0,0,.6); color: #eee;
+      font: 14px/1.35 system-ui, sans-serif; text-shadow: 0 1px 0 #000; transition: opacity 1s; overflow-wrap: anywhere; }
+    #chat-log p.note { color: #aaa; font-style: italic; }
+    #chat-log p.old { opacity: 0; }
+    #chat-input { position: fixed; left: 1rem; bottom: 2.6rem; z-index: 7; width: min(28rem, 60vw); box-sizing: border-box;
+      font: 14px system-ui, sans-serif; padding: .45rem .6rem; border-radius: 6px; border: 1px solid #f5c518;
+      background: rgba(10,10,12,.92); color: #fff; outline: none; }
+    [hidden] { display: none !important; }
+    /* until shell.js picks the screen (landing page, lobby or folder picker), show none of them */
+    body.booting #picker { visibility: hidden; }
+
+    /* ---- landing page (D21 front page) ---- */
+    body.landing-on { overflow-y: auto; height: auto; min-height: 100%; }
+    body.landing-on main { height: auto; }
+    .landing-on #status { position: static; text-align: center; margin: .5rem 0; }
+    #topnav { position: sticky; top: .75rem; z-index: 8; margin: .75rem auto 0; width: min(1120px, calc(100% - 2rem));
+      display: flex; align-items: center; gap: 1rem; padding: .55rem .7rem .55rem 1.1rem; box-sizing: border-box;
+      border-radius: 16px; background: rgba(24,24,29,.82); backdrop-filter: blur(10px); border: 1px solid #2c2c33; }
+    #topnav .logo { font: 22px/1 Bungee, "Arial Black", Impact, sans-serif; color: #f5c518; text-decoration: none;
+      letter-spacing: .02em; text-shadow: 2px 2px 0 #000; }
+    #topnav .logo small { font: 600 12px system-ui, sans-serif; color: var(--muted); margin-left: .4rem; text-shadow: none; }
+    #topnav nav { display: flex; gap: .25rem; margin-left: .5rem; flex-wrap: wrap; }
+    #topnav nav a { color: #cfcdc9; text-decoration: none; padding: .35rem .7rem; border-radius: 9px; font-size: 14px; }
+    #topnav nav a:hover { background: #2a2a31; color: #fff; }
+    #topnav .grow { flex: 1; }
+    .btn { font: 15px/1 Bungee, "Arial Black", sans-serif; letter-spacing: .03em; padding: .7rem 1.1rem; border-radius: 10px;
+      border: 0; cursor: pointer; text-transform: uppercase; color: #121212; background: #f5c518; box-shadow: 0 3px 0 #a5830b;
+      white-space: nowrap; }
+    .btn:hover { filter: brightness(1.08); }
+    .btn:disabled { opacity: .6; cursor: progress; filter: none; transform: none; }
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #a5830b; }
+    .btn.alt { background: #2fbf71; box-shadow: 0 3px 0 #1d7a48; color: #08130c; }
+    .btn.ghost { background: #2a2a31; box-shadow: 0 3px 0 #17171b; color: #eee; }
+    #landing { width: min(1120px, calc(100% - 2rem)); margin: 1.25rem auto 3rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    #landing section { scroll-margin-top: 5.5rem; }
+    .card { background: #18181d; border: 1px solid #2a2a31; border-radius: 16px; padding: 1.25rem; }
+    .hero { display: grid; grid-template-columns: 1.7fr 1fr; gap: 1.25rem; }
+    .hero-shot { position: relative; padding: 0; overflow: hidden; min-height: 260px; }
+    .hero-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .hero-shot .tag { position: absolute; left: 1rem; bottom: 1rem; padding: .5rem .8rem; border-radius: 10px;
+      background: rgba(0,0,0,.72); font: 18px Bungee, "Arial Black", sans-serif; color: #f5c518; text-shadow: 2px 2px 0 #000; }
+    .hero.no-shot { grid-template-columns: 1fr; }
+    .hero.no-shot .hero-shot { display: none; }
+    .hero-side { display: flex; flex-direction: column; justify-content: center; gap: .9rem; }
+    .hero-side h1 { margin: 0; font: 34px/1.05 Bungee, "Arial Black", Impact, sans-serif; color: #fff; text-shadow: 3px 3px 0 #000; }
+    .hero-side h1 span { color: #f5c518; }
+    .hero-side p { margin: 0; color: #b9b6b0; }
+    #files-state { font-size: 14px; color: #9fdcae; }
+    #files-bar { width: 100%; height: .5rem; accent-color: #f5c518; }
+    .modes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .mode h2, .section-title { margin: 0 0 .35rem; font: 20px Bungee, "Arial Black", sans-serif; color: #fff; letter-spacing: .02em; }
+    .mode p { margin: 0 0 1rem; color: #aaa7a1; font-size: 14px; }
+    .mode .pill { display: inline-block; font-size: 12px; padding: .15rem .55rem; border-radius: 99px; background: #23232a;
+      color: #cfcdc9; margin-right: .3rem; margin-bottom: .8rem; }
+    .section-title { font-size: 26px; margin-bottom: .2rem; text-shadow: 2px 2px 0 #000; }
+    .section-sub { margin: 0 0 1rem; color: #9a978f; }
+    .kb { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 14px; background: #121216; border: 1px solid #26262c; }
+    .kb-row { display: flex; gap: 6px; }
+    .kb-key { flex: 1; min-width: 0; height: 42px; display: grid; place-items: center; border-radius: 8px; font-size: 13px;
+      color: #77757f; background: #1d1d23; border: 1px solid #2a2a31; box-shadow: inset 0 -2px 0 #15151a; overflow: hidden;
+      white-space: nowrap; }
+    .kb-key.lit { color: var(--c); background: color-mix(in srgb, var(--c) 14%, #1d1d23);
+      border-color: color-mix(in srgb, var(--c) 55%, transparent); font-weight: 700; }
+    .legend { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem 1.2rem; }
+    .legend li { display: flex; align-items: center; gap: .55rem; font-size: 14px; }
+    .legend .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+    .legend .caps { display: inline-flex; align-items: center; gap: .25rem; }
+    .legend kbd { font: 600 12px system-ui, sans-serif; padding: .15rem .45rem; border-radius: 6px; background: #2a2a31;
+      border: 1px solid #36363e; color: #eee; min-width: 1.1rem; text-align: center; }
+    .legend .sep { color: #666; font-size: 12px; }
+    .legend .does { color: #cfcdc9; }
+    #options-root { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem 1.5rem; }
+    .opt { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 0;
+      border-bottom: 1px solid #24242a; }
+    .opt-label { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .opt-label small { color: #8c8a85; font-size: 12px; }
+    .seg { display: inline-flex; flex: none; gap: 3px; padding: 3px; border-radius: 10px; background: #111115;
+      border: 1px solid #2a2a31; }
+    .seg button { white-space: nowrap; font: 600 12px system-ui, sans-serif; padding: .35rem .6rem; border-radius: 7px; border: 0; cursor: pointer;
+      background: none; color: #aaa7a1; }
+    .seg button[aria-checked="true"], .seg button[aria-selected="true"] { background: #f5c518; color: #121212; }
+    .controls-tabs { margin-bottom: 1rem; }
+    .controls-tabs button { font-size: 14px; padding: .45rem 1rem; }
+    #pad-status.found { color: #9fdcae; }
+    .pad-wrap { padding: 14px; border-radius: 14px; background: #121216; border: 1px solid #26262c; }
+    .pad-diagram { display: block; width: min(520px, 100%); margin: 0 auto; }
+    .pad-body { fill: #1d1d23; stroke: #2a2a31; stroke-width: 2; }
+    .pad-part { fill: #25252c; stroke: #33333b; stroke-width: 1.5; }
+    .pad-part.lit { fill: color-mix(in srgb, var(--c) 18%, #1d1d23); stroke: color-mix(in srgb, var(--c) 70%, transparent); }
+    .pad-label { font: 700 13px system-ui, sans-serif; fill: #77757f; text-anchor: middle; dominant-baseline: central; }
+    .pad-label.lit { fill: var(--c); }
+    .pad-note { margin: 1rem 0 0; font-size: 14px; }
+    .board { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .board th { text-align: left; color: #8c8a85; font-weight: 600; font-size: 12px; padding: .4rem .5rem; border-bottom: 1px solid #2a2a31; }
+    .board td { padding: .55rem .5rem; border-bottom: 1px solid #202026; vertical-align: top; }
+    .board .rank { font: 18px Bungee, "Arial Black", sans-serif; color: #f5c518; width: 2.5rem; }
+    .board .crew-name { font-weight: 700; color: #fff; }
+    .board .members { color: #8c8a85; font-size: 12px; }
+    .board .rep { font: 16px Bungee, "Arial Black", sans-serif; color: #2fbf71; }
+    .faq details { border: 1px solid #2a2a31; border-radius: 12px; padding: .8rem 1rem; margin-bottom: .6rem; background: #141418; }
+    .faq summary { cursor: pointer; font-weight: 600; }
+    .faq p { color: #b5b2ac; margin: .6rem 0 0; }
+    .faq a, .landing-foot a { color: #f5c518; }
+    .landing-foot { text-align: center; color: #77757f; font-size: 12px; }
+    /* the co-op lobby on the game server, in the landing page's style */
+    .on-site #picker:has(#coop:not([hidden])) { margin: 1.5rem auto; width: min(680px, calc(100% - 2rem)); max-width: none;
+      box-sizing: border-box; padding: 1.5rem; background: #18181d; border: 1px solid #2a2a31; border-radius: 16px; }
+    .on-site #picker:has(#coop:not([hidden])) h1 { font: 26px Bungee, "Arial Black", sans-serif; color: #fff;
+      text-shadow: 2px 2px 0 #000; }
+    .on-site #coop button { border-color: #3a3a42; background: #2a2a31; }
+    .on-site #coop button.primary { background: #f5c518; color: #121212; border: 0; box-shadow: 0 3px 0 #a5830b;
+      font-family: Bungee, "Arial Black", sans-serif; text-transform: uppercase; letter-spacing: .03em; }
+    .on-site #coop-join { background: #2fbf71 !important; color: #08130c !important; border: 0 !important;
+      box-shadow: 0 3px 0 #1d7a48; font-weight: 700; }
+    .on-site #coop-players li { padding: .2rem 0; }
+    @media (max-width: 900px) {
+      .hero, .modes { grid-template-columns: 1fr; }
+      .legend, #options-root { grid-template-columns: 1fr; }
+      #topnav nav { display: none; }
+      .kb-key { height: 30px; font-size: 10px; }
+      .kb, .kb-row { gap: 3px; }
+      .kb { padding: 8px; }
+    }
+    /* bottom centre: the game's HUD uses the top corners and edges */
+    #tools { position: fixed; bottom: .5rem; left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap;
+      justify-content: center; gap: .4rem; max-width: calc(100% - 1rem); opacity: .35; }
+    #tools:hover, #tools:focus-within { opacity: 1; }
+    #tools button, #tools label { white-space: nowrap; font: 12px system-ui, sans-serif; padding: .3rem .6rem; border-radius: 4px;
+      border: 1px solid #555; background: #1c1c20; color: var(--fg); cursor: pointer; }
+    #tools input { display: none; }
+    #tools button[aria-pressed="true"] { border-color: var(--accent); }
+    #fps { position: fixed; bottom: .5rem; left: .5rem; margin: 0; padding: .2rem .5rem; border-radius: 4px;
+      background: rgba(0, 0, 0, .6); color: #9f9; font: 12px ui-monospace, Menlo, monospace; pointer-events: none; }
+    #map-screen { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; cursor: crosshair;
+      touch-action: none; }
+    #map-overlay { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+    #map-radar { position: fixed; left: 0; top: 0; pointer-events: none; z-index: 2; }
+    #tools { z-index: 6; }
+    #saved { margin: 1rem 0 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #333; }
+    #saved button { font: inherit; }
+    #play-saved { padding: .6rem 1.1rem; border-radius: 6px; border: 0; background: var(--accent); color: #fff;
+      font-weight: 600; cursor: pointer; }
+    #coop .row { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: .8rem 0; }
+    #coop .field { display: flex; flex-direction: column; gap: .3rem; color: var(--muted); font-size: .9rem; }
+    #coop input, #coop select { font: inherit; padding: .45rem .6rem; border-radius: 6px; border: 1px solid #444;
+      background: #16161a; color: var(--fg); }
+    #coop button { font: inherit; padding: .5rem 1rem; border-radius: 6px; border: 1px solid var(--accent);
+      background: none; color: var(--fg); cursor: pointer; }
+    #coop button.primary { background: var(--accent); color: #fff; font-weight: 600; }
+    #coop button:disabled { opacity: .5; cursor: default; }
+    .on-server .p2p-only { display: none; }
+    #coop-link { width: min(100%, 30rem); }
+    #coop-players { margin: .4rem 0; padding-left: 1.4rem; }
+    #coop-players .crewtag { font-size: .8rem; padding: .05rem .4rem; border-radius: 4px; margin-left: .4rem; color: #111; font-weight: 700; }
+    .mode-help { color: var(--muted); font-size: .9rem; margin: .2rem 0; }
+    #coop input.num { width: 6.5rem; }
+    #coop input.num.wide { width: 9rem; }
+    #coop-crews { display: grid; gap: .5rem; margin: .5rem 0; }
+    #coop-crews .crew { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; padding: .5rem .7rem; border-radius: 8px;
+      background: #141418; border-left: 4px solid var(--c, #888); }
+    #coop-crews .crew b { min-width: 7rem; }
+    #coop-crews .crew.mine { outline: 1px solid var(--c); }
+    #coop-crews .crew button { margin-left: auto; }
+    #coop-crews .crew .who { color: var(--muted); font-size: .85rem; }
+    #coop-results { margin: .6rem 0; padding: .7rem .9rem; border-radius: 10px; background: #141418; border: 1px solid #2a2a31; }
+    #coop-results h3 { margin: 0 0 .4rem; font-size: 1rem; }
+    #coop-results table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+    #coop-results td, #coop-results th { padding: .2rem .4rem; text-align: left; }
+    #coop-results th { color: var(--muted); font-weight: 600; }
+    #freeware { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #333; }
+    #download-freeware { padding: .6rem 1.1rem; border-radius: 6px; border: 1px solid var(--accent); background: none;
+      color: var(--fg); font: inherit; font-weight: 600; cursor: pointer; }
+    #download-freeware:disabled { opacity: .5; cursor: default; }
+    label.button.secondary { background: none; border: 1px solid var(--accent); color: var(--fg); }
+    #freeware a { color: var(--fg); }
+    #forget-files { margin-left: .6rem; background: none; border: 0; color: var(--muted); text-decoration: underline;
+      cursor: pointer; }
+  </style>
+</head>
+<body class="booting">
+  <header id="topnav" hidden>
+    <a class="logo" href="#top">GTA2<small>in your browser</small></a>
+    <nav aria-label="Sections">
+      <a href="#play">Play</a><a href="#crews">Crews</a><a href="#controls">Controls</a><a href="#options">Options</a><a href="#help">Help</a>
+    </nav>
+    <span class="grow"></span>
+    <button class="btn" type="button" data-play>Play now</button>
+  </header>
+  <main>
+    <div id="landing" hidden>
+      <section class="hero" id="top">
+        <div class="card hero-shot">
+          <img src="img/downtown.png" alt="GTA2's Downtown district in widescreen, with the round radar" width="800" height="452"
+            onerror="this.closest('.hero').classList.add('no-shot')">
+          <span class="tag">Respect is everything</span>
+        </div>
+        <div class="card hero-side">
+          <h1>GTA2 in your <span>browser</span></h1>
+          <p>The real 1999 game, running in your browser on any computer. Nothing to install. Widescreen,
+            smooth at your screen's refresh rate, a full map, and co-op with friends.</p>
+          <progress id="files-bar" max="1" value="0"></progress>
+          <span id="files-state">Getting GTA2 ready…</span>
+          <div><button class="btn" type="button" data-play>Play now</button></div>
+          <div id="continue-root" hidden></div>
+        </div>
+      </section>
+
+      <section class="modes" id="play">
+        <div class="card mode">
+          <h2>Single player</h2>
+          <span class="pill">3 districts</span><span class="pill">Saves in your browser</span>
+          <p>The full story: Downtown, Residential and Industrial. Earn respect with the gangs, take their jobs,
+            and keep the cops off your back.</p>
+          <button class="btn" type="button" data-play>Play</button>
+        </div>
+        <div class="card mode">
+          <h2>Play with friends</h2>
+          <span class="pill">Up to 6 players</span><span class="pill">Free roam</span>
+          <p>Host a room and send your friends the link. Everyone sees each other on the map, shares waypoints,
+            and keeps score.</p>
+          <button class="btn alt" type="button" data-coop>Host or join</button>
+        </div>
+        <div class="card mode">
+          <h2>The map</h2>
+          <span class="pill">M</span><span class="pill">Waypoints</span>
+          <p>A full map of each district that fills in as you explore, with gang jobs, phones, garages and
+            save points. Click anywhere to set a waypoint.</p>
+          <a class="btn ghost" href="#controls" style="display:inline-block;text-decoration:none">See controls</a>
+        </div>
+      </section>
+
+      <section class="card" id="crews">
+        <h2 class="section-title">Crew leaderboard</h2>
+        <p class="section-sub">Gang Wars crews on this server. Win matches, rack up kills and points to climb.
+          A win is worth 50 reputation, each kill 5, each death −2, and every $10,000 of points 1.</p>
+        <div id="leaderboard-root"><p class="section-sub">No crews yet. Start a Gang War: "Play with friends", then mode "Gang Wars".</p></div>
+      </section>
+
+      <section class="card" id="controls">
+        <h2 class="section-title">Controls</h2>
+        <div class="seg controls-tabs" id="controls-tabs" role="tablist" aria-label="Controls">
+          <button type="button" role="tab" id="tab-kb" aria-controls="panel-kb" aria-selected="true">Keyboard</button>
+          <button type="button" role="tab" id="tab-pad" aria-controls="panel-pad" aria-selected="false" tabindex="-1">Controller</button>
+        </div>
+        <div id="panel-kb" role="tabpanel" aria-labelledby="tab-kb">
+          <p class="section-sub">Change any of them in the game: Options on the main menu, or the Controls button under the game.</p>
+          <div id="kb-root"></div>
+          <div id="legend-root"></div>
+        </div>
+        <div id="panel-pad" role="tabpanel" aria-labelledby="tab-pad" hidden>
+          <p class="section-sub" id="pad-status" role="status"></p>
+          <div class="pad-wrap" id="pad-root"></div>
+          <div id="pad-legend-root"></div>
+          <p class="section-sub pad-note">In the game's menus and on the map: ✕ confirms, ○ goes back, the left stick or
+            d-pad moves, L1 / R1 zoom the map.</p>
+        </div>
+      </section>
+
+      <section class="card" id="options">
+        <h2 class="section-title">Options</h2>
+        <p class="section-sub">Saved in this browser and used next time you start. The buttons at the bottom of the
+          game screen change most of them while you play.</p>
+        <div id="options-root"></div>
+      </section>
+
+      <section class="card faq" id="help">
+        <h2 class="section-title">Help and FAQ</h2>
+        <details open><summary>What is this?</summary>
+          <p>Grand Theft Auto 2 (DMA Design, 1999), running from the community's reconstruction of its original code,
+            compiled for the web. It plays like the original, with modern extras: widescreen, a smoother camera,
+            smooth motion on high-refresh screens, a map with waypoints, and co-op.</p></details>
+        <details><summary>Do I need to install anything?</summary>
+          <p>No. The first visit downloads the game once (about 355 MB) and keeps it in your browser, so later
+            visits start straight away. Use a desktop browser: Chrome, Edge, Firefox, Safari or Brave, on Windows,
+            macOS, Linux or ChromeOS.</p></details>
+        <details><summary>How does co-op work?</summary>
+          <p>Press "Host or join", host a room, and send your friends the link the lobby shows. When everyone is in,
+            pick a district and start. Every player's browser runs the whole game; only key presses travel between
+            you. Hold Tab for the scoreboard; your friends show on the map and radar in their own colours.</p></details>
+        <details><summary>Where are my saves?</summary>
+          <p>In this browser. Use "Export saves" at the bottom of the game screen to keep a copy, and "Import saves"
+            to bring them to another browser.</p></details>
+        <details><summary>It runs slowly or looks wrong</summary>
+          <p>Turn on the FPS counter in Options. Close other heavy tabs, and try another browser if it stays low.
+            "Motion: Original 30 fps" and "Screen shape: 4:3 original" are the lightest settings.</p></details>
+        <details id="stats-faq" hidden><summary>Do you track me?</summary>
+          <p>No cookies and no personal data. This site counts visits, games started, how long games run
+            (in steps such as "over 30 minutes") and first-time downloads, anonymously with
+            <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>,
+            so we know how many people play.</p></details>
+        <details><summary>Is it legal?</summary>
+          <p>GTA2 was released as freeware by Rockstar Games in 2004. This is an unofficial, non-commercial fan
+            project, not affiliated with Rockstar Games or Take-Two Interactive. GTA2 is © Rockstar Games.</p></details>
+      </section>
+    </div>
+    <section id="picker">
+      <h1>GTA2 in the browser</h1>
+      <p>Choose your installed GTA2 folder (the one containing <code>data</code>). Your game files are read
+        locally and never leave this computer.</p>
+      <div id="coop" hidden>
+        <p>Free roam with friends in a story district, using GTA2's own multiplayer.
+          Everyone runs the game; only key presses travel between players.</p>
+        <p class="p2p-only">They go directly from browser to browser (peer to peer, no game
+          server). Each player needs their own copy of the game files.</p>
+        <label class="field">Your name <input id="coop-name" maxlength="16" placeholder="Player"></label>
+        <div class="row">
+          <button id="coop-host" type="button" class="primary">Host a game</button>
+          <span>or</span>
+          <input id="coop-code" maxlength="8" placeholder="Room code" aria-label="Room code">
+          <button id="coop-join" type="button">Join</button>
+        </div>
+        <p id="coop-state" role="status"></p>
+        <p id="coop-invite" hidden>Send your friends this link: <input id="coop-link" readonly aria-label="Invite link">
+          <button id="coop-copy" type="button">Copy</button></p>
+        <div id="coop-results" hidden></div>
+        <ol id="coop-players"></ol>
+        <div class="row">
+          <label class="field">Mode
+            <select id="coop-mode">
+              <option value="roam">Free roam</option>
+              <option value="wars">Gang Wars</option>
+              <option value="ffa">Free-for-all</option>
+            </select>
+          </label>
+          <label class="field">District
+            <select id="coop-district">
+              <option value="downtown">Downtown</option>
+              <option value="residential">Residential</option>
+              <option value="industrial">Industrial</option>
+            </select>
+          </label>
+          <label class="field" data-modes="wars ffa">Time limit (min, 0 = none)
+            <input id="coop-minutes" type="number" min="0" max="60" step="1" list="coop-minutes-list" class="num">
+            <datalist id="coop-minutes-list"><option value="10"><option value="20"><option value="30"><option value="60"></datalist>
+          </label>
+          <label class="field" data-modes="ffa">Kills to win (0 = no limit)
+            <input id="coop-kills" type="number" min="0" max="999" step="1" list="coop-kills-list" class="num">
+            <datalist id="coop-kills-list"><option value="5"><option value="10"><option value="20"><option value="50"></datalist>
+          </label>
+          <label class="field" data-modes="wars">Points to win ($, 0 = no target)
+            <input id="coop-points" type="number" min="0" max="100000000" step="10000" list="coop-points-list" class="num wide">
+            <datalist id="coop-points-list"><option value="250000"><option value="500000"><option value="1000000"><option value="5000000"></datalist>
+          </label>
+          <label class="field ff" data-modes="roam"><span>Friendly fire</span>
+            <span><input id="coop-ff" type="checkbox"> players can hurt each other</span></label>
+        </div>
+        <p id="coop-mode-help" class="mode-help"></p>
+        <div class="row" data-modes="wars">
+          <label class="field">New crew (or join one below)
+            <input id="coop-crew" list="coop-crew-list" maxlength="16" placeholder="Crew name, e.g. Hexen">
+          </label>
+          <datalist id="coop-crew-list"></datalist>
+        </div>
+        <div id="coop-crews" data-modes="wars"></div>
+        <div class="row">
+          <button id="coop-start" type="button" class="primary" hidden>Start</button>
+          <span id="coop-start-why" class="mode-help"></span>
+        </div>
+      </div>
+      <div id="saved" hidden>
+        <p id="saved-info"></p>
+        <button id="play-saved" type="button">Play</button>
+        <button id="forget-files" type="button">Forget game files</button>
+      </div>
+      <label class="button">Choose GTA2 folder
+        <input id="folder" type="file" webkitdirectory directory multiple>
+      </label>
+      <div id="freeware">
+        <p>No GTA2 installed? Rockstar released it free in 2004. Download that release from the
+          Internet Archive straight into this browser (346 MB); it is unpacked here and kept for next time.</p>
+        <button id="download-freeware" type="button">Download GTA2 (free, 346 MB)</button>
+        <p id="installer-pick">Or download <code>GTA2INSTALLER.exe</code> from the
+          <a href="https://archive.org/details/gta2_rockstar-classics" target="_blank" rel="noopener">Internet Archive</a>
+          yourself and choose it here:</p>
+        <label class="button secondary">Choose GTA2INSTALLER.exe
+          <input id="installer-file" type="file" accept=".exe,application/octet-stream">
+        </label>
+      </div>
+    </section>
+    <section id="game" hidden>
+      <canvas id="screen" tabindex="0"></canvas>
+    </section>
+    <p id="status" role="status"></p>
+    <p id="coop-banner" role="status" hidden></p>
+    <p id="fps" hidden></p>
+    <div id="tools" hidden>
+      <button id="camera" type="button" title="Modern: smooth zoom (no pumping). Classic: the original camera.">Camera: Modern</button>
+      <button id="view-distance" type="button">View: Normal</button>
+      <button id="map-open" type="button" title="Full map (M): set a waypoint">Map (M)</button>
+      <button id="minimap-toggle" type="button" aria-pressed="true">Minimap</button>
+      <button id="fps-toggle" type="button" aria-pressed="false">FPS</button>
+      <button id="fullscreen" type="button">Full screen</button>
+      <button id="mute" type="button">Mute</button>
+      <button id="saves-open" type="button">Saves</button>
+      <button id="controls-open" type="button" title="Change the game's keys">Controls</button>
+      <button id="export-saves" type="button">Export saves</button>
+      <label>Import saves<input id="import-saves" type="file" accept="application/json,.json"></label>
+    </div>
+  </main>
+  <script type="module" src="shell.js?v=bc2f50ac33"></script>
+</body>
+</html>

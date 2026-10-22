@@ -57,6 +57,13 @@ window.NIMO_GAMES = [
     cdnProviders: ['jsdelivr']
   },
   {
+    id: '1358',
+    title: 'Grand Theft Auto 2',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/M1sterMo/gta2@main/',
+    cdnProbe: 'shell.js',
+    cdnProviders: ['jsdelivr', 'jsdelivr-fastly', 'jsdelivr-gcore', 'rawcdn']
+  },
+  {
     id: '1388880',
     title: 'Doki Doki Literature Club!'
   },
