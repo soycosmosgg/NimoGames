@@ -14,7 +14,12 @@
             data-providers-exact="true"
             data-game-id="1351"
             data-loading="true"></script>
-    <script src="/games/1351/vcweb-loader.js"></script>
+    <script>
+      const gameLoader = document.createElement('script');
+      gameLoader.src = new URL('/games/1351/vcweb-loader.js', location.origin).href;
+      gameLoader.onerror = () => console.error('[Nimo Games] Could not load the Vice City game loader.');
+      document.head.appendChild(gameLoader);
+    </script>
   </head>
   <body data-is-touch="0" data-state-car="0" data-state-car-gun="0" data-state-gun="0" data-state-bike="0"
     data-state-menu="1" data-state-cutscene="0" data-state-mobring="0" data-state-job="0"
