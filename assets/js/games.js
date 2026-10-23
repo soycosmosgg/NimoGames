@@ -42,7 +42,7 @@ window.NIMO_GAMES = [
     id: '322170',
     title: 'Geometry Dash',
     cdnBase: 'https://cdn.jsdelivr.net/gh/linkawaken1979-alt/geometry-dash-wasm@main/',
-    cdnProbe: 'index.html',
+    cdnProbe: 'gd_assets.js',
     cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
   },
   {
