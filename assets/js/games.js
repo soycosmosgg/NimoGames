@@ -41,8 +41,8 @@ window.NIMO_GAMES = [
   {
     id: '322170',
     title: 'Geometry Dash',
-    cdnBase: 'https://cdn.jsdelivr.net/gh/web-dashers/web-dashers.github.io@main/',
-    cdnProbe: 'assets/scripts/game/allObjects.js?latest',
+    cdnBase: 'https://cdn.jsdelivr.net/gh/linkawaken1979-alt/geometry-dash-wasm@main/',
+    cdnProbe: 'index.html',
     cdnProviders: ['jsdelivr', 'jsdelivr-gcore', 'rawcdn']
   },
   {
