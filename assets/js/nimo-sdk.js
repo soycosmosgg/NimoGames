@@ -418,11 +418,17 @@
       display: flex;
       width: min(360px, 76vw);
       align-items: center;
+      gap: 12px;
+    }
+    #${overlayId} .nimo-game-loading__percent {
+      flex: 0 0 60px;
+      width: 60px;
+      height: 30px;
     }
     #${overlayId} .nimo-game-loading__track {
       height: 16px;
-      width: 100%;
-      flex: 0 0 auto;
+      width: auto;
+      flex: 1 1 auto;
       overflow: hidden;
       background: #363636;
       border-radius: 3px;
@@ -433,15 +439,6 @@
       background: #fff;
       border-radius: inherit;
       transition: width 180ms ease-out;
-    }
-    #${overlayId} .nimo-game-loading__percent {
-      position: absolute;
-      left: calc(100% + 16px);
-      min-width: 38px;
-      color: #fff;
-      font: 500 13px/1 system-ui, sans-serif;
-      font-variant-numeric: tabular-nums;
-      text-align: right;
     }
     @media (prefers-reduced-motion: reduce) {
       #${overlayId},
@@ -457,6 +454,7 @@
 
     const overlay = document.createElement('div');
     overlay.id = overlayId;
+    overlay.setAttribute('data-noscramble', '');
     overlay.setAttribute('role', 'status');
     overlay.setAttribute('aria-label', 'Cargando juego');
     overlay.innerHTML = `
@@ -468,7 +466,8 @@
             aria-valuemax="100" aria-valuenow="0">
             <div class="nimo-game-loading__fill"></div>
           </div>
-          <span class="nimo-game-loading__percent">0%</span>
+          <canvas class="nimo-game-loading__percent" width="120" height="60"
+            data-noscramble aria-hidden="true"></canvas>
         </div>
       </div>
     `;
@@ -476,11 +475,21 @@
 
     const fill = overlay.querySelector('.nimo-game-loading__fill');
     const track = overlay.querySelector('.nimo-game-loading__track');
-    const percentLabel = overlay.querySelector('.nimo-game-loading__percent');
+    const percentCanvas = overlay.querySelector('.nimo-game-loading__percent');
+    const percentContext = percentCanvas.getContext('2d');
     const beganAt = performance.now();
     const observedLoaders = new Set();
     let finished = false;
     let lastPercent = 0;
+
+    function drawPercent(percent) {
+      percentContext.clearRect(0, 0, percentCanvas.width, percentCanvas.height);
+      percentContext.fillStyle = '#fff';
+      percentContext.font = '500 48px system-ui, sans-serif';
+      percentContext.textAlign = 'left';
+      percentContext.textBaseline = 'middle';
+      percentContext.fillText(`${percent}%`, 0, percentCanvas.height / 2);
+    }
 
     function isVisible(element) {
       const styles = getComputedStyle(element);
@@ -541,7 +550,7 @@
       if (finished) return;
       finished = true;
       fill.style.width = '100%';
-      percentLabel.textContent = '100%';
+      drawPercent(100);
       track.setAttribute('aria-valuenow', '100');
       setTimeout(() => {
         overlay.classList.add('nimo-game-loading--hidden');
@@ -562,7 +571,7 @@
       const percent = Math.max(lastPercent, readProgress());
       lastPercent = percent;
       fill.style.width = `${percent}%`;
-      percentLabel.textContent = `${percent}%`;
+      drawPercent(percent);
       track.setAttribute('aria-valuenow', String(percent));
 
       const loaderFinished = observedLoaders.size > 0 &&
@@ -577,6 +586,9 @@
 
       setTimeout(update, 200);
     }
+
+    window.addEventListener('nimo-game-ready', hide, { once: true });
+    window.addEventListener('nimo-game-error', hide, { once: true });
 
     for (const frame of document.querySelectorAll('iframe')) {
       frame.addEventListener('load', () => {
