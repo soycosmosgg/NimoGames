@@ -60,11 +60,13 @@ Open <http://localhost:8000>. A local web server is recommended because some bro
 assets/
   css/main.css       Main interface styles
   js/app.js          Library, player, recents, and interface behavior
-  js/games.js        Game catalog and launch URLs
+  js/games.js        Generated game catalog and launch URLs
   js/nimo-sdk.js     CDN selection, fallbacks, and the shared game-loading screen
+scripts/             Build-time catalog generator
 admin/               Password-protected dashboard and live message tool
 functions/api/       Cloudflare Pages API endpoints
 migrations/          D1 database and analytics schema
+package.json         Build command for Cloudflare Pages
 favicon/             Browser, Apple, and web-app icons
 games/
   <id>/              Game launch pages
@@ -74,9 +76,13 @@ robots.txt           Crawler directives and sitemap location
 sitemap.xml          Public pages for search engines
 ```
 
-## Update the game catalog
+## Add a game
 
-Edit `window.NIMO_GAMES` in `assets/js/games.js`. Each entry needs an `id` and title; artwork URLs and `playUrl` are generated from the ID. Keep optional game-specific settings such as CDN configuration or custom metadata when needed. Game pages can use `data-loading="true"` on the Nimo SDK script to enable its shared loading screen. Make sure the game ID points to an existing game page and update `sitemap.xml` when adding or removing indexable pages.
+The catalog in `assets/js/games.js` is generated from the folders under `games/`. To add a game, create `games/<numeric-id>/index.html` with a page title and add its `portrait.webp`, `hero.webp`, and `logo.webp` artwork under `images/<numeric-id>/` in the image project served from `cdn-ngames.pages.dev`. The game page title becomes its catalog title after a trailing `| Nimo Games` is removed. If the page includes the Nimo SDK script, its `data-base`, `data-probe`, `data-providers`, `data-providers-exact`, and `data-game-id` attributes are used for the catalog CDN settings; `data-base` and `data-probe` must be supplied together, and `data-game-id` must match the folder.
+
+An optional `games/<numeric-id>/catalog.json` can override `title`, `meta`, CDN settings, or `sandbox`, or set `"exclude": true` for a non-playable placeholder page. The generated `games.js` also supplies the standard artwork URLs and `playUrl`; do not edit it directly.
+
+Run `npm run build` before serving the site locally or deploying. In Cloudflare Pages, set the build command to `npm run build` and the output directory to `.`. This requires no installed npm packages. Remember to update `sitemap.xml` when adding or removing indexable game pages.
 
 ## Links
 

@@ -943,8 +943,8 @@
 
   function renderFeaturedGames() {
     const featuredCards = document.querySelectorAll('[data-featured-game]');
-    Array.from(featuredCards).forEach((card, index) => {
-      const game = catalogGames[catalogGames.length - 1 - index];
+    Array.from(featuredCards).forEach(card => {
+      const game = catalogGames.find(candidate => candidate.id === card.dataset.featuredGame);
       if (!game) {
         card.hidden = true;
         return;

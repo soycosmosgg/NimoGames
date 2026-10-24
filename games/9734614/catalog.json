@@ -1,0 +1,9 @@
+{
+  "sandbox": [
+    "allow-scripts",
+    "allow-same-origin",
+    "allow-forms",
+    "allow-pointer-lock",
+    "allow-downloads"
+  ]
+}
