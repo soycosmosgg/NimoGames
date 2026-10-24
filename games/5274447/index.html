@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>WorldBox | Nimo Games</title>
+    <meta name="description" content="Play WorldBox on Nimo Games in your browser and shape a living world with creatures, resources, and endless sandbox creations.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/5274447/index.html">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="./"
+            data-probe="Build/WorldFox.loader.js"
+            data-game-id="5274447"
+            data-loading="true"></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head><body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+
+      <div id="unity-warning"></div>
+    </div>
+
+    <script>
+      window.addEventListener("load", function () {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (registrations) {
+            registrations.forEach(function (registration) {
+              registration.unregister();
+            });
+          });
+        }
+      });
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display =
+            warningBanner.children.length ? "block" : "none";
+        }
+
+        var div = document.createElement("div");
+        div.innerHTML = msg;
+
+        warningBanner.appendChild(div);
+
+        if (type == "error") {
+          div.style = "background: red; padding: 10px;";
+        } else {
+          if (type == "warning") {
+            div.style = "background: yellow; padding: 10px;";
+          }
+
+          setTimeout(function () {
+            if (div.parentNode === warningBanner) {
+              warningBanner.removeChild(div);
+            }
+
+            updateBannerVisibility();
+          }, 5000);
+        }
+
+        updateBannerVisibility();
+      }
+
+      var cdnBase = "./";
+      var buildUrl = cdnBase + "Build";
+      var loaderUrl = buildUrl + "/WorldFox.loader.js";
+
+      var config = {
+        dataUrl: buildUrl + "/WorldFox.data",
+        frameworkUrl: buildUrl + "/WorldFox.framework.js",
+        codeUrl: buildUrl + "/WorldFox.wasm",
+        streamingAssetsUrl: cdnBase + "StreamingAssets",
+        companyName: "mkarpenko",
+        productName: "WorldBox",
+        productVersion: "0.51.2",
+        showBanner: unityShowBanner
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement("meta");
+
+        meta.name = "viewport";
+        meta.content =
+          "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+
+        document
+          .getElementsByTagName("head")[0]
+          .appendChild(meta);
+      }
+
+      loadingBar.style.display = "block";
+
+      function installSplitFileLoader(manifest) {
+        var originalFetch = window.fetch.bind(window);
+        var rootUrl = new URL(cdnBase, window.location.href);
+
+        function normalizeSplitPath(input) {
+          var url = new URL(
+            typeof input === "string" ? input : input.url,
+            rootUrl
+          );
+
+          var path = decodeURIComponent(url.pathname);
+          var rootPath = rootUrl.pathname;
+
+          if (path.indexOf(rootPath) === 0) {
+            path = path.substring(rootPath.length);
+          } else {
+            path = path.replace(/^\/+/, "");
+          }
+
+          return path.replace(/\\/g, "/");
+        }
+
+        function contentTypeFor(path) {
+          if (path.endsWith(".wasm")) {
+            return "application/wasm";
+          }
+
+          if (path.endsWith(".js")) {
+            return "application/javascript";
+          }
+
+          if (
+            path.endsWith(".data") ||
+            path.endsWith(".bank")
+          ) {
+            return "application/octet-stream";
+          }
+
+          return "application/octet-stream";
+        }
+
+        window.fetch = function (input, init) {
+          var splitPath = normalizeSplitPath(input);
+          var entry = manifest[splitPath];
+
+          if (!entry) {
+            return originalFetch(input, init);
+          }
+
+          return Promise.all(
+            entry.parts.map(function (part) {
+              var partUrl = new URL(part, rootUrl).href;
+
+              return originalFetch(partUrl, init).then(function (response) {
+                if (!response.ok) {
+                  throw new Error(
+                    "Failed to load split part " +
+                    part +
+                    ": " +
+                    response.status
+                  );
+                }
+
+                return response.arrayBuffer();
+              });
+            })
+          ).then(function (buffers) {
+            return new Response(
+              new Blob(buffers, {
+                type: contentTypeFor(splitPath)
+              }),
+              {
+                status: 200,
+                statusText: "OK",
+                headers: {
+                  "Content-Type": contentTypeFor(splitPath),
+                  "Content-Length": String(entry.size)
+                }
+              }
+            );
+          });
+        };
+      }
+
+      var script = document.createElement("script");
+
+      script.src = loaderUrl;
+
+      script.onload = function () {
+        createUnityInstance(
+          canvas,
+          config,
+          function (progress) {
+            progressBarFull.style.width =
+              100 * progress + "%";
+          }
+        )
+          .then(function (unityInstance) {
+            loadingBar.style.display = "none";
+          })
+          .catch(function (message) {
+            console.error(message);
+            alert(message);
+          });
+      };
+
+      fetch(buildUrl + "/split-files.json")
+        .then(function (response) {
+          return response.ok ? response.json() : {};
+        })
+        .then(function (manifest) {
+          installSplitFileLoader(manifest || {});
+          document.body.appendChild(script);
+        })
+        .catch(function () {
+          installSplitFileLoader({});
+          document.body.appendChild(script);
+        });
+    </script>
+  </body>
+</html>
