@@ -167,28 +167,9 @@ async function discoverParts(url) {
 async function fetchPart(url, onBytes) {
   var res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch " + url + " (HTTP " + res.status + ")");
-  if (!res.body) {
-    var buf = await res.arrayBuffer();
-    onBytes(buf.byteLength);
-    return buf;
-  }
-  var reader = res.body.getReader();
-  var chunks = [];
-  var total = 0;
-  while (true) {
-    var step = await reader.read();
-    if (step.done) break;
-    chunks.push(step.value);
-    total += step.value.length;
-    onBytes(step.value.length);
-  }
-  var out = new Uint8Array(total);
-  var offset = 0;
-  for (var i = 0; i < chunks.length; i++) {
-    out.set(chunks[i], offset);
-    offset += chunks[i].length;
-  }
-  return out;
+  var part = await res.blob();
+  onBytes(part.size);
+  return part;
 }
 
 var objectUrls = [];
