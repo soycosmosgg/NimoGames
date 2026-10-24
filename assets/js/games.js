@@ -371,6 +371,16 @@ window.NIMO_GAMES = [
     "playUrl": "games/5255287/index.html"
   },
   {
+    "id": "5274447",
+    "title": "WorldBox",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/worldbox/",
+    "cdnProbe": "Build/WorldFox.loader.js",
+    "hero": "https://cdn-ngames.pages.dev/images/5274447/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5274447/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5274447/logo.webp",
+    "playUrl": "games/5274447/index.html"
+  },
+  {
     "id": "5326261",
     "title": "Brotato",
     "cdnBase": "https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/",

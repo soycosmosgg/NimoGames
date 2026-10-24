@@ -7,7 +7,7 @@
     <meta name="description" content="Play WorldBox on Nimo Games in your browser and shape a living world with creatures, resources, and endless sandbox creations.">
     <link rel="canonical" href="https://nimogames.qzz.io/games/5274447/index.html">
     <script src="/assets/js/nimo-sdk.js"
-            data-base="./"
+            data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/worldbox/"
             data-probe="Build/WorldFox.loader.js"
             data-game-id="5274447"
             data-loading="true"></script>
@@ -75,7 +75,7 @@
         updateBannerVisibility();
       }
 
-      var cdnBase = "./";
+      var cdnBase = window.NIMO_CDN_BASE || "./";
       var buildUrl = cdnBase + "Build";
       var loaderUrl = buildUrl + "/WorldFox.loader.js";
 
