@@ -93,6 +93,16 @@ window.NIMO_GAMES = [
     "playUrl": "games/12100/index.html"
   },
   {
+    "id": "23456",
+    "title": "Forager",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/",
+    "cdnProbe": "ui/loading.json",
+    "hero": "https://cdn-ngames.pages.dev/images/23456/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/23456/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/23456/logo.webp",
+    "playUrl": "games/23456/index.html"
+  },
+  {
     "id": "023978",
     "title": "Blacktop Police Chase",
     "cdnBase": "https://cdn.jsdelivr.net/gh/slytegg/UGS-Files@main/023978/",

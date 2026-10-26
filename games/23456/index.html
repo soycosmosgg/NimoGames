@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#243f69" />
+    <title>Forager</title>
+    <script
+      src="/assets/js/nimo-sdk.js"
+      data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/"
+      data-probe="ui/loading.json"
+      data-game-id="23456"
+    ></script>
+    <link rel="icon" href="./assets/icon.png" type="image/png" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #191726;
+        --cream: #fff5c4;
+        --gold: #ffc431;
+        --sky: #3198f5;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        height: 100dvh;
+        overflow: hidden;
+        background: #15283f;
+        color: var(--cream);
+        font:
+          700 14px/1.5 "Courier New",
+          monospace;
+        background-image:
+          linear-gradient(90deg, #ffffff03 1px, transparent 1px),
+          linear-gradient(#ffffff03 1px, transparent 1px);
+        background-size: 32px 32px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .shell {
+        width: 100%;
+        height: 100dvh;
+      }
+      main {
+        height: 100%;
+      }
+      .stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border: 4px solid var(--ink);
+        background: #142034;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: min(100%, calc((100dvh - 8px) * 16 / 9));
+        height: auto;
+        image-rendering: pixelated;
+        visibility: hidden;
+        outline: none;
+      }
+      .playing canvas {
+        visibility: visible;
+      }
+      .welcome {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--sky);
+        background-image:
+          linear-gradient(
+            45deg,
+            #ffffff08 25%,
+            transparent 25%,
+            transparent 75%,
+            #ffffff08 75%
+          ),
+          linear-gradient(
+            45deg,
+            #ffffff08 25%,
+            transparent 25%,
+            transparent 75%,
+            #ffffff08 75%
+          );
+        background-position:
+          0 0,
+          24px 24px;
+        background-size: 48px 48px;
+        padding: 20px;
+        isolation: isolate;
+      }
+      .welcome:before,
+      .welcome:after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        height: 44px;
+        background: #fff5;
+        box-shadow:
+          24px -20px 0 #fff5,
+          -24px 20px 0 #fff3;
+      }
+      .welcome:before {
+        width: 110px;
+        top: 15%;
+        left: 5%;
+      }
+      .welcome:after {
+        width: 80px;
+        top: 28%;
+        right: 5%;
+      }
+      .logo {
+        width: min(440px, 42%);
+        height: auto;
+        margin: -24px 0 -4px;
+        filter: drop-shadow(0 5px 0 #193e6450);
+      }
+      #status {
+        margin: 16px 0 0;
+        font-size: 16px;
+        color: #fff5c4;
+        text-shadow: 2px 2px #24518b;
+      }
+      .loading {
+        width: min(380px, 80%);
+        margin-top: 16px;
+      }
+      .percentage {
+        text-align: right;
+        margin-bottom: 6px;
+        color: #fff5c4;
+        font-size: 12px;
+        text-shadow: 1px 1px #24518b;
+      }
+      .meter {
+        height: 24px;
+        padding: 3px;
+        background: var(--ink);
+        border: 2px solid #9ab3d0;
+      }
+      .fill {
+        height: 100%;
+        width: 0;
+        background: var(--gold);
+        box-shadow:
+          inset 0 4px #fff077,
+          inset 0 -4px #d78228;
+        transition: width 0.16s linear;
+      }
+      .failed #status {
+        color: #ffe28b;
+        max-width: 440px;
+        text-align: center;
+      }
+      @media (max-width: 700px) {
+        .logo {
+          width: min(280px, 70%);
+          margin: 0;
+        }
+        #status {
+          font-size: 13px;
+        }
+      }
+      @media (max-height: 500px) {
+        .logo {
+          width: min(230px, 35%);
+          margin: 0;
+        }
+        .welcome {
+          padding: 12px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <main>
+        <div class="stage" id="stage">
+          <canvas
+            id="canvas"
+            width="1280"
+            height="720"
+            tabindex="0"
+            aria-label="Forager game"
+          ></canvas>
+          <div class="welcome" id="welcome">
+            <img class="logo" src="./ui/logo.png" alt="Forager" />
+            <p id="status" role="status" aria-live="polite" hidden></p>
+            <div class="loading" id="loading">
+              <div class="percentage" id="percentage">0%</div>
+              <div
+                class="meter"
+                id="progress"
+                role="progressbar"
+                aria-label="Loading your world"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow="0"
+              >
+                <div class="fill" id="fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <pre id="log" hidden></pre>
+    </div>
+    <script type="module">
+      import createRunner from "./butterscotch.mjs";
+      const canvas = document.querySelector("#canvas"),
+        log = document.querySelector("#log"),
+        status = document.querySelector("#status"),
+        stage = document.querySelector("#stage"),
+        welcome = document.querySelector("#welcome");
+      const loading = document.querySelector("#loading"),
+        percentage = document.querySelector("#percentage"),
+        progress = document.querySelector("#progress"),
+        fill = document.querySelector("#fill");
+      const print = (...args) => {
+        console.log(...args);
+        log.textContent += args.join(" ") + "\n";
+        if (log.textContent.length > 200000)
+          log.textContent = log.textContent.slice(-160000);
+      };
+      function showError(message) {
+        stage.classList.add("failed");
+        stage.classList.remove("playing");
+        welcome.hidden = false;
+        loading.hidden = true;
+        status.hidden = false;
+        status.textContent = message;
+      }
+      window.onerror = (message) => {
+        showError(
+          "Something interrupted your adventure. Please reload and try again.",
+        );
+        print(message);
+      };
+      let assetCache, assetVersion;
+      let loaded = 0,
+        total = 1;
+      function updateProgress(
+        value = Math.min(99, Math.floor((loaded / total) * 100)),
+      ) {
+        fill.style.width = value + "%";
+        percentage.textContent = value + "%";
+        progress.setAttribute("aria-valuenow", String(value));
+      }
+      async function fetchBytes(path) {
+        const url = new URL("./" + path, location.href);
+        url.searchParams.set("v", assetVersion);
+        const cached = await assetCache.match(url);
+        const response = cached || (await fetch(url));
+        if (!response.ok)
+          throw new Error(
+            "A game file could not be downloaded. Check your connection and reload.",
+          );
+        const stored = cached
+          ? Promise.resolve()
+          : assetCache
+              .put(url, response.clone())
+              .catch((error) =>
+                print("Could not cache game file:", error.message),
+              );
+        if (!response.body) {
+          const bytes = new Uint8Array(await response.arrayBuffer());
+          loaded += bytes.length;
+          updateProgress();
+          await stored;
+          return bytes;
+        }
+        const reader = response.body.getReader(),
+          chunks = [];
+        let length = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          length += value.length;
+          loaded += value.length;
+          updateProgress();
+        }
+        const bytes = new Uint8Array(length);
+        let offset = 0;
+        for (const chunk of chunks) {
+          bytes.set(chunk, offset);
+          offset += chunk.length;
+        }
+        await stored;
+        return bytes;
+      }
+      async function startGame() {
+        try {
+          if (
+            typeof WebAssembly.Suspending !== "function" ||
+            typeof WebAssembly.promising !== "function"
+          )
+            throw new Error(
+              "Open this game in an up-to-date Chrome or Firefox browser.",
+            );
+          if (!navigator.storage?.getDirectory)
+            throw new Error(
+              "This browser cannot store game saves. Open in an up-to-date Chrome or Firefox browser.",
+            );
+          if (!crossOriginIsolated)
+            throw new Error(
+              "This game needs cross-origin isolation. Start the local server with `node serve-local.mjs` and open http://localhost:8000.",
+            );
+
+          const manifestResponse = await fetch("./ui/loading.json");
+          if (!manifestResponse.ok)
+            throw new Error(
+              "Loading information could not be downloaded. Please reload.",
+            );
+          const manifest = await manifestResponse.json();
+          assetVersion = manifest.version;
+          assetCache = await caches.open("forager-assets-" + assetVersion);
+          total = Object.values(manifest.bytes).reduce(
+            (sum, bytes) => sum + bytes,
+            0,
+          );
+          updateProgress();
+          const wasmBinary = await fetchBytes("butterscotch.wasm");
+          const M = await createRunner({
+            canvas,
+            wasmBinary,
+            print,
+            printErr: print,
+          });
+          window.runner = M;
+          const keys = new Set(),
+            buttons = new Set();
+          window.addEventListener("keydown", (e) => {
+            if (e.target === canvas) {
+              e.preventDefault();
+              if (!keys.has(e.keyCode)) {
+                keys.add(e.keyCode);
+                M._onKeyDown(e.keyCode);
+              }
+            }
+          });
+          window.addEventListener("keyup", (e) => {
+            if (keys.delete(e.keyCode)) {
+              e.preventDefault();
+              M._onKeyUp(e.keyCode);
+            }
+          });
+          canvas.addEventListener("mousemove", (e) => {
+            const r = canvas.getBoundingClientRect();
+            M._onMouseMove(
+              ((e.clientX - r.left) * canvas.width) / r.width,
+              ((e.clientY - r.top) * canvas.height) / r.height,
+            );
+          });
+          canvas.addEventListener(
+            "wheel",
+            (e) => {
+              e.preventDefault();
+              M._onMouseWheel(-e.deltaY);
+            },
+            { passive: false },
+          );
+          canvas.addEventListener("mousedown", (e) => {
+            canvas.focus();
+            const b = [1, 3, 2][e.button];
+            if (b !== undefined && !buttons.has(b)) {
+              buttons.add(b);
+              M._onMouseDown(b);
+            }
+          });
+          window.addEventListener("mouseup", (e) => {
+            const b = [1, 3, 2][e.button];
+            if (buttons.delete(b)) M._onMouseUp(b);
+          });
+          const releaseInputs = () => {
+            for (const k of keys) M._onKeyUp(k);
+            keys.clear();
+            for (const b of buttons) M._onMouseUp(b);
+            buttons.clear();
+          };
+          window.addEventListener("blur", releaseInputs);
+          document.addEventListener("visibilitychange", () => {
+            if (document.hidden) releaseInputs();
+          });
+          canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+          if (
+            (await M.ccall("mountOpfs", "number", [], [], { async: true })) !==
+            0
+          )
+            throw new Error(
+              "Game save storage could not be opened. Check this browser’s storage settings and reload.",
+            );
+          M.FS.mkdirTree("/game/assets/local");
+          let gameBinary = new Uint8Array(
+            manifest.gameParts.reduce(
+              (size, part) => size + manifest.bytes[part],
+              0,
+            ),
+          );
+          let gameOffset = 0;
+          for (const part of manifest.gameParts) {
+            const bytes = await fetchBytes(part);
+            if (bytes.byteLength !== manifest.bytes[part])
+              throw new Error("A game file part is incomplete. Please reload.");
+            gameBinary.set(bytes, gameOffset);
+            gameOffset += bytes.byteLength;
+          }
+          M.FS.writeFile("/game/assets/game.unx", gameBinary);
+          gameBinary = null;
+          for (const file of Object.keys(manifest.bytes)) {
+            if (file === "butterscotch.wasm" || manifest.gameParts.includes(file))
+              continue;
+            M.FS.writeFile("/game/" + file, await fetchBytes(file));
+          }
+
+          for (const name of await caches.keys()) {
+            if (
+              name.startsWith("forager-assets-") &&
+              name !== "forager-assets-" + assetVersion
+            )
+              await caches.delete(name);
+          }
+
+          const args = [
+            "/game/assets/game.unx",
+            "--save-folder",
+            "/butterscotch/forager",
+            "--os-type",
+            "linux",
+            "--disable-log-colours",
+            ...JSON.parse(
+              new URLSearchParams(location.search).get("args") || "[]",
+            ),
+          ];
+          const ptrs = args.map((x) => M.stringToNewUTF8(x)),
+            argv = M._malloc(ptrs.length * 4);
+          ptrs.forEach((p, i) => M.setValue(argv + i * 4, p, "i32"));
+          let started = false;
+          const reveal = setInterval(() => {
+            if (M._getRunnerFrameCount() > 0) {
+              clearInterval(reveal);
+              started = true;
+              updateProgress(100);
+              stage.classList.add("playing");
+              welcome.hidden = true;
+              canvas.focus();
+            }
+          }, 100);
+          try {
+            const result = await M.ccall(
+              "startRunner",
+              "number",
+              ["number", "number"],
+              [args.length, argv],
+              { async: true },
+            );
+            clearInterval(reveal);
+            if (result !== 0)
+              throw new Error(
+                "Forager could not start. Please reload and try again.",
+              );
+            showError(
+              started
+                ? "Your adventure has ended. Reload to play again."
+                : "Forager stopped before opening. Please reload.",
+            );
+          } finally {
+            clearInterval(reveal);
+          }
+        } catch (e) {
+          showError(e.message || "Game failed to start");
+          print(e.stack || e);
+        }
+      }
+      startGame();
+    </script>
+  </body>
+</html>
