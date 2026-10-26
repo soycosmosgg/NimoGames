@@ -98,10 +98,6 @@ window.NIMO_GAMES = [
     "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/",
     "cdnProbe": "ui/loading.json",
     "cdnProviders": [
-      "jsdelivr",
-      "jsdelivr-fastly",
-      "jsdelivr-gcore",
-      "rawcdn",
       "github-raw"
     ],
     "cdnProvidersExact": true,
@@ -376,9 +372,9 @@ window.NIMO_GAMES = [
   },
   {
     "id": "5248037",
-    "title": "Mindustry Web Port",
-    "cdnBase": "https://cdn.jsdelivr.net/gh/khoichon/mindustry-web@main/",
-    "cdnProbe": "background.png",
+    "title": "Mindustry",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/mindustry/",
+    "cdnProbe": "asset-manifest.txt",
     "hero": "https://cdn-ngames.pages.dev/images/5248037/hero.webp",
     "portrait": "https://cdn-ngames.pages.dev/images/5248037/portrait.webp",
     "logo": "https://cdn-ngames.pages.dev/images/5248037/logo.webp",

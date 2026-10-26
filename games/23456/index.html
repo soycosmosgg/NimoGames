@@ -9,7 +9,7 @@
       src="/assets/js/nimo-sdk.js"
       data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/"
       data-probe="ui/loading.json"
-      data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn,github-raw"
+      data-providers="github-raw"
       data-providers-exact="true"
       data-game-id="23456"
     ></script>
@@ -265,6 +265,24 @@
         percentage.textContent = value + "%";
         progress.setAttribute("aria-valuenow", String(value));
       }
+      // GitHub Raw serves text files with LF even when the manifest counts CRLF.
+      function normalizeTextAssetLineEndings(path, bytes, expectedLength) {
+        if (!/\.(?:ini|json|txt)$/i.test(path) || expectedLength <= bytes.length)
+          return bytes;
+        let lineFeeds = 0;
+        for (const byte of bytes) {
+          if (byte === 13) return bytes;
+          if (byte === 10) lineFeeds++;
+        }
+        if (bytes.length + lineFeeds !== expectedLength) return bytes;
+        const normalized = new Uint8Array(expectedLength);
+        let offset = 0;
+        for (const byte of bytes) {
+          if (byte === 10) normalized[offset++] = 13;
+          normalized[offset++] = byte;
+        }
+        return normalized;
+      }
       async function fetchBytes(path, expectedLength) {
         const cdnBases = window.NIMO_CDN_BASES?.length
           ? [...window.NIMO_CDN_BASES]
@@ -310,10 +328,20 @@
                 offset += chunk.length;
               }
             }
-            if (expectedLength !== undefined && bytes.byteLength !== expectedLength)
-              throw new Error(
-                `received ${bytes.byteLength} of ${expectedLength} bytes`,
+            if (expectedLength !== undefined && bytes.byteLength !== expectedLength) {
+              const normalized = normalizeTextAssetLineEndings(
+                path,
+                bytes,
+                expectedLength,
               );
+              if (normalized.byteLength !== expectedLength)
+                throw new Error(
+                  `received ${bytes.byteLength} of ${expectedLength} bytes`,
+                );
+              loaded += normalized.byteLength - bytes.byteLength;
+              bytes = normalized;
+              updateProgress();
+            }
             if (cacheCopy)
               await assetCache
                 .put(url, cacheCopy)
