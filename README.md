@@ -54,6 +54,8 @@ python -m http.server 8000
 
 Open <http://localhost:8000>. A local web server is recommended because some browser features do not work consistently when opening `index.html` directly as a file.
 
+Forager requires cross-origin isolation to run its WebAssembly build inside the game player. Cloudflare Pages applies the required COOP and COEP headers to the home page and Forager route through `_headers`; preserve those rules when deploying. To run the downloaded Forager source by itself, use its `serve-local.mjs` server.
+
 ## Project structure
 
 ```text
