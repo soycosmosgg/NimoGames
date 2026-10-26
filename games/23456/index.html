@@ -266,7 +266,7 @@
         progress.setAttribute("aria-valuenow", String(value));
       }
       async function fetchBytes(path) {
-        const url = new URL("./" + path, location.href);
+        const url = new URL("./" + path, document.baseURI);
         url.searchParams.set("v", assetVersion);
         const cached = await assetCache.match(url);
         const response = cached || (await fetch(url));
