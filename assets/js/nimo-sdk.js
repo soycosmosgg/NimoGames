@@ -288,6 +288,11 @@
     ? requestedProvider
     : availableBases[0].provider;
   const selectedBase = availableBases.find(cdn => cdn.provider === provider).base;
+  if (requestedProvider && !parentSelectedProvider) {
+    const cleanUrl = new URL(location.href);
+    cleanUrl.searchParams.delete('nimoCdn');
+    history.replaceState(history.state, '', cleanUrl);
+  }
 
   window.NIMO_CDN_BASES = Object.freeze(
     (availableBases || []).map(({ provider, base }) =>

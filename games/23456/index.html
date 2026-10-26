@@ -427,9 +427,9 @@
             "butterscotch.wasm",
             manifest.bytes["butterscotch.wasm"],
           );
-          const { default: createRunner } = await import(
-            "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/butterscotch.js"
-          );
+          const loaderUrl = new URL("butterscotch.js", window.NIMO_CDN_BASE);
+          loaderUrl.searchParams.set("v", assetVersion);
+          const { default: createRunner } = await import(loaderUrl.href);
           const M = await createRunner({
             canvas,
             wasmBinary,
