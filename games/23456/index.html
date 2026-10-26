@@ -444,14 +444,9 @@
                   "_wasmfs_mkdir",
                   "_wasmfs_write_file",
                 ]);
-                const exports = new Proxy(instance.exports, {
-                  get(target, name) {
-                    const value = Reflect.get(target, name);
-                    return asyncWasmFsExports.has(name)
-                      ? WebAssembly.promising(value)
-                      : value;
-                  },
-                });
+                const exports = { ...instance.exports };
+                for (const name of asyncWasmFsExports)
+                  exports[name] = WebAssembly.promising(exports[name]);
                 runnerOptions._wasmfs_mkdir = exports._wasmfs_mkdir;
                 runnerOptions._wasmfs_write_file = exports._wasmfs_write_file;
                 receiveInstance({ exports });
