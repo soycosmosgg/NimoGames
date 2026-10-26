@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mindustry Web Port</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="og:title" content="Mindustry Web Port" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:title" content="Mindustry Web Port" />
+    <meta name="description" content="A web port of the game Mindustry, with as many features baked in as possible."/>
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/khoichon/mindustry-web@main/"
+            data-probe="background.png"
+            data-game-id="5248037"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" />
+    
+    <style>
+html {  line-height: 1.15;}body {  margin: 0;}* {  box-sizing: border-box;  border-width: 0;  border-style: solid;  -webkit-font-smoothing: antialiased;}p,li,ul,pre,div,h1,h2,h3,h4,h5,h6,figure,blockquote,figcaption {  margin: 0;  padding: 0;}button {  background-color: transparent;}button,input,optgroup,select,textarea {  font-family: inherit;  font-size: 100%;  line-height: 1.15;  margin: 0;}button,select {  text-transform: none;}button,[type="button"],[type="reset"],[type="submit"] {  -webkit-appearance: button;  color: inherit;}button::-moz-focus-inner,[type="button"]::-moz-focus-inner,[type="reset"]::-moz-focus-inner,[type="submit"]::-moz-focus-inner {  border-style: none;  padding: 0;}button:-moz-focus,[type="button"]:-moz-focus,[type="reset"]:-moz-focus,[type="submit"]:-moz-focus {  outline: 1px dotted ButtonText;}a {  color: inherit;  text-decoration: inherit;}pre {  white-space: normal;}input {  padding: 2px 4px;}img {  display: block;}details {  display: block;  margin: 0;  padding: 0;}summary::-webkit-details-marker {  display: none;}html { scroll-behavior: smooth  }
+
+html { font-family: Inter; font-size: 16px; }
+body { font-weight: 400; font-style: normal; text-decoration: none; text-transform: none; letter-spacing: normal; line-height: 1.15; color: var(--dl-color-theme-neutral-dark); background: var(--dl-color-theme-neutral-light); fill: var(--dl-color-theme-neutral-dark); }
+
+a:has(> [class*="-product-card-elm"]) { display: contents; }
+[class*="-product-item-wrapper-elm"] > a { display: contents; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible, [role="button"]:focus-visible, [role="link"]:focus-visible { outline: 2px solid var(--color-primary, #2563eb); outline-offset: 2px; }
+[tabindex="-1"]:focus-visible { outline: none; }
+
+:root {
+  --dl-layout-size-large: 144px;
+  --dl-layout-size-small: 48px;
+  --dl-layout-space-unit: 16px;
+  --dl-layout-size-medium: 96px;
+  --dl-layout-size-xlarge: 192px;
+  --dl-layout-size-xsmall: 16px;
+  --dl-color-theme-accent1: #FFFFFF;
+  --dl-color-theme-accent2: #F5D1B0;
+  --dl-layout-radius-round: 50%;
+  --dl-layout-size-xxlarge: 288px;
+  --dl-color-theme-primary1: #BF4408;
+  --dl-color-theme-primary2: #E65103;
+  --dl-layout-size-maxwidth: 1400px;
+  --dl-layout-radius-radius2: 2px;
+  --dl-layout-radius-radius4: 4px;
+  --dl-layout-radius-radius8: 8px;
+  --dl-layout-space-halfunit: 8px;
+  --dl-layout-space-sixunits: 96px;
+  --dl-layout-space-twounits: 32px;
+  --dl-color-theme-secondary1: #FFFFFF;
+  --dl-color-theme-secondary2: #FBF1EB;
+  --dl-layout-space-fiveunits: 80px;
+  --dl-layout-space-fourunits: 64px;
+  --dl-layout-space-threeunits: 48px;
+  --dl-color-theme-neutral-dark: #191818;
+  --dl-layout-radius-cardradius: 8px;
+  --dl-color-theme-neutral-light: #FBFAF9;
+  --dl-layout-radius-imageradius: 8px;
+  --dl-layout-radius-inputradius: 24px;
+  --dl-layout-radius-buttonradius: 24px;
+  --dl-layout-space-oneandhalfunits: 24px;
+}
+ 
+ 
+.button-outline {
+  gap: var(--dl-layout-space-halfunit);
+  fill: var(--dl-color-theme-primary1);
+  color: var(--dl-color-theme-primary1);
+  border: 1px solid;
+  cursor: pointer;
+  display: flex;
+  transition: 0.3s;
+  align-items: center;
+  font-weight: bold;
+  padding-top: var(--dl-layout-space-halfunit);
+  white-space: nowrap;
+  border-color: var(--dl-color-theme-primary1);
+  padding-left: var(--dl-layout-space-oneandhalfunits);
+  border-radius: var(--dl-layout-radius-buttonradius);
+  padding-right: var(--dl-layout-space-oneandhalfunits);
+  padding-bottom: var(--dl-layout-space-halfunit);
+  justify-content: center;
+}
+ 
+.button-outline:hover {
+  fill: var(--dl-color-theme-secondary2);
+  color: var(--dl-color-theme-secondary2);
+  border-color: var(--dl-color-theme-primary2);
+  background-color: var(--dl-color-theme-primary2);
+}
+ 
+.heading-1 {
+  font-size: 48px;
+  font-family: STIX Two Text;
+  font-weight: 700;
+  line-height: 1.5;
+}
+ 
+.heading-2 {
+  font-size: 35px;
+  font-family: STIX Two Text;
+  font-weight: 600;
+  line-height: 1.5;
+}
+ 
+.heading-3 {
+  font-size: 26px;
+  font-family: STIX Two Text;
+  font-weight: 600;
+  line-height: 1.5;
+}
+ 
+.body-large {
+  font-size: 18px;
+  font-family: Noto Sans;
+  line-height: 1.5;
+}
+ 
+.body-small {
+  font-size: 16px;
+  font-family: Noto Sans;
+  line-height: 1.5;
+}
+ 
+.section-padding {
+  width: 100%;
+  display: flex;
+  padding: var(--dl-layout-space-fiveunits);
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.section-max-width {
+  width: 100%;
+  max-width: var(--dl-layout-size-maxwidth);
+}
+ 
+.img-ratio-16-9 {
+  width: 100%;
+  object-fit: cover;
+  aspect-ratio: 16/9;
+  border-radius: var(--dl-layout-radius-imageradius);
+}
+ 
+.img-ratio-4-3 {
+  width: 100%;
+  object-fit: cover;
+  aspect-ratio: 4/3;
+  border-radius: var(--dl-layout-radius-imageradius);
+}
+ 
+.flex-column {
+  gap: var(--dl-layout-space-twounits);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.flex-row {
+  gap: var(--dl-layout-space-twounits);
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+}
+ 
+.divider-horizontal {
+  width: 100%;
+  height: 1px;
+  background-color: var(--dl-color-theme-neutral-dark);
+}
+ 
+.grid-auto-300 {
+  display: grid;
+  grid-gap: var(--dl-layout-space-oneandhalfunits);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+ 
+.home-page-background-image {
+  inset: 0;
+  width: 100%;
+  filter: blur(12px);
+  height: 100%;
+  z-index: 0;
+  position: absolute;
+  transform: scale(1.04);
+  object-fit: cover;
+  pointer-events: none;
+}
+ 
+.home-page-background-overlay {
+  inset: 0;
+  z-index: 1;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+ 
+.download-actions-section {
+  gap: var(--dl-layout-space-unit);
+  color: rgb(255, 255, 255);
+  width: 100%;
+  display: flex;
+  padding: var(--dl-layout-space-fourunits) var(--dl-layout-space-twounits);
+  z-index: 1;
+  position: relative;
+  background: rgba(8, 12, 20, 0.62);
+  box-sizing: border-box;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+ 
+.download-actions-main {
+  gap: var(--dl-layout-space-unit);
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  max-width: 1100px;
+  align-items: stretch;
+  justify-items: stretch;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+ 
+.download-actions-primary-link {
+  color: rgb(10, 18, 30);
+  border: 1px solid rgb(255, 255, 255);
+  display: flex;
+  padding: var(--dl-layout-space-unit) var(--dl-layout-space-oneandhalfunits);
+  background: rgb(255, 255, 255);
+  box-sizing: border-box;
+  min-height: 52px;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  align-items: center;
+  font-weight: 700;
+  border-radius: 6px;
+  justify-content: center;
+  text-decoration: none;
+}
+ 
+.download-actions-primary-link:hover {
+  color: rgb(6, 12, 22);
+  transform: translateY(-1px);
+  background: rgb(218, 232, 255);
+}
+ 
+.download-actions-secondary-link {
+  color: rgb(255, 255, 255);
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  display: inline-flex;
+  padding: 0 var(--dl-layout-space-oneandhalfunits);
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  min-height: 40px;
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  align-items: center;
+  font-weight: 600;
+  grid-column: 1 / -1;
+  justify-self: center;
+  border-radius: 999px;
+  justify-content: center;
+  text-decoration: none;
+}
+ 
+.download-actions-secondary-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgb(255, 255, 255);
+}
+ 
+.Content {
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 400;
+  line-height: 1.15;
+  text-transform: none;
+  text-decoration: none;
+}
+ 
+
+ 
+@media(max-width: 767px) {
+  .section-padding {
+    padding: var(--dl-layout-space-threeunits);
+  }
+  .flex-column {
+    gap: var(--dl-layout-space-oneandhalfunits);
+  }
+  .flex-row {
+    gap: var(--dl-layout-space-oneandhalfunits);
+  }
+}
+ 
+@media(max-width: 479px) {
+  .section-padding {
+    padding: var(--dl-layout-space-oneandhalfunits);
+  }
+  .flex-column {
+    gap: var(--dl-layout-space-unit);
+  }
+  .flex-row {
+    gap: var(--dl-layout-space-unit);
+  }
+  .grid-auto-300 {
+    grid-template-columns: 1fr;
+  }
+  .download-actions-section {
+    padding: var(--dl-layout-space-threeunits) var(--dl-layout-space-unit);
+  }
+  .download-actions-main {
+    gap: var(--dl-layout-space-unit);
+    grid-template-columns: 1fr;
+  }
+  .download-actions-primary-link {
+    width: 100%;
+  }
+  .download-actions-secondary-link {
+    width: auto;
+    max-width: 100%;
+    grid-column: auto;
+  }
+}
+
+.hero7-header23-elm {
+  z-index: 1;
+  position: relative;
+}
+ 
+.hero7-max-width-elm {
+  display: flex;
+  align-self: center;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.hero7-content-elm {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  display: flex;
+  max-width: 1000px;
+  align-self: stretch;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.hero7-text-elm1 {
+  text-align: center;
+}
+ 
+.hero7-text-elm2 {
+  text-align: center;
+}
+ 
+.hero7-actions-elm {
+  gap: var(--dl-layout-space-unit);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.hero7-container1 {
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.hero7-container2 {
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.hero7-text1 {
+  display: inline-block;
+}
+ 
+.hero7-text2 {
+  display: inline-block;
+}
+ 
+@media(max-width: 479px) {
+  .hero7-actions-elm {
+    width: 100%;
+    flex-direction: column;
+  }
+  .hero7-container1 {
+    width: 100%;
+  }
+  .hero7-container2 {
+    width: 100%;
+  }
+}
+
+.download-actions-section-download-actions-section-elm {
+  position: relative;
+  background: rgba(8, 12, 20, 0);
+}
+ 
+.download-actions-section-link1 {
+  display: contents;
+}
+ 
+.download-actions-section-download-actions-primary-link-elm1 {
+  background: #ffd37f;
+  border-radius: 12px;
+}
+ 
+.download-actions-section-link2 {
+  display: contents;
+}
+ 
+.download-actions-section-download-actions-primary-link-elm2 {
+  background: #ffd37f;
+  border-radius: 12px;
+}
+ 
+.download-actions-section-link3 {
+  display: contents;
+}
+ 
+.download-actions-section-download-actions-primary-link-elm3 {
+  width: 384px;
+  background: #ffd37f;
+  border-radius: 12px;
+}
+ 
+.download-actions-section-link4 {
+  display: contents;
+}
+
+.features19-layout349-elm {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.features19-max-width-elm {
+  gap: var(--dl-layout-space-fiveunits);
+  display: flex;
+  align-items: center;
+}
+ 
+.features19-image-container-elm {
+  flex: 1;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+ 
+.features19-pasted-image-elm {
+  width: 570px;
+  height: 374px;
+}
+ 
+.features19-content-elm1 {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features19-section-title-elm {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features19-content-elm2 {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features19-text1 {
+  display: inline-block;
+}
+ 
+.features19-text2 {
+  display: inline-block;
+}
+ 
+@media(max-width: 991px) {
+  .features19-max-width-elm {
+    gap: var(--dl-layout-space-twounits);
+    flex-direction: column;
+  }
+}
+
+.features18-layout349-elm {
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.features18-max-width-elm {
+  gap: var(--dl-layout-space-fiveunits);
+  display: flex;
+  align-items: center;
+}
+ 
+.features18-content-elm1 {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features18-section-title-elm {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features18-content-elm2 {
+  gap: var(--dl-layout-space-oneandhalfunits);
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.features18-image-container-elm {
+  flex: 1;
+  display: flex;
+  position: relative;
+  align-items: center;
+}
+ 
+.features18-text1 {
+  display: inline-block;
+}
+ 
+.features18-text2 {
+  display: inline-block;
+}
+ 
+@media(max-width: 991px) {
+  .features18-max-width-elm {
+    gap: var(--dl-layout-space-twounits);
+    flex-direction: column-reverse;
+  }
+}
+
+.features10-layout300-elm {
+  width: 100%;
+  height: auto;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  flex-shrink: 0;
+  flex-direction: column;
+}
+ 
+.features10-max-width-elm {
+  gap: var(--dl-layout-space-threeunits);
+  align-items: center;
+}
+ 
+.features10-section-title-elm {
+  align-items: center;
+}
+ 
+.features10-text-elm2 {
+  text-align: center;
+}
+ 
+.features10-content-elm {
+  align-self: stretch;
+  align-items: center;
+}
+ 
+.features10-feature1-elm {
+  align-items: flex-start;
+}
+ 
+.features10-feature1-title-elm {
+  text-align: center;
+}
+ 
+.features10-feature2-elm {
+  align-items: flex-start;
+}
+ 
+.features10-feature3-elm {
+  align-items: flex-start;
+}
+ 
+.features10-actions-elm {
+  align-items: flex-start;
+}
+ 
+.features10-text1 {
+  display: inline-block;
+}
+ 
+.features10-text2 {
+  display: inline-block;
+}
+ 
+.features10-text3 {
+  display: inline-block;
+}
+ 
+.features10-text4 {
+  display: inline-block;
+}
+ 
+.features10-text5 {
+  display: inline-block;
+}
+ 
+.features10-text6 {
+  display: inline-block;
+}
+ 
+.features10-text7 {
+  display: inline-block;
+}
+ 
+.features10-text8 {
+  display: inline-block;
+}
+ 
+@media(max-width: 991px) {
+  .features10-section-title-elm {
+    width: 100%;
+  }
+}
+ 
+@media(max-width: 767px) {
+  .features10-section-title-elm {
+    width: auto;
+  }
+  .features10-text-elm1 {
+    text-align: center;
+  }
+  .features10-feature2-elm {
+    width: auto;
+  }
+  .features10-feature3-elm {
+    width: auto;
+  }
+}
+ 
+@media(max-width: 479px) {
+  .features10-max-width-elm {
+    gap: var(--dl-layout-space-oneandhalfunits);
+  }
+  .features10-actions-elm {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
+.footer4-footer7-elm {
+  width: 100%;
+  height: auto;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  align-items: center;
+  flex-shrink: 0;
+  flex-direction: column;
+  justify-content: center;
+}
+ 
+.footer4-max-width-elm {
+  gap: var(--dl-layout-space-threeunits);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.footer4-content-elm {
+  gap: var(--dl-layout-space-twounits);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.footer4-logo-elm1 {
+  gap: 24px;
+  display: flex;
+  overflow: hidden;
+  align-items: flex-start;
+  flex-direction: column;
+}
+ 
+.footer4-logo-elm2 {
+  height: 100%;
+}
+ 
+.footer4-links-elm {
+  gap: var(--dl-layout-space-twounits);
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.footer4-credits-elm {
+  gap: var(--dl-layout-space-twounits);
+  display: flex;
+  align-self: stretch;
+  align-items: center;
+  flex-direction: column;
+}
+ 
+.footer4-row-elm {
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  flex-shrink: 0;
+  justify-content: space-between;
+}
+ 
+.footer4-container {
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.footer4-footer-links-elm {
+  gap: 24px;
+  display: flex;
+  align-items: flex-start;
+}
+ 
+.footer4-text1 {
+  display: inline-block;
+}
+ 
+.footer4-text2 {
+  display: inline-block;
+}
+ 
+@media(max-width: 767px) {
+  .footer4-row-elm {
+    gap: var(--dl-layout-space-oneandhalfunits);
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+ 
+@media(max-width: 479px) {
+  .footer4-max-width-elm {
+    gap: var(--dl-layout-space-oneandhalfunits);
+  }
+  .footer4-links-elm {
+    flex-direction: column;
+  }
+  .footer4-footer-links-elm {
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+.home-container1 {
+  width: 100%;
+  display: flex;
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+ 
+.home-text10 {
+  color: rgb(255, 255, 255);
+  display: inline-block;
+}
+ 
+.home-text15 {
+  display: inline-block;
+}
+ 
+.home-text18 {
+  font-style: italic;
+}
+ 
+.home-text19 {
+  display: inline-block;
+}
+ 
+.home-text20 {
+  display: inline-block;
+}
+ 
+.home-text21 {
+  display: inline-block;
+}
+ 
+.home-text22 {
+  display: inline-block;
+}
+ 
+.home-text23 {
+  display: inline-block;
+}
+ 
+.home-text24 {
+  display: inline-block;
+}
+ 
+.home-text25 {
+  display: inline-block;
+}
+ 
+.home-text26 {
+  display: inline-block;
+}
+ 
+.home-text27 {
+  display: inline-block;
+}
+ 
+.home-text33 {
+  display: inline-block;
+}
+ 
+.home-text34 {
+  display: inline-block;
+}
+ 
+.home-text35 {
+  display: inline-block;
+}
+ 
+.home-text36 {
+  display: inline-block;
+}
+ 
+.home-text37 {
+  display: inline-block;
+}
+ 
+ 
+ 
+ 
+    </style>
+  </head>
+  <body>
+    <div class="home-container1">
+      <img loading="eager" decoding="async" alt="Decorative blurred page background" src="./assets/background.png" fetchpriority="high" id="tq-main" class="home-page-background-image" onerror="this.style.display='none'" />
+      <div class="home-page-background-overlay"></div>
+
+      <!-- Hero -->
+      <div class="hero7-header23-elm section-padding">
+        <div class="hero7-max-width-elm section-max-width">
+          <div class="hero7-content-elm">
+            <h1 class="hero7-text-elm1 heading-1">
+              <span class="home-text15"><span>Mindustry, ported </span><br /><span class="home-text18">entirely to the web.</span></span>
+            </h1>
+            <p class="hero7-text-elm2 body-large">
+              <span class="home-text10">
+                <span>This project involves porting as much of Mindustry as possible.</span>
+                <br /><br />
+                <span>This build forkes and modifies the engine Mindustry itself is built on, so its rendering, audio, and I/O layers target the web instead of desktop backends. That modified engine along with the game code is then ahead-of-time compiled from Java to JavaScript with TeaVM. The result is bundled with all assets into a single self-contained .html file: open it in any browser, no server, JVM, or network required after download.</span>
+              </span>
+            </p>
+            <div class="hero7-actions-elm">
+              <div class="hero7-container1"></div>
+              <div class="hero7-container2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Downloads -->
+      <section class="download-actions-section-download-actions-section-elm download-actions-section">
+        <h1>Download (or playable) links</h1>
+        <div class="download-actions-main">
+          <a href="https://github.com/khoichon/mindustry-web/releases/latest/download/mindustry-offline.html" class="download-actions-section-link1">
+            <div download="" class="download-actions-section-download-actions-primary-link-elm1 download-actions-primary-link"><span>Download standalone HTML file</span></div>
+          </a>
+          <a href="https://github.com/khoichon/mindustry-web/releases/latest/download/mindustry-offline.zip" class="download-actions-section-link2">
+            <div download="" class="download-actions-section-download-actions-primary-link-elm2 download-actions-primary-link"><span>Download ZIP file (for web hosting)</span></div>
+          </a>
+          <a href="./offlinemode/build/" class="download-actions-section-link3">
+            <div class="download-actions-section-download-actions-primary-link-elm3 download-actions-primary-link"><span>Try build directly (bleeding-edge builds)</span></div>
+          </a>
+        </div>
+        <a href="./onlinemode/" class="download-actions-section-link4">
+          <div class="download-actions-secondary-link"><span>Try legacy version (has mod support)</span></div>
+        </a>
+      </section>
+
+      <!-- Save/load -->
+      <div class="features19-layout349-elm section-padding">
+        <div class="features19-max-width-elm section-max-width">
+          <div class="features19-image-container-elm">
+            <img loading="eager" decoding="async" alt="savefile image" src="./assets/sf_demo.png" class="features19-pasted-image-elm" />
+          </div>
+          <div class="features19-content-elm1">
+            <div class="features19-section-title-elm">
+              <div class="features19-content-elm2">
+                <h2 class="heading-2"><span class="home-text19">Working save-load function</span></h2>
+                <p class="body-large"><span class="home-text20">You can upload and download your savefiles the normal way you would do it, allowing you to continue your game progress from another device in a flash.</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main features -->
+      <div class="features18-layout349-elm section-padding">
+        <div class="features18-max-width-elm section-max-width">
+          <div class="features18-content-elm1">
+            <div class="features18-section-title-elm">
+              <div class="features18-content-elm2">
+                <h2 class="heading-2"><span class="home-text21">Main features work</span></h2>
+                <p class="body-large"><span class="home-text22">Almost every feature in the base Mindustry works as intended (as far as testing can go). Enjoy the same features as the original Mindustry, even on restricted devices. (Unless it is a potato.)</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="features18-image-container-elm">
+            <video src="./assets/build-remove-demo.mp4" loop muted autoplay playsinline class="img-ratio-16-9"></video>
+          </div>
+        </div>
+      </div>
+
+      <!-- Multiplayer -->
+      <div class="features10-layout300-elm section-padding">
+        <div class="features10-max-width-elm flex-column section-max-width">
+          <div class="features10-section-title-elm flex-column">
+            <h2 class="heading-2 features10-text-elm1"><span class="home-text23">Multiplayer-compatible with other web players</span></h2>
+            <p class="features10-text-elm2 body-large">
+              <span class="home-text27">
+                <span>Even multiplayer is coded in, allowing any players to play Mindustry together even without hosting limits (like the Mindustry Tool mod)! (Work in progress, might be buggy)</span>
+                <br /><br />
+                <span>(Multiplayer with normal Mindustry clients is still a work in progress)</span>
+                <br />
+              </span>
+            </p>
+          </div>
+          <div class="features10-content-elm grid-auto-300">
+            <div class="features10-feature1-elm flex-column">
+              <video src="./assets/host-password-demo.mp4" loop muted autoplay playsinline class="img-ratio-4-3"></video>
+              <h3 class="features10-feature1-title-elm heading-3"><span class="home-text24">The Host</span></h3>
+              <span class="body-small"><span class="home-text33">The host can host a world as how they normally host a LAN world, along with an optional password.</span></span>
+            </div>
+            <div class="features10-feature2-elm flex-column">
+              <video src="./assets/player-password-demo.mp4" loop muted autoplay playsinline class="img-ratio-4-3"></video>
+              <h3 class="heading-3"><span class="home-text25">The Player</span></h3>
+              <span class="body-small"><span class="home-text34">Find the host&apos;s world in the Local Servers section (once again, as if you are joining a LAN world). If a password is required, you are prompted accordingly.</span></span>
+            </div>
+            <div class="features10-feature3-elm flex-column">
+              <video src="./assets/multiplayer-build-demo.mp4" loop muted autoplay playsinline class="img-ratio-4-3"></video>
+              <h3 class="heading-3"><span class="home-text26">The Gameplay</span></h3>
+              <span class="body-small"><span class="home-text35">All players and features works, and it is really simple to build together. The connection uses WebRTC, so most of the time the data won&apos;t even be touching my servers, and even if they do, it is encrypted.</span></span>
+            </div>
+          </div>
+          <div class="features10-actions-elm flex-row"></div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer4-footer7-elm section-padding">
+        <div class="footer4-max-width-elm section-max-width">
+          <div class="footer4-content-elm">
+            <div class="footer4-logo-elm1">
+              <img loading="eager" decoding="async" alt="Logo" src="./assets/logo-nobg.png" class="footer4-logo-elm2" />
+            </div>
+            <div class="footer4-links-elm"></div>
+          </div>
+          <div class="footer4-credits-elm">
+            <div class="divider-horizontal"></div>
+            <div class="footer4-row-elm">
+              <div class="footer4-container">
+                <span class="body-small">uhh hi i guess i didnt think you would make it this far, very nice</span>
+              </div>
+              <div class="footer4-footer-links-elm">
+                <span class="body-small"><a href="https://khoichon.dev/gh/mindustry-web" class="home-text36">repo source</a></span>
+                <span class="body-small"><a href="https://github.com/Anuken/Mindustry" class="home-text37">game source</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
