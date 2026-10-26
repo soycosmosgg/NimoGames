@@ -9,7 +9,7 @@
       src="/assets/js/nimo-sdk.js"
       data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/"
       data-probe="ui/loading.json"
-      data-providers="github-raw"
+      data-providers="jsdelivr,github-raw"
       data-providers-exact="true"
       data-game-id="23456"
     ></script>
@@ -225,7 +225,6 @@
       <pre id="log" hidden></pre>
     </div>
     <script type="module">
-      import createRunner from "./butterscotch.mjs";
       const canvas = document.querySelector("#canvas"),
         log = document.querySelector("#log"),
         status = document.querySelector("#status"),
@@ -394,6 +393,9 @@
           const wasmBinary = await fetchBytes(
             "butterscotch.wasm",
             manifest.bytes["butterscotch.wasm"],
+          );
+          const { default: createRunner } = await import(
+            "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/butterscotch.js"
           );
           const M = await createRunner({
             canvas,

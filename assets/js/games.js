@@ -98,6 +98,7 @@ window.NIMO_GAMES = [
     "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/",
     "cdnProbe": "ui/loading.json",
     "cdnProviders": [
+      "jsdelivr",
       "github-raw"
     ],
     "cdnProvidersExact": true,
