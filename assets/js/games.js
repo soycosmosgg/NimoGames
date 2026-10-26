@@ -98,7 +98,7 @@ window.NIMO_GAMES = [
     "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/",
     "cdnProbe": "ui/loading.json",
     "cdnProviders": [
-      "github-raw"
+      "rawcdn"
     ],
     "cdnProvidersExact": true,
     "hero": "https://cdn-ngames.pages.dev/images/23456/hero.webp",
