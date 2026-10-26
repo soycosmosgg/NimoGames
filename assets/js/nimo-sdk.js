@@ -7,7 +7,8 @@
     jsdelivr: 'jsDelivr',
     'jsdelivr-fastly': 'jsDelivr Fastly edge',
     'jsdelivr-gcore': 'jsDelivr Gcore edge',
-    rawcdn: 'raw.githack CDN'
+    rawcdn: 'raw.githack CDN',
+    'github-raw': 'GitHub raw'
   };
 
   function getCdnBases(jsDelivrBase, providerFilter, includeRawcdn = true) {
@@ -22,7 +23,8 @@
       { provider: 'jsdelivr', base: `https://cdn.jsdelivr.net${jsdelivrPath}` },
       { provider: 'jsdelivr-fastly', base: `https://fastly.jsdelivr.net${jsdelivrPath}` },
       { provider: 'jsdelivr-gcore', base: `https://gcore.jsdelivr.net${jsdelivrPath}` },
-      { provider: 'rawcdn', base: `https://raw.githack.com/${owner}/${repo}/${ref}${path}` }
+      { provider: 'rawcdn', base: `https://raw.githack.com/${owner}/${repo}/${ref}${path}` },
+      { provider: 'github-raw', base: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}${path}` }
     ];
     const selectedProviders = providerFilter
       ? [...new Set(includeRawcdn ? [...providerFilter, 'rawcdn'] : providerFilter)]

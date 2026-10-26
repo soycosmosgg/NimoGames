@@ -100,7 +100,9 @@ window.NIMO_GAMES = [
     "cdnProviders": [
       "jsdelivr",
       "jsdelivr-fastly",
-      "jsdelivr-gcore"
+      "jsdelivr-gcore",
+      "rawcdn",
+      "github-raw"
     ],
     "cdnProvidersExact": true,
     "hero": "https://cdn-ngames.pages.dev/images/23456/hero.webp",

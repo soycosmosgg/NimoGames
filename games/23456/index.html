@@ -9,7 +9,7 @@
       src="/assets/js/nimo-sdk.js"
       data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/"
       data-probe="ui/loading.json"
-      data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore"
+      data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn,github-raw"
       data-providers-exact="true"
       data-game-id="23456"
     ></script>
@@ -265,48 +265,72 @@
         percentage.textContent = value + "%";
         progress.setAttribute("aria-valuenow", String(value));
       }
-      async function fetchBytes(path) {
-        const url = new URL("./" + path, document.baseURI);
-        url.searchParams.set("v", assetVersion);
-        const cached = await assetCache.match(url);
-        const response = cached || (await fetch(url));
-        if (!response.ok)
-          throw new Error(
-            "A game file could not be downloaded. Check your connection and reload.",
-          );
-        const stored = cached
-          ? Promise.resolve()
-          : assetCache
-              .put(url, response.clone())
-              .catch((error) =>
-                print("Could not cache game file:", error.message),
+      async function fetchBytes(path, expectedLength) {
+        const cdnBases = window.NIMO_CDN_BASES?.length
+          ? [...window.NIMO_CDN_BASES]
+          : [{ base: document.baseURI, provider: "current CDN" }];
+        cdnBases.sort(
+          (a, b) =>
+            Number(b.base === window.NIMO_CDN_BASE) -
+            Number(a.base === window.NIMO_CDN_BASE),
+        );
+        for (const { base, provider } of cdnBases) {
+          const url = new URL("./" + path, base);
+          url.searchParams.set("v", assetVersion);
+          let cached = false;
+          const loadedBeforeAttempt = loaded;
+          try {
+            let response = await assetCache.match(url);
+            cached = Boolean(response);
+            if (!response) response = await fetch(url);
+            if (!response.ok)
+              throw new Error(`HTTP ${response.status}`);
+            const cacheCopy = cached ? null : response.clone();
+            let bytes;
+            if (!response.body) {
+              bytes = new Uint8Array(await response.arrayBuffer());
+              loaded += bytes.length;
+              updateProgress();
+            } else {
+              const reader = response.body.getReader(),
+                chunks = [];
+              let length = 0;
+              for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                length += value.length;
+                loaded += value.length;
+                updateProgress();
+              }
+              bytes = new Uint8Array(length);
+              let offset = 0;
+              for (const chunk of chunks) {
+                bytes.set(chunk, offset);
+                offset += chunk.length;
+              }
+            }
+            if (expectedLength !== undefined && bytes.byteLength !== expectedLength)
+              throw new Error(
+                `received ${bytes.byteLength} of ${expectedLength} bytes`,
               );
-        if (!response.body) {
-          const bytes = new Uint8Array(await response.arrayBuffer());
-          loaded += bytes.length;
-          updateProgress();
-          await stored;
-          return bytes;
+            if (cacheCopy)
+              await assetCache
+                .put(url, cacheCopy)
+                .catch((error) =>
+                  print("Could not cache game file:", error.message),
+                );
+            return bytes;
+          } catch (error) {
+            loaded = loadedBeforeAttempt;
+            updateProgress();
+            if (cached) await assetCache.delete(url);
+            print(`Could not load ${path} from ${provider}:`, error.message);
+          }
         }
-        const reader = response.body.getReader(),
-          chunks = [];
-        let length = 0;
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          length += value.length;
-          loaded += value.length;
-          updateProgress();
-        }
-        const bytes = new Uint8Array(length);
-        let offset = 0;
-        for (const chunk of chunks) {
-          bytes.set(chunk, offset);
-          offset += chunk.length;
-        }
-        await stored;
-        return bytes;
+        throw new Error(
+          "A game file could not be downloaded. Check your connection and reload.",
+        );
       }
       async function startGame() {
         try {
@@ -339,7 +363,10 @@
             0,
           );
           updateProgress();
-          const wasmBinary = await fetchBytes("butterscotch.wasm");
+          const wasmBinary = await fetchBytes(
+            "butterscotch.wasm",
+            manifest.bytes["butterscotch.wasm"],
+          );
           const M = await createRunner({
             canvas,
             wasmBinary,
@@ -418,9 +445,7 @@
           );
           let gameOffset = 0;
           for (const part of manifest.gameParts) {
-            const bytes = await fetchBytes(part);
-            if (bytes.byteLength !== manifest.bytes[part])
-              throw new Error("A game file part is incomplete. Please reload.");
+            const bytes = await fetchBytes(part, manifest.bytes[part]);
             gameBinary.set(bytes, gameOffset);
             gameOffset += bytes.byteLength;
           }
@@ -429,7 +454,10 @@
           for (const file of Object.keys(manifest.bytes)) {
             if (file === "butterscotch.wasm" || manifest.gameParts.includes(file))
               continue;
-            M.FS.writeFile("/game/" + file, await fetchBytes(file));
+            M.FS.writeFile(
+              "/game/" + file,
+              await fetchBytes(file, manifest.bytes[file]),
+            );
           }
 
           for (const name of await caches.keys()) {
