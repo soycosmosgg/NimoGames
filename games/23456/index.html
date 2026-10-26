@@ -430,13 +430,76 @@
           const loaderUrl = new URL("butterscotch.js", window.NIMO_CDN_BASE);
           loaderUrl.searchParams.set("v", assetVersion);
           const { default: createRunner } = await import(loaderUrl.href);
-          const M = await createRunner({
+          const runnerOptions = {
             canvas,
             wasmBinary,
             print,
             printErr: print,
-          });
+          };
+          // WASMFS directory and file operations can suspend while accessing OPFS.
+          runnerOptions.instantiateWasm = (imports, receiveInstance) => {
+            WebAssembly.instantiate(wasmBinary, imports).then(
+              ({ instance }) => {
+                const asyncWasmFsExports = new Set([
+                  "_wasmfs_mkdir",
+                  "_wasmfs_write_file",
+                ]);
+                const exports = new Proxy(instance.exports, {
+                  get(target, name) {
+                    const value = Reflect.get(target, name);
+                    return asyncWasmFsExports.has(name)
+                      ? WebAssembly.promising(value)
+                      : value;
+                  },
+                });
+                runnerOptions._wasmfs_mkdir = exports._wasmfs_mkdir;
+                runnerOptions._wasmfs_write_file = exports._wasmfs_write_file;
+                receiveInstance({ exports });
+              },
+              (error) => {
+                print("Could not initialize Forager WebAssembly:", error);
+                showError("Forager could not initialize. Please reload and try again.");
+              },
+            );
+            return {};
+          };
+          const M = await createRunner(runnerOptions);
           window.runner = M;
+          async function mkdirTree(path, mode = 511) {
+            let current = "";
+            for (const part of path.split("/")) {
+              if (!part) continue;
+              if (current || path.startsWith("/")) current += "/";
+              current += part;
+              const result = await M.ccall(
+                "wasmfs_mkdir",
+                "number",
+                ["string", "number"],
+                [current, mode],
+                { async: true },
+              );
+              if (result < 0 && result !== -17)
+                throw new M.FS.ErrnoError(-result);
+            }
+          }
+          async function writeFile(path, bytes) {
+            const pointer = M._malloc(bytes.byteLength);
+            if (!pointer && bytes.byteLength)
+              throw new Error(`Could not allocate memory for ${path}.`);
+            try {
+              M.HEAPU8.set(bytes, pointer);
+              const result = await M.ccall(
+                "wasmfs_write_file",
+                "number",
+                ["string", "number", "number"],
+                [path, pointer, bytes.byteLength],
+                { async: true },
+              );
+              if (result < 0) throw new M.FS.ErrnoError(-result);
+            } finally {
+              if (pointer) M._free(pointer);
+            }
+          }
           const keys = new Set(),
             buttons = new Set();
           window.addEventListener("keydown", (e) => {
@@ -499,8 +562,8 @@
             throw new Error(
               "Game save storage could not be opened. Check this browser’s storage settings and reload.",
             );
-          M.FS.mkdirTree("/butterscotch/forager");
-          M.FS.mkdirTree("/game/assets/local");
+          await mkdirTree("/butterscotch/forager");
+          await mkdirTree("/game/assets/local");
           let gameBinary = new Uint8Array(
             manifest.gameParts.reduce(
               (size, part) => size + manifest.bytes[part],
@@ -513,12 +576,12 @@
             gameBinary.set(bytes, gameOffset);
             gameOffset += bytes.byteLength;
           }
-          M.FS.writeFile("/game/assets/game.unx", gameBinary);
+          await writeFile("/game/assets/game.unx", gameBinary);
           gameBinary = null;
           for (const file of Object.keys(manifest.bytes)) {
             if (file === "butterscotch.wasm" || manifest.gameParts.includes(file))
               continue;
-            M.FS.writeFile(
+            await writeFile(
               "/game/" + file,
               await fetchBytes(file, manifest.bytes[file]),
             );
