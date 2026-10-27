@@ -430,6 +430,16 @@ window.NIMO_GAMES = [
     "playUrl": "games/5326261/index.html"
   },
   {
+    "id": "5403326",
+    "title": "Balatro",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/Miticraft89/Balatro-Web-Scrapped@dc9bdb4493e4331e44f2e57c230d7491db57dbe1/",
+    "cdnProbe": "game.data",
+    "hero": "https://cdn-ngames.pages.dev/images/5403326/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5403326/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5403326/logo.webp",
+    "playUrl": "games/5403326/index.html"
+  },
+  {
     "id": "5493605",
     "title": "Shift at Midnight",
     "cdnBase": "https://cdn.jsdelivr.net/gh/slqntdevss/ShiftAtMidnightPort@latest/",
