@@ -391,6 +391,16 @@ window.NIMO_GAMES = [
     "playUrl": "games/5274447/index.html"
   },
   {
+    "id": "5306805",
+    "title": "Vampire Survivors",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/Miticraft89/Vampire-survivors-web-scrapped@main/",
+    "cdnProbe": "manifest.json",
+    "hero": "https://cdn-ngames.pages.dev/images/5306805/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5306805/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5306805/logo.webp",
+    "playUrl": "games/5306805/index.html"
+  },
+  {
     "id": "5326261",
     "title": "Brotato",
     "cdnBase": "https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/",
