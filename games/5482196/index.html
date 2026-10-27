@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Gambonanza | Nimo Games</title>
+    <meta name="description" content="Play Gambonanza in your browser on Nimo Games.">
+    <link rel="canonical" href="https://nimogames.qzz.io/games/5482196/index.html">
+    <script src="/assets/js/nimo-sdk.js"
+            data-base="https://cdn.jsdelivr.net/gh/AlexBoops/Gambonanza-Port@main/"
+            data-probe="Build/Downloads.loader.js"
+            data-providers="jsdelivr,jsdelivr-fastly,jsdelivr-gcore,rawcdn"
+            data-game-id="5482196"></script>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <style>
+      html, body { margin: 0; padding: 0; background: #231f20; overflow: hidden; }
+      #unity-container { position: absolute; width: 100%; height: 100%; }
+      #unity-canvas { width: 100% !important; height: 100% !important; display: block; }
+      #unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: block; }
+      #unity-logo { width: 154px; height: 130px; background: url('TemplateData/unity-logo-dark.png') no-repeat center; }
+      #unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; background: url('TemplateData/progress-bar-empty-dark.png') no-repeat center; }
+      #unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('TemplateData/progress-bar-full-dark.png') no-repeat center; }
+      #unity-warning { }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=1280 height=720 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+    </div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      // Configuration for split files matching your Build folder structure
+      var chunkMap = {
+        "Build/Downloads.data": 5, // Downloads.data.part1 -> Downloads.data.part5
+        "Build/Downloads.wasm": 3  // Downloads.wasm.part1 -> Downloads.wasm.part3
+      };
+
+      // Helper to fetch and stitch chunk parts into a single Blob URL
+      async function fetchAndStitchChunks(baseUrl, totalParts, onProgress) {
+        var parts = [];
+        var loadedBytes = [];
+
+        for (var i = 1; i <= totalParts; i++) {
+          var partUrl = baseUrl + ".part" + i;
+          var response = await fetch(partUrl);
+          if (!response.ok) throw new Error("Failed to load chunk part: " + partUrl);
+          var buffer = await response.arrayBuffer();
+          parts.push(buffer);
+          if (onProgress) onProgress(i / totalParts);
+        }
+
+        var blob = new Blob(parts, { type: "application/octet-stream" });
+        return URL.createObjectURL(blob);
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Downloads.loader.js";
+
+      async function launchGame() {
+        var bar = document.querySelector("#unity-progress-bar-full");
+
+        // Stitch split .data and .wasm chunks into local memory Blob URLs
+        var dataBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.data", chunkMap["Build/Downloads.data"], function(p) {
+          if (bar) bar.style.width = (p * 50) + "%"; // First 50% for chunk download
+        });
+
+        var wasmBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.wasm", chunkMap["Build/Downloads.wasm"], function(p) {
+          if (bar) bar.style.width = (50 + (p * 20)) + "%"; // Next 20% for WASM download
+        });
+
+        var config = {
+          arguments: [],
+          dataUrl: dataBlobUrl,
+          frameworkUrl: buildUrl + "/Downloads.framework.js",
+          codeUrl: wasmBlobUrl,
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "Blukulele",
+          productName: "Gambonanza",
+          productVersion: "1.0",
+          showBanner: unityShowBanner
+        };
+
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            if (bar) bar.style.width = (70 + (progress * 30)) + "%"; // Remaining 30% for Unity engine init
+          }).then((unityInstance) => {
+            var loadingBar = document.querySelector("#unity-loading-bar");
+            if (loadingBar) loadingBar.style.display = "none";
+          }).catch((message) => {
+            alert(message);
+          });
+        };
+        document.body.appendChild(script);
+      }
+
+      launchGame().catch(function(err) {
+        console.error("Failed to assemble WebGL build chunks:", err);
+        unityShowBanner("Failed to assemble build payload chunks. Check console.", "error");
+      });
+    </script>
+  </body>
+</html>

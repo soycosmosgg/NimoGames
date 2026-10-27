@@ -430,6 +430,32 @@ window.NIMO_GAMES = [
     "playUrl": "games/5326261/index.html"
   },
   {
+    "id": "5454178",
+    "title": "Five Nights at Freddy's: Into the Pit",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/web-ports/fnaf-into-the-pit@main/",
+    "cdnProbe": "Build/INTOTHEPIT.loader.js",
+    "hero": "https://cdn-ngames.pages.dev/images/5454178/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5454178/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5454178/logo.webp",
+    "playUrl": "games/5454178/index.html"
+  },
+  {
+    "id": "5482196",
+    "title": "Gambonanza",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/AlexBoops/Gambonanza-Port@main/",
+    "cdnProbe": "Build/Downloads.loader.js",
+    "cdnProviders": [
+      "jsdelivr",
+      "jsdelivr-fastly",
+      "jsdelivr-gcore",
+      "rawcdn"
+    ],
+    "hero": "https://cdn-ngames.pages.dev/images/5482196/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5482196/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5482196/logo.webp",
+    "playUrl": "games/5482196/index.html"
+  },
+  {
     "id": "5493605",
     "title": "Shift at Midnight",
     "cdnBase": "https://cdn.jsdelivr.net/gh/slqntdevss/ShiftAtMidnightPort@latest/",
