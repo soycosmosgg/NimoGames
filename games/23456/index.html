@@ -9,6 +9,8 @@
       src="/assets/js/nimo-sdk.js"
       data-base="https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/"
       data-probe="ui/loading.json"
+      data-providers="rawcdn"
+      data-providers-exact="true"
       data-game-id="23456"
     ></script>
     <link rel="icon" href="./assets/icon.png" type="image/png" />
@@ -54,6 +56,25 @@
         border: 4px solid var(--ink);
         background: #142034;
         overflow: hidden;
+      }
+      .back-button {
+        position: absolute;
+        z-index: 2;
+        top: 12px;
+        right: 12px;
+        display: grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border: 1px solid #ffffff80;
+        border-radius: 50%;
+        background: #191726cc;
+        color: #fff;
+        font: 32px/1 Arial, sans-serif;
+        cursor: pointer;
+      }
+      .back-button:hover {
+        background: #191726;
       }
       canvas {
         display: block;
@@ -193,6 +214,13 @@
     <div class="shell">
       <main>
         <div class="stage" id="stage">
+          <button
+            class="back-button"
+            id="back-button"
+            type="button"
+            aria-label="Volver a Nimo Games"
+            title="Volver a Nimo Games"
+          >&times;</button>
           <canvas
             id="canvas"
             width="1280"
@@ -223,8 +251,8 @@
       <pre id="log" hidden></pre>
     </div>
     <script type="module">
-      import createRunner from "./butterscotch.mjs";
       const canvas = document.querySelector("#canvas"),
+        backButton = document.querySelector("#back-button"),
         log = document.querySelector("#log"),
         status = document.querySelector("#status"),
         stage = document.querySelector("#stage"),
@@ -233,6 +261,12 @@
         percentage = document.querySelector("#percentage"),
         progress = document.querySelector("#progress"),
         fill = document.querySelector("#fill");
+      backButton.addEventListener("click", () => {
+        window.close();
+        window.setTimeout(() => {
+          if (!window.closed) window.location.replace("https://nimogames.qzz.io/");
+        }, 100);
+      });
       const print = (...args) => {
         console.log(...args);
         log.textContent += args.join(" ") + "\n";
@@ -263,48 +297,100 @@
         percentage.textContent = value + "%";
         progress.setAttribute("aria-valuenow", String(value));
       }
-      async function fetchBytes(path) {
-        const url = new URL("./" + path, location.href);
-        url.searchParams.set("v", assetVersion);
-        const cached = await assetCache.match(url);
-        const response = cached || (await fetch(url));
-        if (!response.ok)
-          throw new Error(
-            "A game file could not be downloaded. Check your connection and reload.",
-          );
-        const stored = cached
-          ? Promise.resolve()
-          : assetCache
-              .put(url, response.clone())
-              .catch((error) =>
-                print("Could not cache game file:", error.message),
-              );
-        if (!response.body) {
-          const bytes = new Uint8Array(await response.arrayBuffer());
-          loaded += bytes.length;
-          updateProgress();
-          await stored;
+      // GitHub Raw serves text files with LF even when the manifest counts CRLF.
+      function normalizeTextAssetLineEndings(path, bytes, expectedLength) {
+        if (!/\.(?:ini|json|txt)$/i.test(path) || expectedLength <= bytes.length)
           return bytes;
+        let lineFeeds = 0;
+        for (const byte of bytes) {
+          if (byte === 13) return bytes;
+          if (byte === 10) lineFeeds++;
         }
-        const reader = response.body.getReader(),
-          chunks = [];
-        let length = 0;
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          length += value.length;
-          loaded += value.length;
-          updateProgress();
-        }
-        const bytes = new Uint8Array(length);
+        if (bytes.length + lineFeeds !== expectedLength) return bytes;
+        const normalized = new Uint8Array(expectedLength);
         let offset = 0;
-        for (const chunk of chunks) {
-          bytes.set(chunk, offset);
-          offset += chunk.length;
+        for (const byte of bytes) {
+          if (byte === 10) normalized[offset++] = 13;
+          normalized[offset++] = byte;
         }
-        await stored;
-        return bytes;
+        return normalized;
+      }
+      async function fetchBytes(path, expectedLength) {
+        const cdnBases = window.NIMO_CDN_BASES?.length
+          ? [...window.NIMO_CDN_BASES]
+          : [{ base: document.baseURI, provider: "current CDN" }];
+        cdnBases.sort(
+          (a, b) =>
+            Number(b.base === window.NIMO_CDN_BASE) -
+            Number(a.base === window.NIMO_CDN_BASE),
+        );
+        for (const { base, provider } of cdnBases) {
+          const url = new URL("./" + path, base);
+          url.searchParams.set("v", assetVersion);
+          let cached = false;
+          const loadedBeforeAttempt = loaded;
+          try {
+            let response = await assetCache.match(url);
+            cached = Boolean(response);
+            if (!response) response = await fetch(url);
+            if (!response.ok)
+              throw new Error(`HTTP ${response.status}`);
+            const cacheCopy = cached ? null : response.clone();
+            let bytes;
+            if (!response.body) {
+              bytes = new Uint8Array(await response.arrayBuffer());
+              loaded += bytes.length;
+              updateProgress();
+            } else {
+              const reader = response.body.getReader(),
+                chunks = [];
+              let length = 0;
+              for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                chunks.push(value);
+                length += value.length;
+                loaded += value.length;
+                updateProgress();
+              }
+              bytes = new Uint8Array(length);
+              let offset = 0;
+              for (const chunk of chunks) {
+                bytes.set(chunk, offset);
+                offset += chunk.length;
+              }
+            }
+            if (expectedLength !== undefined && bytes.byteLength !== expectedLength) {
+              const normalized = normalizeTextAssetLineEndings(
+                path,
+                bytes,
+                expectedLength,
+              );
+              if (normalized.byteLength !== expectedLength)
+                throw new Error(
+                  `received ${bytes.byteLength} of ${expectedLength} bytes`,
+                );
+              loaded += normalized.byteLength - bytes.byteLength;
+              bytes = normalized;
+              updateProgress();
+            }
+            if (cacheCopy)
+              await assetCache
+                .put(url, cacheCopy)
+                .catch((error) =>
+                  print("Could not cache game file:", error.message),
+                );
+            return bytes;
+          } catch (error) {
+            loaded = loadedBeforeAttempt;
+            updateProgress();
+            if (cached) await assetCache.delete(url);
+            print(`Could not load ${path} from ${provider}:`, error.message);
+          }
+        }
+        throw new Error(
+          "A game file could not be downloaded. Check your connection and reload.",
+        );
       }
       async function startGame() {
         try {
@@ -337,14 +423,78 @@
             0,
           );
           updateProgress();
-          const wasmBinary = await fetchBytes("butterscotch.wasm");
-          const M = await createRunner({
+          const wasmBinary = await fetchBytes(
+            "butterscotch.wasm",
+            manifest.bytes["butterscotch.wasm"],
+          );
+          const loaderUrl = new URL("butterscotch.js", window.NIMO_CDN_BASE);
+          loaderUrl.searchParams.set("v", assetVersion);
+          const { default: createRunner } = await import(loaderUrl.href);
+          const runnerOptions = {
             canvas,
             wasmBinary,
             print,
             printErr: print,
-          });
+          };
+          // WASMFS directory and file operations can suspend while accessing OPFS.
+          runnerOptions.instantiateWasm = (imports, receiveInstance) => {
+            WebAssembly.instantiate(wasmBinary, imports).then(
+              ({ instance }) => {
+                const asyncWasmFsExports = new Set([
+                  "_wasmfs_mkdir",
+                  "_wasmfs_write_file",
+                ]);
+                const exports = { ...instance.exports };
+                for (const name of asyncWasmFsExports)
+                  exports[name] = WebAssembly.promising(exports[name]);
+                runnerOptions._wasmfs_mkdir = exports._wasmfs_mkdir;
+                runnerOptions._wasmfs_write_file = exports._wasmfs_write_file;
+                receiveInstance({ exports });
+              },
+              (error) => {
+                print("Could not initialize Forager WebAssembly:", error);
+                showError("Forager could not initialize. Please reload and try again.");
+              },
+            );
+            return {};
+          };
+          const M = await createRunner(runnerOptions);
           window.runner = M;
+          async function mkdirTree(path, mode = 511) {
+            let current = "";
+            for (const part of path.split("/")) {
+              if (!part) continue;
+              if (current || path.startsWith("/")) current += "/";
+              current += part;
+              const result = await M.ccall(
+                "wasmfs_mkdir",
+                "number",
+                ["string", "number"],
+                [current, mode],
+                { async: true },
+              );
+              if (result < 0 && result !== -20)
+                throw new M.FS.ErrnoError(-result);
+            }
+          }
+          async function writeFile(path, bytes) {
+            const pointer = M._malloc(bytes.byteLength);
+            if (!pointer && bytes.byteLength)
+              throw new Error(`Could not allocate memory for ${path}.`);
+            try {
+              M.HEAPU8.set(bytes, pointer);
+              const result = await M.ccall(
+                "wasmfs_write_file",
+                "number",
+                ["string", "number", "number"],
+                [path, pointer, bytes.byteLength],
+                { async: true },
+              );
+              if (result < 0) throw new M.FS.ErrnoError(-result);
+            } finally {
+              if (pointer) M._free(pointer);
+            }
+          }
           const keys = new Set(),
             buttons = new Set();
           window.addEventListener("keydown", (e) => {
@@ -407,7 +557,8 @@
             throw new Error(
               "Game save storage could not be opened. Check this browser’s storage settings and reload.",
             );
-          M.FS.mkdirTree("/game/assets/local");
+          await mkdirTree("/butterscotch/forager");
+          await mkdirTree("/game/assets/local");
           let gameBinary = new Uint8Array(
             manifest.gameParts.reduce(
               (size, part) => size + manifest.bytes[part],
@@ -416,18 +567,19 @@
           );
           let gameOffset = 0;
           for (const part of manifest.gameParts) {
-            const bytes = await fetchBytes(part);
-            if (bytes.byteLength !== manifest.bytes[part])
-              throw new Error("A game file part is incomplete. Please reload.");
+            const bytes = await fetchBytes(part, manifest.bytes[part]);
             gameBinary.set(bytes, gameOffset);
             gameOffset += bytes.byteLength;
           }
-          M.FS.writeFile("/game/assets/game.unx", gameBinary);
+          await writeFile("/game/assets/game.unx", gameBinary);
           gameBinary = null;
           for (const file of Object.keys(manifest.bytes)) {
             if (file === "butterscotch.wasm" || manifest.gameParts.includes(file))
               continue;
-            M.FS.writeFile("/game/" + file, await fetchBytes(file));
+            await writeFile(
+              "/game/" + file,
+              await fetchBytes(file, manifest.bytes[file]),
+            );
           }
 
           for (const name of await caches.keys()) {

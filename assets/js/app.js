@@ -764,6 +764,29 @@
       return;
     }
     if (selectedVersion) game = { ...game, ...selectedVersion };
+    if (game.id === '23456') {
+      const gameWindow = window.open('about:blank', '_blank');
+      if (!gameWindow) {
+        window.alert('Permite las ventanas emergentes para abrir Forager.');
+        return;
+      }
+
+      activeGameId = null;
+      queueGameLaunch(game.id);
+      if (visitorSessionId) updateVisitorCount(visitorSessionId);
+      recentGameIds = [game.id, ...recentGameIds.filter(id => id !== game.id)];
+      saveRecentGameIds();
+      homeGames = buildHomeGames();
+      recentGamesCount.textContent = String(recentGameIds.length);
+      renderCarousel();
+      window.NimoSDK.getGameLaunchUrl(game).then(launchUrl => {
+        if (!gameWindow.closed) gameWindow.location.replace(launchUrl);
+      }).catch(error => {
+        console.error('[Nimo SDK] Could not prepare Forager launch.', error);
+        if (!gameWindow.closed) gameWindow.location.replace(game.playUrl);
+      });
+      return;
+    }
     activeGameId = game.id;
     queueGameLaunch(game.id);
     if (visitorSessionId) updateVisitorCount(visitorSessionId);

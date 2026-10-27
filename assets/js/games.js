@@ -97,6 +97,10 @@ window.NIMO_GAMES = [
     "title": "Forager",
     "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/forager/",
     "cdnProbe": "ui/loading.json",
+    "cdnProviders": [
+      "rawcdn"
+    ],
+    "cdnProvidersExact": true,
     "hero": "https://cdn-ngames.pages.dev/images/23456/hero.webp",
     "portrait": "https://cdn-ngames.pages.dev/images/23456/portrait.webp",
     "logo": "https://cdn-ngames.pages.dev/images/23456/logo.webp",
@@ -365,6 +369,16 @@ window.NIMO_GAMES = [
     "portrait": "https://cdn-ngames.pages.dev/images/3527290/portrait.webp",
     "logo": "https://cdn-ngames.pages.dev/images/3527290/logo.webp",
     "playUrl": "games/3527290/index.html"
+  },
+  {
+    "id": "5248037",
+    "title": "Mindustry",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/retrodotgg/wasmports@main/mindustry/",
+    "cdnProbe": "asset-manifest.txt",
+    "hero": "https://cdn-ngames.pages.dev/images/5248037/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5248037/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5248037/logo.webp",
+    "playUrl": "games/5248037/index.html"
   },
   {
     "id": "5255287",
