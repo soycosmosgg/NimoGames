@@ -62,7 +62,7 @@
       };
 
       // Helper to fetch and stitch chunk parts into a single Blob URL
-      async function fetchAndStitchChunks(baseUrl, totalParts, onProgress) {
+      async function fetchAndStitchChunks(baseUrl, totalParts, contentType, onProgress) {
         var parts = [];
         var loadedBytes = [];
 
@@ -75,7 +75,7 @@
           if (onProgress) onProgress(i / totalParts);
         }
 
-        var blob = new Blob(parts, { type: "application/octet-stream" });
+        var blob = new Blob(parts, { type: contentType });
         return URL.createObjectURL(blob);
       }
 
@@ -93,11 +93,11 @@
         var bar = document.querySelector("#unity-progress-bar-full");
 
         // Stitch split .data and .wasm chunks into local memory Blob URLs
-        var dataBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.data", chunkMap["Build/Downloads.data"], function(p) {
+        var dataBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.data", chunkMap["Build/Downloads.data"], "application/octet-stream", function(p) {
           if (bar) bar.style.width = (p * 50) + "%"; // First 50% for chunk download
         });
 
-        var wasmBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.wasm", chunkMap["Build/Downloads.wasm"], function(p) {
+        var wasmBlobUrl = await fetchAndStitchChunks(buildUrl + "/Downloads.wasm", chunkMap["Build/Downloads.wasm"], "application/wasm", function(p) {
           if (bar) bar.style.width = (50 + (p * 20)) + "%"; // Next 20% for WASM download
         });
 

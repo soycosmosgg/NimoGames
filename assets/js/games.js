@@ -405,6 +405,16 @@ window.NIMO_GAMES = [
     "playUrl": "games/5274447/index.html"
   },
   {
+    "id": "5292335",
+    "title": "Cookie Clicker",
+    "cdnBase": "https://cdn.jsdelivr.net/gh/bubbls/UGS-Assets@main/cookieclicker/",
+    "cdnProbe": "showads.js",
+    "hero": "https://cdn-ngames.pages.dev/images/5292335/hero.webp",
+    "portrait": "https://cdn-ngames.pages.dev/images/5292335/portrait.webp",
+    "logo": "https://cdn-ngames.pages.dev/images/5292335/logo.webp",
+    "playUrl": "games/5292335/index.html"
+  },
+  {
     "id": "5326261",
     "title": "Brotato",
     "cdnBase": "https://cdn.jsdelivr.net/gh/aahspaghetticode/ignore@20b998679f3a2a598bf5c10a5dd8422b47272a04/",
